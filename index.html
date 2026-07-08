@@ -1,0 +1,1516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>APPROACH IQ — Golf Practice Intelligence</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #050a12;
+      --bg-secondary: #0c1222;
+      --bg-card: rgba(12, 18, 34, 0.85);
+      --bg-glass: rgba(255, 255, 255, 0.02);
+      --border-glass: rgba(255, 255, 255, 0.06);
+      --border-accent: rgba(16, 185, 129, 0.2);
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --text-muted: #475569;
+      --brand-green: #10b981;
+      --brand-emerald: #34d399;
+      --brand-teal: #14b8a6;
+      --brand-cyan: #06b6d4;
+      --accent-red: #f43f5e;
+      --accent-red-dim: rgba(244, 63, 94, 0.12);
+      --accent-amber: #f59e0b;
+      --accent-amber-dim: rgba(245, 158, 11, 0.12);
+      --accent-green-dim: rgba(16, 185, 129, 0.12);
+      --gradient-brand: linear-gradient(135deg, #10b981 0%, #06b6d4 50%, #3b82f6 100%);
+      --gradient-hero: linear-gradient(180deg, rgba(16, 185, 129, 0.08) 0%, transparent 60%);
+      --gradient-card: linear-gradient(145deg, rgba(16, 185, 129, 0.03) 0%, rgba(6, 182, 212, 0.02) 100%);
+      --shadow-xl: 0 25px 80px rgba(0, 0, 0, 0.5);
+      --shadow-glow: 0 0 40px rgba(16, 185, 129, 0.08);
+      --shadow-brand: 0 4px 20px rgba(16, 185, 129, 0.25);
+      --radius: 20px;
+      --radius-sm: 12px;
+      --radius-xs: 8px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Animated background orbs */
+    .bg-orbs {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; overflow: hidden;
+    }
+    .bg-orbs .orb {
+      position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.4;
+      animation: orbFloat 15s ease-in-out infinite;
+    }
+    .bg-orbs .orb-1 { width: 400px; height: 400px; background: rgba(16, 185, 129, 0.06); top: -10%; left: -5%; animation-delay: 0s; }
+    .bg-orbs .orb-2 { width: 500px; height: 500px; background: rgba(6, 182, 212, 0.04); top: 40%; right: -10%; animation-delay: -5s; }
+    .bg-orbs .orb-3 { width: 300px; height: 300px; background: rgba(59, 130, 246, 0.05); bottom: -5%; left: 30%; animation-delay: -10s; }
+
+    @keyframes orbFloat {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      33% { transform: translate(30px, -20px) scale(1.05); }
+      66% { transform: translate(-20px, 15px) scale(0.95); }
+    }
+
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes slideInLeft { from { opacity: 0; transform: translateX(-16px); } to { opacity: 1; transform: translateX(0); } }
+    @keyframes scaleIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+    @keyframes shimmer { 0% { background-position: -200% center; } 100% { background-position: 200% center; } }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+
+    /* ===== HERO HEADER / BRANDING ===== */
+    .hero {
+      position: relative;
+      padding: 3rem 2rem 2rem;
+      text-align: center;
+      background: var(--gradient-hero);
+    }
+
+    .hero::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 10%;
+      right: 10%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border-accent), transparent);
+    }
+
+    .brand-logo {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 72px;
+      height: 72px;
+      border-radius: 20px;
+      background: var(--gradient-brand);
+      box-shadow: var(--shadow-brand), inset 0 1px 0 rgba(255,255,255,0.2);
+      margin-bottom: 1rem;
+      animation: scaleIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .brand-logo svg { width: 40px; height: 40px; fill: white; }
+
+    .brand-name {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 2.2rem;
+      font-weight: 700;
+      letter-spacing: -1px;
+      background: var(--gradient-brand);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: fadeInUp 0.5s ease 0.1s backwards;
+    }
+
+    .brand-tagline {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      margin-top: 0.4rem;
+      font-weight: 400;
+      letter-spacing: 0.3px;
+      animation: fadeInUp 0.5s ease 0.2s backwards;
+    }
+
+    .hero-stats {
+      display: inline-flex;
+      gap: 1.5rem;
+      margin-top: 1.2rem;
+      animation: fadeInUp 0.5s ease 0.3s backwards;
+    }
+
+    .hero-stat {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.4rem 0.9rem;
+      background: var(--accent-green-dim);
+      border: 1px solid var(--border-accent);
+      border-radius: 20px;
+      font-size: 0.78rem;
+      color: var(--brand-emerald);
+      font-weight: 600;
+    }
+
+    .hero-stat .stat-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--brand-green);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    /* ===== TABS ===== */
+    .tabs {
+      display: flex;
+      justify-content: center;
+      gap: 4px;
+      padding: 6px;
+      margin: 1.5rem auto;
+      max-width: 520px;
+      background: var(--bg-secondary);
+      border-radius: 14px;
+      border: 1px solid var(--border-glass);
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .tab {
+      flex: 1;
+      padding: 0.7rem 1rem;
+      text-align: center;
+      color: var(--text-muted);
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      font-size: 0.82rem;
+      font-weight: 600;
+      font-family: inherit;
+      border-radius: 10px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+    }
+    .tab:hover { color: var(--text-secondary); background: rgba(255,255,255,0.03); }
+    .tab.active {
+      background: var(--gradient-brand);
+      color: white;
+      box-shadow: var(--shadow-brand);
+      text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    }
+
+    /* ===== VIEWS ===== */
+    .view { display: none; padding: 0 1.5rem 3rem; max-width: 1000px; margin: 0 auto; animation: fadeInUp 0.4s ease; }
+    .view.active { display: block; }
+
+    /* ===== CARDS ===== */
+    .card {
+      background: var(--bg-card);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid var(--border-glass);
+      border-radius: var(--radius);
+      padding: 2rem;
+      margin-bottom: 1.5rem;
+      box-shadow: var(--shadow-xl);
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.25s, box-shadow 0.25s;
+    }
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: var(--gradient-brand);
+      opacity: 0.6;
+    }
+    .card:hover { transform: translateY(-3px); box-shadow: var(--shadow-xl), var(--shadow-glow); }
+
+    .card h2 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .section-badge {
+      font-size: 0.65rem;
+      font-family: 'Inter', sans-serif;
+      padding: 0.2rem 0.6rem;
+      border-radius: 6px;
+      background: var(--accent-green-dim);
+      color: var(--brand-emerald);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* ===== FORM ===== */
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; }
+    @media (max-width: 600px) { .form-grid { grid-template-columns: 1fr; } }
+    .form-grid .full-width { grid-column: 1 / -1; }
+
+    .form-group label {
+      display: block; margin-bottom: 0.4rem; font-weight: 600;
+      font-size: 0.72rem; color: var(--text-secondary);
+      text-transform: uppercase; letter-spacing: 0.8px;
+    }
+    .form-group input, .form-group select {
+      width: 100%; padding: 0.8rem 1rem;
+      border: 1px solid var(--border-glass); border-radius: var(--radius-xs);
+      font-size: 0.95rem; font-family: inherit;
+      background: var(--bg-secondary); color: var(--text-primary);
+      transition: border-color 0.2s, box-shadow 0.2s; outline: none;
+    }
+    .form-group input:focus, .form-group select:focus {
+      border-color: var(--brand-green);
+      box-shadow: 0 0 0 3px var(--accent-green-dim), 0 0 20px rgba(16, 185, 129, 0.05);
+    }
+    .form-group input::placeholder { color: var(--text-muted); }
+
+    /* ===== BUTTONS ===== */
+    .btn {
+      padding: 0.75rem 1.5rem; border: none; border-radius: var(--radius-xs);
+      cursor: pointer; font-size: 0.85rem; font-weight: 700; font-family: inherit;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      text-transform: uppercase; letter-spacing: 0.3px;
+    }
+    .btn-primary {
+      background: var(--gradient-brand); color: white;
+      box-shadow: var(--shadow-brand);
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(16, 185, 129, 0.35); }
+    .btn-secondary {
+      background: rgba(16, 185, 129, 0.08); color: var(--brand-emerald);
+      border: 1px solid var(--border-accent);
+    }
+    .btn-secondary:hover { background: rgba(16, 185, 129, 0.15); transform: translateY(-1px); }
+    .btn-danger {
+      background: var(--accent-red-dim); color: var(--accent-red);
+      border: 1px solid rgba(244, 63, 94, 0.15);
+    }
+    .btn-danger:hover { background: rgba(244, 63, 94, 0.2); }
+
+    .btn-row { margin-top: 1.8rem; display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center; }
+    .error-msg { color: var(--accent-red); font-size: 0.85rem; margin-top: 0.5rem; }
+    .success-msg { color: var(--brand-emerald); font-size: 0.85rem; margin-top: 0.5rem; font-weight: 600; }
+
+    .csv-hint {
+      margin-top: 1rem; font-size: 0.72rem; color: var(--text-muted);
+      padding: 0.7rem 1rem; background: var(--bg-glass);
+      border: 1px dashed var(--border-glass); border-radius: var(--radius-xs);
+    }
+    .csv-hint code { color: var(--brand-emerald); font-weight: 500; }
+
+    /* ===== KPI CARDS ===== */
+    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 1.4rem; }
+
+    .kpi-card {
+      background: var(--bg-card);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border-glass);
+      border-radius: var(--radius);
+      padding: 1.8rem;
+      position: relative; overflow: hidden;
+      transition: transform 0.25s, box-shadow 0.25s;
+      animation: fadeInUp 0.5s ease backwards;
+    }
+    .kpi-card:hover { transform: translateY(-4px) scale(1.01); box-shadow: var(--shadow-xl), var(--shadow-glow); }
+    .kpi-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      background: var(--gradient-brand); opacity: 0.8;
+    }
+
+    .kpi-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.2rem; }
+    .kpi-header h3 {
+      font-family: 'Space Grotesk', sans-serif;
+      color: var(--brand-emerald); font-size: 1.15rem; font-weight: 700;
+    }
+    .kpi-target-badge {
+      font-size: 0.68rem; font-weight: 700; padding: 0.25rem 0.6rem;
+      background: var(--accent-green-dim); border: 1px solid var(--border-accent);
+      border-radius: 6px; color: var(--brand-emerald); text-transform: uppercase; letter-spacing: 0.4px;
+    }
+
+    .kpi-main-metric { display: flex; align-items: center; gap: 1.2rem; margin-bottom: 1.2rem; }
+    .kpi-ring {
+      position: relative; width: 80px; height: 80px; flex-shrink: 0;
+    }
+    .kpi-ring svg { width: 80px; height: 80px; transform: rotate(-90deg); }
+    .kpi-ring-bg { fill: none; stroke: rgba(255,255,255,0.05); stroke-width: 6; }
+    .kpi-ring-fill { fill: none; stroke-width: 6; stroke-linecap: round; transition: stroke-dashoffset 1s ease; }
+    .kpi-ring-label {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      font-family: 'Space Grotesk', sans-serif; font-size: 1.1rem; font-weight: 800; color: var(--text-primary);
+    }
+    .kpi-ring-sub { display: block; font-size: 0.55rem; color: var(--text-muted); font-weight: 500; text-align: center; }
+
+    .kpi-main-details { flex: 1; }
+    .kpi-main-value { font-family: 'Space Grotesk', sans-serif; font-size: 1.8rem; font-weight: 800; color: var(--text-primary); line-height: 1; }
+    .kpi-main-label { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.3rem; }
+    .kpi-benchmark { font-size: 0.72rem; color: var(--text-muted); margin-top: 0.4rem; padding: 0.3rem 0.6rem; background: rgba(255,255,255,0.02); border-radius: 6px; display: inline-block; }
+    .kpi-benchmark strong { color: var(--accent-amber); }
+
+    .kpi-breakdown { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border-glass); }
+    .kpi-mini { text-align: center; padding: 0.6rem; background: rgba(255,255,255,0.015); border-radius: var(--radius-xs); }
+    .kpi-mini-value { font-family: 'Space Grotesk', sans-serif; font-size: 1rem; font-weight: 700; color: var(--text-primary); }
+    .kpi-mini-label { font-size: 0.65rem; color: var(--text-muted); margin-top: 0.2rem; text-transform: uppercase; letter-spacing: 0.5px; }
+
+    .kpi-bias { margin-top: 1rem; padding-top: 0.8rem; border-top: 1px solid var(--border-glass); }
+    .kpi-bias-title { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.5rem; }
+    .kpi-bias-bar { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.4rem; }
+    .kpi-bias-label { font-size: 0.7rem; color: var(--text-secondary); width: 50px; text-align: right; }
+    .kpi-bias-track { flex: 1; height: 6px; background: rgba(255,255,255,0.04); border-radius: 3px; position: relative; overflow: visible; }
+    .kpi-bias-marker { position: absolute; top: -3px; width: 12px; height: 12px; border-radius: 50%; transform: translateX(-50%); transition: left 0.5s ease; }
+    .kpi-bias-center { position: absolute; top: 0; left: 50%; width: 1px; height: 6px; background: rgba(255,255,255,0.2); }
+
+    .kpi-footer { margin-top: 1rem; display: flex; justify-content: space-between; align-items: center; font-size: 0.7rem; color: var(--text-muted); }
+
+    /* ===== ADVICE ===== */
+    .advice-list { list-style: none; }
+    .advice-item {
+      display: flex; align-items: center; padding: 1.1rem 1.3rem;
+      background: var(--bg-card); backdrop-filter: blur(20px);
+      border: 1px solid var(--border-glass); border-radius: var(--radius-sm);
+      margin-bottom: 0.7rem; transition: all 0.25s; animation: slideInLeft 0.4s ease backwards;
+    }
+    .advice-item:hover { transform: translateX(6px); box-shadow: var(--shadow-glow); border-color: var(--border-accent); }
+
+    .advice-rank {
+      width: 40px; height: 40px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 900; font-size: 0.95rem; margin-right: 1.2rem; flex-shrink: 0;
+      font-family: 'Space Grotesk', sans-serif;
+    }
+    .advice-rank.bad { background: var(--accent-red-dim); color: var(--accent-red); border: 1px solid rgba(244,63,94,0.2); }
+    .advice-rank.mid { background: var(--accent-amber-dim); color: var(--accent-amber); border: 1px solid rgba(245,158,11,0.2); }
+    .advice-rank.good { background: var(--accent-green-dim); color: var(--brand-emerald); border: 1px solid rgba(16,185,129,0.2); }
+
+    .advice-details { flex: 1; }
+    .advice-club { font-weight: 700; font-size: 1rem; font-family: 'Space Grotesk', sans-serif; }
+    .advice-dispersion { font-size: 0.78rem; color: var(--text-muted); margin-top: 0.25rem; }
+    .advice-bar { height: 5px; border-radius: 3px; margin-top: 0.6rem; background: rgba(255,255,255,0.04); overflow: hidden; }
+    .advice-bar-fill { height: 100%; border-radius: 3px; transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
+
+    .chart-container { position: relative; width: 100%; max-width: 680px; margin: 1.5rem auto; }
+    .no-data { text-align: center; color: var(--text-muted); padding: 3rem; font-size: 0.95rem; }
+    .filter-row { display: flex; gap: 1rem; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; }
+    .filter-row select {
+      padding: 0.65rem 1rem; border-radius: var(--radius-xs);
+      border: 1px solid var(--border-glass); background: var(--bg-secondary);
+      color: var(--text-primary); font-family: inherit; font-size: 0.9rem; outline: none;
+    }
+    .filter-row select:focus { border-color: var(--brand-green); }
+    .filter-row label { font-size: 0.82rem; color: var(--text-secondary); font-weight: 600; }
+
+    /* ===== ADVERTS ===== */
+    .ad-banner {
+      max-width: 1000px; margin: 1.5rem auto; padding: 0 1.5rem;
+    }
+    .ad-card {
+      display: flex; align-items: center; gap: 1.5rem;
+      padding: 1.4rem 1.8rem; border-radius: var(--radius);
+      border: 1px solid var(--border-glass);
+      background: linear-gradient(135deg, rgba(12, 18, 34, 0.9), rgba(20, 30, 50, 0.9));
+      box-shadow: var(--shadow-xl);
+      transition: transform 0.2s;
+      overflow: hidden; position: relative;
+    }
+    .ad-card:hover { transform: translateY(-2px); }
+    .ad-card::before {
+      content: 'AD'; position: absolute; top: 8px; right: 12px;
+      font-size: 0.55rem; font-weight: 800; color: var(--text-muted);
+      letter-spacing: 1px; opacity: 0.5;
+    }
+    .ad-icon {
+      font-size: 2.5rem; flex-shrink: 0;
+    }
+    .ad-content { flex: 1; }
+    .ad-brand {
+      font-family: 'Space Grotesk', sans-serif; font-weight: 700;
+      font-size: 1rem; color: var(--text-primary); margin-bottom: 0.25rem;
+    }
+    .ad-tagline { font-size: 0.82rem; color: var(--text-secondary); line-height: 1.4; }
+    .ad-cta {
+      flex-shrink: 0; padding: 0.5rem 1rem; border-radius: var(--radius-xs);
+      font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.5px; border: none; cursor: pointer;
+      font-family: inherit; transition: all 0.2s;
+    }
+    .ad-cta-gold { background: linear-gradient(135deg, #f59e0b, #d97706); color: #000; }
+    .ad-cta-gold:hover { transform: scale(1.05); box-shadow: 0 4px 15px rgba(245,158,11,0.3); }
+    .ad-cta-blue { background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: #fff; }
+    .ad-cta-blue:hover { transform: scale(1.05); box-shadow: 0 4px 15px rgba(59,130,246,0.3); }
+    .ad-cta-green { background: var(--gradient-brand); color: #fff; }
+    .ad-cta-green:hover { transform: scale(1.05); box-shadow: var(--shadow-brand); }
+    .ad-cta-red { background: linear-gradient(135deg, #f43f5e, #be123c); color: #fff; }
+    .ad-cta-red:hover { transform: scale(1.05); box-shadow: 0 4px 15px rgba(244,63,94,0.3); }
+
+    @media (max-width: 600px) {
+      .ad-card { flex-direction: column; text-align: center; gap: 0.8rem; }
+    }
+
+    /* ===== REVIEWS CAROUSEL ===== */
+    .reviews-section {
+      max-width: 1000px; margin: 3rem auto 0; padding: 0 1.5rem;
+    }
+    .reviews-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.4rem; font-weight: 700; text-align: center;
+      margin-bottom: 1.5rem; color: var(--text-primary);
+    }
+    .carousel-wrapper { position: relative; overflow: hidden; }
+    .carousel {
+      display: flex; transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      gap: 1.5rem;
+    }
+    .review-card {
+      min-width: 100%; padding: 2rem; border-radius: var(--radius);
+      background: var(--bg-card); backdrop-filter: blur(20px);
+      border: 1px solid var(--border-glass);
+      box-shadow: var(--shadow-xl);
+    }
+    .review-stars { font-size: 1.3rem; color: #fbbf24; margin-bottom: 0.8rem; letter-spacing: 2px; }
+    .review-text {
+      font-size: 1rem; line-height: 1.7; color: var(--text-secondary);
+      font-style: italic; margin-bottom: 1rem;
+    }
+    .review-author { font-weight: 700; color: var(--text-primary); font-size: 0.9rem; }
+    .review-hcp {
+      display: inline-block; margin-left: 0.5rem; padding: 0.15rem 0.5rem;
+      background: var(--accent-green-dim); border: 1px solid var(--border-accent);
+      border-radius: 6px; font-size: 0.7rem; color: var(--brand-emerald); font-weight: 600;
+    }
+    .carousel-dots {
+      display: flex; justify-content: center; gap: 0.5rem; margin-top: 1.2rem;
+    }
+    .carousel-dot {
+      width: 10px; height: 10px; border-radius: 50%;
+      background: var(--text-muted); cursor: pointer;
+      transition: all 0.3s; border: none;
+    }
+    .carousel-dot.active { background: var(--brand-green); transform: scale(1.3); box-shadow: 0 0 10px rgba(16,185,129,0.4); }
+
+    /* ===== FOOTER ===== */
+    .app-footer {
+      text-align: center; padding: 2rem; margin-top: 2rem;
+      border-top: 1px solid var(--border-glass);
+      font-size: 0.7rem; color: var(--text-muted);
+    }
+    .app-footer .footer-brand {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700; font-size: 0.8rem;
+      background: var(--gradient-brand);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+
+    /* ===== TOAST NOTIFICATIONS ===== */
+    .toast-container { position: fixed; top: 1rem; right: 1rem; z-index: 9999; display: flex; flex-direction: column; gap: 0.5rem; }
+    .toast {
+      padding: 0.8rem 1.2rem; border-radius: var(--radius-xs);
+      font-size: 0.85rem; font-weight: 500; font-family: inherit;
+      display: flex; align-items: center; gap: 0.5rem;
+      animation: slideInToast 0.3s ease; box-shadow: var(--shadow-xl);
+      max-width: 350px;
+    }
+    .toast-success { background: rgba(16, 185, 129, 0.15); border: 1px solid var(--border-accent); color: var(--brand-emerald); }
+    .toast-error { background: var(--accent-red-dim); border: 1px solid rgba(244,63,94,0.2); color: var(--accent-red); }
+    .toast-info { background: rgba(59,130,246,0.12); border: 1px solid rgba(59,130,246,0.2); color: #60a5fa; }
+    .toast-undo { cursor: pointer; text-decoration: underline; margin-left: 0.5rem; font-weight: 700; }
+    @keyframes slideInToast { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+
+    /* ===== DARK/LIGHT TOGGLE ===== */
+    .theme-toggle {
+      position: fixed; top: 1rem; left: 1rem; z-index: 100;
+      width: 40px; height: 40px; border-radius: 50%;
+      background: var(--bg-secondary); border: 1px solid var(--border-glass);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; font-size: 1.1rem; transition: all 0.3s;
+      box-shadow: var(--shadow-xl);
+    }
+    .theme-toggle:hover { transform: scale(1.1); border-color: var(--border-accent); }
+
+    /* Light mode overrides */
+    body.light {
+      --bg-primary: #f8faf9;
+      --bg-secondary: #ffffff;
+      --bg-card: rgba(255, 255, 255, 0.95);
+      --bg-glass: rgba(0, 0, 0, 0.02);
+      --border-glass: rgba(0, 0, 0, 0.08);
+      --border-accent: rgba(16, 185, 129, 0.3);
+      --text-primary: #1a202c;
+      --text-secondary: #4a5568;
+      --text-muted: #718096;
+      --shadow-xl: 0 10px 40px rgba(0, 0, 0, 0.08);
+      --shadow-glow: 0 0 20px rgba(16, 185, 129, 0.06);
+    }
+    body.light .bg-orbs .orb { opacity: 0.15; }
+    body.light .form-group input, body.light .form-group select { background: #f7fafc; color: #1a202c; border-color: #e2e8f0; }
+    body.light .filter-row select { background: #f7fafc; color: #1a202c; border-color: #e2e8f0; }
+
+    /* ===== LAYOUT WITH SIDEBAR ADS ===== */
+    .page-layout {
+      display: grid;
+      grid-template-columns: 1fr minmax(0, 1000px) 1fr;
+      gap: 0;
+      padding: 0;
+    }
+    .sidebar-ad {
+      padding: 1rem 0.8rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      align-items: center;
+      position: sticky;
+      top: 1rem;
+      align-self: start;
+    }
+    .sidebar-ad-card {
+      width: 160px;
+      padding: 1.2rem 1rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-glass);
+      background: var(--bg-card);
+      text-align: center;
+      transition: transform 0.2s;
+      position: relative;
+    }
+    .sidebar-ad-card:hover { transform: translateY(-2px); }
+    .sidebar-ad-card::before {
+      content: 'AD'; position: absolute; top: 6px; right: 8px;
+      font-size: 0.5rem; font-weight: 800; color: var(--text-muted); opacity: 0.4; letter-spacing: 1px;
+    }
+    .sidebar-ad-icon { font-size: 2rem; margin-bottom: 0.5rem; }
+    .sidebar-ad-brand { font-family: 'Space Grotesk', sans-serif; font-size: 0.75rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.3rem; }
+    .sidebar-ad-text { font-size: 0.65rem; color: var(--text-muted); line-height: 1.4; margin-bottom: 0.6rem; }
+    .sidebar-ad-cta {
+      font-size: 0.6rem; font-weight: 700; text-transform: uppercase; padding: 0.3rem 0.6rem;
+      border-radius: 4px; border: none; cursor: pointer; font-family: inherit;
+    }
+    @media (max-width: 1200px) { .sidebar-ad { display: none; } .page-layout { grid-template-columns: 1fr; } }
+
+    /* ===== TREND CHART ===== */
+    .kpi-trend { margin-top: 1rem; padding-top: 0.8rem; border-top: 1px solid var(--border-glass); }
+    .kpi-trend canvas { width: 100% !important; height: 80px !important; }
+  </style>
+</head>
+
+<body>
+  <!-- Toast notifications -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Dark/Light toggle -->
+  <button class="theme-toggle" id="theme-toggle" title="Toggle light/dark mode">🌙</button>
+
+  <!-- Animated background orbs -->
+  <div class="bg-orbs">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
+
+  <!-- HERO / BRANDING -->
+  <header class="hero">
+    <div class="brand-logo">
+      <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+        <!-- Golf green (kidney shape) -->
+        <ellipse cx="24" cy="28" rx="18" ry="14" fill="#2d8f52" opacity="0.9"/>
+        <ellipse cx="24" cy="28" rx="14" ry="10" fill="#34d399" opacity="0.3"/>
+        <!-- Fairway leading to green -->
+        <path d="M20 42 Q24 35 28 42 L32 48 L16 48 Z" fill="#1a6b3c" opacity="0.6"/>
+        <!-- Flag pole -->
+        <line x1="26" y1="28" x2="26" y2="8" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+        <!-- Flag -->
+        <path d="M26 8 L36 12 L26 16 Z" fill="#f43f5e"/>
+        <!-- Hole -->
+        <circle cx="26" cy="28" r="2" fill="#0a0a0a" stroke="white" stroke-width="0.8"/>
+        <!-- Sand bunker -->
+        <ellipse cx="12" cy="32" rx="5" ry="3" fill="#fbbf24" opacity="0.4"/>
+        <!-- Water hazard -->
+        <ellipse cx="38" cy="34" rx="4" ry="2.5" fill="#06b6d4" opacity="0.4"/>
+      </svg>
+    </div>
+    <h1 class="brand-name">APPROACH IQ</h1>
+    <p class="brand-tagline">Precision Practice Intelligence for the Modern Golfer</p>
+    <div class="hero-stats">
+      <div class="hero-stat"><div class="stat-dot"></div><span id="total-shots">0</span> shots tracked</div>
+      <div class="hero-stat"><div class="stat-dot"></div><span id="total-clubs">0</span> clubs active</div>
+    </div>
+  </header>
+
+  <!-- NAVIGATION -->
+  <nav class="tabs" role="tablist">
+    <button class="tab active" data-tab="entry" role="tab">⛳ Log</button>
+    <button class="tab" data-tab="charts" role="tab">📊 Charts</button>
+    <button class="tab" data-tab="kpis" role="tab">📈 KPIs</button>
+    <button class="tab" data-tab="advice" role="tab">🎯 Advice</button>
+  </nav>
+
+  <!-- PAGE LAYOUT WITH SIDEBAR ADS -->
+  <div class="page-layout">
+    <!-- LEFT SIDEBAR ADS -->
+    <aside class="sidebar-ad">
+      <div class="sidebar-ad-card">
+        <div class="sidebar-ad-icon">🏌️</div>
+        <div class="sidebar-ad-brand">TaylorMade Qi35</div>
+        <div class="sidebar-ad-text">60-layer carbon crown. Maximum forgiveness on every drive.</div>
+        <button class="sidebar-ad-cta ad-cta-gold">Shop Now</button>
+      </div>
+      <div class="sidebar-ad-card">
+        <div class="sidebar-ad-icon">⛳</div>
+        <div class="sidebar-ad-brand">Titleist Pro V1x</div>
+        <div class="sidebar-ad-text">Tour-level spin control. Consistent flight in all conditions.</div>
+        <button class="sidebar-ad-cta ad-cta-blue">Buy Now</button>
+      </div>
+      <div class="sidebar-ad-card">
+        <div class="sidebar-ad-icon">👟</div>
+        <div class="sidebar-ad-brand">FootJoy Pro|SL</div>
+        <div class="sidebar-ad-text">Waterproof comfort. Walk 36 holes without thinking about your feet.</div>
+        <button class="sidebar-ad-cta ad-cta-green">Find Fit</button>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main>
+
+  <!-- ENTRY VIEW -->
+  <section id="view-entry" class="view active" role="tabpanel">
+    <div class="card">
+      <h2>Log a Shot <span class="section-badge">Quick Entry</span></h2>
+      <form id="shot-form">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="club">Club</label>
+            <select id="club" required>
+              <option value="">Select club...</option>
+              <option value="Wedge">Wedge</option>
+              <option value="9 Iron">9 Iron</option>
+              <option value="8 Iron">8 Iron</option>
+              <option value="7 Iron">7 Iron</option>
+              <option value="6 Iron">6 Iron</option>
+              <option value="5 Iron">5 Iron</option>
+              <option value="3 Wood">3 Wood</option>
+              <option value="Driver">Driver</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="shotDate">Date</label>
+            <input type="date" id="shotDate" required />
+          </div>
+          <div class="form-group">
+            <label for="verticalDistance">Vertical to Pin (yds) +long / -short</label>
+            <input type="number" id="verticalDistance" step="0.1" placeholder="e.g. 3 or -2" required />
+          </div>
+          <div class="form-group">
+            <label for="horizontalDistance">Horizontal to Pin (yds) +right / -left</label>
+            <input type="number" id="horizontalDistance" step="0.1" placeholder="e.g. -4 or 5" required />
+          </div>
+          <div class="form-group full-width">
+            <label for="distanceIntoGreen">Distance of Shot into Green (yds)</label>
+            <input type="number" id="distanceIntoGreen" step="0.1" min="0" placeholder="e.g. 120" required />
+          </div>
+        </div>
+        <div id="form-errors" class="error-msg"></div>
+        <div id="form-success" class="success-msg"></div>
+        <div id="import-result" class="success-msg"></div>
+        <div class="btn-row">
+          <button type="submit" class="btn btn-primary">Save Shot</button>
+          <button type="button" class="btn btn-secondary" onclick="document.getElementById('csv-file-input').click()">📂 Import CSV</button>
+          <button type="button" class="btn btn-danger" onclick="clearAllData()">Clear All</button>
+          <input type="file" id="csv-file-input" accept=".csv" style="display:none;" onchange="handleCSVImport(event)" />
+        </div>
+        <div class="csv-hint">CSV format: <code>Club, Vertical Distance, Horizontal Distance, Distance Into Green, Date (YYYY-MM-DD)</code></div>
+      </form>
+    </div>
+  </section>
+
+  <!-- CHARTS VIEW -->
+  <section id="view-charts" class="view" role="tabpanel">
+    <div class="card">
+      <h2>Shot Dispersion <span class="section-badge">Green View</span></h2>
+      <div class="filter-row">
+        <label for="chart-club">Club:</label>
+        <select id="chart-club">
+          <option value="Wedge">Wedge</option>
+          <option value="9 Iron">9 Iron</option>
+          <option value="8 Iron">8 Iron</option>
+          <option value="7 Iron">7 Iron</option>
+          <option value="6 Iron">6 Iron</option>
+          <option value="5 Iron">5 Iron</option>
+          <option value="3 Wood">3 Wood</option>
+          <option value="Driver">Driver</option>
+        </select>
+        <label for="chart-month">Month:</label>
+        <select id="chart-month"><option value="">All Time</option></select>
+        <button class="btn btn-primary" onclick="exportChart()">📥 Export PNG</button>
+      </div>
+      <div class="chart-container" style="max-width:600px;">
+        <canvas id="green-canvas" style="width:100%; height:auto; aspect-ratio:1/1;"></canvas>
+      </div>
+      <div id="chart-no-data" class="no-data" style="display:none;">No data for this club yet. Start logging shots!</div>
+    </div>
+  </section>
+
+  <!-- KPIS VIEW -->
+  <section id="view-kpis" class="view" role="tabpanel">
+    <div style="margin-bottom:1.5rem;">
+      <h2 style="font-family:'Space Grotesk',sans-serif; font-size:1.5rem; font-weight:700; display:flex; align-items:center; gap:0.5rem;">
+        Performance Metrics <span class="section-badge">Per Club</span>
+      </h2>
+      <p style="color:var(--text-muted); font-size:0.85rem; margin-top:0.4rem;">Averages calculated within each club's distance bucket</p>
+      <div class="filter-row" style="margin-top:1rem;">
+        <label for="kpi-month">Month:</label>
+        <select id="kpi-month"><option value="">All Time</option></select>
+      </div>
+    </div>
+    <div id="kpi-grid" class="kpi-grid"></div>
+    <div id="kpi-no-data" class="no-data" style="display:none;">No data yet. Log some shots to see your KPIs here.</div>
+  </section>
+
+  <!-- ADVICE VIEW -->
+  <section id="view-advice" class="view" role="tabpanel">
+    <div class="card">
+      <h2>Practice Priorities <span class="section-badge">AI Insights</span></h2>
+      <p style="color:var(--text-muted); margin-bottom:1rem; font-size:0.88rem;">
+        Clubs ranked by shot dispersion — higher dispersion means less consistency. Focus your next range session on the clubs at the top.
+      </p>
+      <div class="filter-row" style="margin-bottom:1.5rem;">
+        <label for="advice-window">Period:</label>
+        <select id="advice-window">
+          <option value="30" selected>Last 30 days</option>
+          <option value="60">Last 60 days</option>
+          <option value="90">Last 90 days</option>
+          <option value="">All Time</option>
+        </select>
+      </div>
+      <ul id="advice-list" class="advice-list"></ul>
+      <div id="advice-no-data" class="no-data" style="display:none;">
+        Need at least 3 shots per club within its distance bucket to generate advice. Keep logging!
+      </div>
+    </div>
+  </section>
+
+    </main>
+
+    <!-- RIGHT SIDEBAR ADS -->
+    <aside class="sidebar-ad">
+      <div class="sidebar-ad-card">
+        <div class="sidebar-ad-icon">🎯</div>
+        <div class="sidebar-ad-brand">Callaway Ai Smoke</div>
+        <div class="sidebar-ad-text">AI-optimised face for YOUR swing. Tighter dispersion guaranteed.</div>
+        <button class="sidebar-ad-cta ad-cta-green">Book Fitting</button>
+      </div>
+      <div class="sidebar-ad-card">
+        <div class="sidebar-ad-icon">🔥</div>
+        <div class="sidebar-ad-brand">Ping G430 Max</div>
+        <div class="sidebar-ad-text">Carbonfly wrap. Lower CG, higher launch off the deck.</div>
+        <button class="sidebar-ad-cta ad-cta-red">View Details</button>
+      </div>
+      <div class="sidebar-ad-card">
+        <div class="sidebar-ad-icon">⚡</div>
+        <div class="sidebar-ad-brand">Vokey SM10 Wedges</div>
+        <div class="sidebar-ad-text">Progressive CG. Tour-proven spin from every lie.</div>
+        <button class="sidebar-ad-cta ad-cta-blue">Explore</button>
+      </div>
+    </aside>
+  </div>
+
+  <!-- REVIEWS CAROUSEL -->
+  <section class="reviews-section">
+    <h2 class="reviews-title">What Golfers Are Saying</h2>
+    <div class="carousel-wrapper">
+      <div class="carousel" id="reviews-carousel">
+        <div class="review-card">
+          <div class="review-stars">★★★★★</div>
+          <p class="review-text">"Completely changed how I practice. I used to just hit balls mindlessly — now I know exactly which clubs need work. Dropped 4 shots off my handicap in 3 months."</p>
+          <div class="review-author">— James T. <span class="review-hcp">HCP 12 → 8</span></div>
+        </div>
+        <div class="review-card">
+          <div class="review-stars">★★★★★</div>
+          <p class="review-text">"The scatter plot on the green is genius. Seeing where my shots actually land relative to the pin is so much more intuitive than numbers on a page. Love the export feature for my coach."</p>
+          <div class="review-author">— Sarah M. <span class="review-hcp">HCP 18</span></div>
+        </div>
+        <div class="review-card">
+          <div class="review-stars">★★★★★</div>
+          <p class="review-text">"Simple, fast, and actually useful. The CSV import means I can log an entire session in seconds. The advice tab told me my 6 iron was my weakest — I had no idea."</p>
+          <div class="review-author">— David K. <span class="review-hcp">HCP 6</span></div>
+        </div>
+        <div class="review-card">
+          <div class="review-stars">★★★★★</div>
+          <p class="review-text">"As a teaching pro, I get my students to use this and share their charts with me. It gives me objective data to work with instead of just watching them hit. Invaluable tool."</p>
+          <div class="review-author">— Coach Mike R. <span class="review-hcp">PGA Pro</span></div>
+        </div>
+        <div class="review-card">
+          <div class="review-stars">★★★★★</div>
+          <p class="review-text">"Finally an app that doesn't need an account, subscription, or complicated setup. Just open it, log shots, and get insights. This is what golf tech should be."</p>
+          <div class="review-author">— Priya N. <span class="review-hcp">HCP 22</span></div>
+        </div>
+      </div>
+      <div class="carousel-dots" id="carousel-dots"></div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="app-footer">
+    <span class="footer-brand">APPROACH IQ</span> — Built for golfers who want to improve, not just play.
+  </footer>
+
+  <script>
+    // ===== CONSTANTS =====
+    const CLUBS = ['Wedge', '9 Iron', '8 Iron', '7 Iron', '6 Iron', '5 Iron', '3 Wood', 'Driver'];
+    const DISTANCE_BUCKETS = {
+      'Wedge': 10, '9 Iron': 13, '8 Iron': 15, '7 Iron': 25,
+      '6 Iron': 30, '5 Iron': 30, '3 Wood': 50, 'Driver': 55
+    };
+    const STORAGE_KEY = 'golf-practice-tracker-shots';
+
+    // ===== DATA LAYER =====
+    function getShots() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return [];
+        return JSON.parse(raw);
+      } catch (e) { console.error('Failed to load shots:', e); return []; }
+    }
+    function saveShots(shots) { localStorage.setItem(STORAGE_KEY, JSON.stringify(shots)); }
+    function addShot(shot) {
+      const shots = getShots();
+      shot.id = crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2);
+      shots.push(shot);
+      saveShots(shots);
+      updateStats();
+      return shot;
+    }
+    function updateStats() {
+      const shots = getShots();
+      document.getElementById('total-shots').textContent = shots.length;
+      const activeClubs = new Set(shots.map(s => s.club)).size;
+      document.getElementById('total-clubs').textContent = activeClubs;
+    }
+
+    // ===== VALIDATION =====
+    function validateShotInput(data) {
+      const errors = [];
+      if (!data.club || !CLUBS.includes(data.club)) errors.push('club');
+      if (data.verticalDistance === '' || isNaN(Number(data.verticalDistance))) errors.push('verticalDistance');
+      if (data.horizontalDistance === '' || isNaN(Number(data.horizontalDistance))) errors.push('horizontalDistance');
+      if (data.distanceIntoGreen === '' || isNaN(Number(data.distanceIntoGreen)) || Number(data.distanceIntoGreen) < 0) errors.push('distanceIntoGreen');
+      if (!data.date || !/^\d{4}-\d{2}-\d{2}$/.test(data.date)) errors.push('date');
+      return { valid: errors.length === 0, errors };
+    }
+
+    // ===== KPI CALCULATIONS =====
+    function filterShotsByBucket(shots, club) {
+      return shots.filter(s => s.club === club && s.distanceIntoGreen <= DISTANCE_BUCKETS[club]);
+    }
+    function calculateHypotenuse(shot) {
+      return Math.sqrt(shot.verticalDistance ** 2 + shot.horizontalDistance ** 2);
+    }
+    function calculateKPIs(shots, club) {
+      const filtered = filterShotsByBucket(shots, club);
+      if (filtered.length === 0) return null;
+      const n = filtered.length;
+      return {
+        club,
+        avgAbsVerticalDistance: filtered.reduce((s, x) => s + Math.abs(x.verticalDistance), 0) / n,
+        avgAbsHorizontalDistance: filtered.reduce((s, x) => s + Math.abs(x.horizontalDistance), 0) / n,
+        avgHypotenuseDistance: filtered.reduce((s, x) => s + calculateHypotenuse(x), 0) / n,
+        shotCount: n
+      };
+    }
+
+    // ===== DISPERSION & ADVICE =====
+    function standardDeviation(values) {
+      if (values.length === 0) return 0;
+      const mean = values.reduce((s, v) => s + v, 0) / values.length;
+      return Math.sqrt(values.reduce((s, v) => s + (v - mean) ** 2, 0) / values.length);
+    }
+    function calculateDispersion(shots, club) {
+      const filtered = filterShotsByBucket(shots, club);
+      if (filtered.length < 3) return null;
+      return standardDeviation(filtered.map(calculateHypotenuse));
+    }
+    function generateAdvice(shots) {
+      const advice = [];
+      for (const club of CLUBS) {
+        const disp = calculateDispersion(shots, club);
+        if (disp !== null) advice.push({ club, dispersion: disp, shotCount: filterShotsByBucket(shots, club).length });
+      }
+      return advice.sort((a, b) => b.dispersion - a.dispersion);
+    }
+
+    // ===== TAB NAVIGATION =====
+    const tabs = document.querySelectorAll('.tab');
+    const views = document.querySelectorAll('.view');
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        tabs.forEach(t => t.classList.remove('active'));
+        views.forEach(v => v.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById('view-' + tab.dataset.tab).classList.add('active');
+        if (tab.dataset.tab === 'charts') renderChart();
+        if (tab.dataset.tab === 'kpis') renderKPIs();
+        if (tab.dataset.tab === 'advice') renderAdvice();
+      });
+    });
+
+    // ===== SHOT ENTRY FORM =====
+    const form = document.getElementById('shot-form');
+    document.getElementById('shotDate').value = new Date().toISOString().split('T')[0];
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const errEl = document.getElementById('form-errors');
+      const succEl = document.getElementById('form-success');
+      errEl.textContent = ''; succEl.textContent = '';
+      const data = {
+        club: document.getElementById('club').value,
+        verticalDistance: document.getElementById('verticalDistance').value,
+        horizontalDistance: document.getElementById('horizontalDistance').value,
+        distanceIntoGreen: document.getElementById('distanceIntoGreen').value,
+        date: document.getElementById('shotDate').value
+      };
+      const result = validateShotInput(data);
+      if (!result.valid) { errEl.textContent = '⚠️ Fix: ' + result.errors.join(', '); return; }
+      addShot({
+        club: data.club,
+        verticalDistance: Number(data.verticalDistance),
+        horizontalDistance: Number(data.horizontalDistance),
+        distanceIntoGreen: Number(data.distanceIntoGreen),
+        date: data.date
+      });
+      succEl.textContent = '✅ Shot saved!';
+      showToast('✅ Shot saved — ' + data.club, 'success', 4000, undoLastShot);
+      document.getElementById('verticalDistance').value = '';
+      document.getElementById('horizontalDistance').value = '';
+      document.getElementById('distanceIntoGreen').value = '';
+      setTimeout(() => { succEl.textContent = ''; }, 2500);
+    });
+
+    // ===== MONTH FILTER HELPER =====
+    function filterByMonth(shots, monthValue) {
+      if (!monthValue) return shots; // no filter = all time
+      // monthValue is 'YYYY-MM' format
+      return shots.filter(s => s.date && s.date.startsWith(monthValue));
+    }
+
+    // ===== GOLF GREEN CHART =====
+    const chartClubSelect = document.getElementById('chart-club');
+    const chartMonthInput = document.getElementById('chart-month');
+    chartClubSelect.addEventListener('change', renderChart);
+    chartMonthInput.addEventListener('change', renderChart);
+    chartMonthInput.addEventListener('input', renderChart);
+
+    function renderChart() {
+      const club = chartClubSelect.value;
+      const monthVal = chartMonthInput.value;
+      const allShots = getShots();
+      const shots = filterByMonth(allShots, monthVal).filter(s => s.club === club);
+      const noDataEl = document.getElementById('chart-no-data');
+      const canvas = document.getElementById('green-canvas');
+      const ctx = canvas.getContext('2d');
+
+      if (shots.length === 0) { noDataEl.style.display = 'block'; canvas.style.display = 'none'; return; }
+      noDataEl.style.display = 'none'; canvas.style.display = 'block';
+
+      // Responsive canvas sizing
+      const rect = canvas.parentElement.getBoundingClientRect();
+      const size = Math.min(rect.width, 600);
+      canvas.width = size * window.devicePixelRatio;
+      canvas.height = size * window.devicePixelRatio;
+      ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+
+      const W = size, H = size;
+      const cx = W / 2, cy = H / 2;
+      const data = shots.map(s => ({ x: s.horizontalDistance, y: s.verticalDistance }));
+
+      // The green's outer edge = the club's distance bucket (max "good" distance)
+      const bucketDist = DISTANCE_BUCKETS[club];
+      const greenRadius = Math.min(W, H) * 0.42;
+      // Scale: 1 yard = greenRadius / bucketDist pixels
+      const scale = greenRadius / bucketDist;
+
+      // Number of contour rings (evenly spaced up to bucket distance)
+      const numContours = 5;
+      const contourStep = bucketDist / numContours;
+
+      // Clear canvas
+      ctx.clearRect(0, 0, W, H);
+
+      // Draw outer green (full bucket radius)
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(cx, cy, greenRadius + 8, 0, Math.PI * 2);
+      ctx.fillStyle = '#0f4d28'; // rough/fringe
+      ctx.fill();
+      ctx.restore();
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(cx, cy, greenRadius, 0, Math.PI * 2);
+      ctx.fillStyle = '#1a6b3c';
+      ctx.fill();
+      ctx.strokeStyle = '#2d8f52';
+      ctx.lineWidth = 3;
+      ctx.stroke();
+      ctx.restore();
+
+      // Draw contour rings with distance labels (like a topographic map)
+      ctx.font = '600 11px Inter, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+
+      for (let i = 1; i <= numContours; i++) {
+        const dist = contourStep * i;
+        const r = scale * dist;
+        // Contour circle
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, 0, Math.PI * 2);
+        if (i === numContours) {
+          // Outermost = bucket boundary
+          ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
+          ctx.lineWidth = 2;
+          ctx.setLineDash([6, 4]);
+        } else {
+          const alpha = 0.08 + (i * 0.04);
+          ctx.strokeStyle = `rgba(255, 255, 255, ${alpha})`;
+          ctx.lineWidth = 1;
+          ctx.setLineDash([4, 6]);
+        }
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // Distance label on right side
+        const labelX = cx + r + 2;
+        const labelY = cy;
+        ctx.fillStyle = i === numContours ? 'rgba(255,255,255,0.6)' : 'rgba(255,255,255,0.35)';
+        ctx.font = i === numContours ? 'bold 11px Inter, sans-serif' : '10px Inter, sans-serif';
+        ctx.textAlign = 'left';
+        ctx.fillText(Math.round(dist) + ' yds', labelX, labelY);
+      }
+
+      // Draw flag at pin (center)
+      ctx.beginPath();
+      ctx.moveTo(cx, cy + 2);
+      ctx.lineTo(cx, cy - 44);
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 2.5;
+      ctx.stroke();
+      // Flag
+      ctx.beginPath();
+      ctx.moveTo(cx, cy - 44);
+      ctx.lineTo(cx + 20, cy - 36);
+      ctx.lineTo(cx, cy - 28);
+      ctx.closePath();
+      ctx.fillStyle = '#f43f5e';
+      ctx.fill();
+      ctx.shadowColor = 'rgba(244, 63, 94, 0.4)';
+      ctx.shadowBlur = 8;
+      ctx.fill();
+      ctx.shadowBlur = 0;
+      // Hole
+      ctx.beginPath();
+      ctx.arc(cx, cy, 5, 0, Math.PI * 2);
+      ctx.fillStyle = '#0a0a0a';
+      ctx.fill();
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      // Draw shot markers
+      data.forEach((d) => {
+        const px = cx + d.x * scale;
+        const py = cy - d.y * scale; // flip y
+        // Glow
+        ctx.beginPath();
+        ctx.arc(px, py, 11, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(52, 211, 153, 0.15)';
+        ctx.fill();
+        // Ball
+        ctx.beginPath();
+        ctx.arc(px, py, 6, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(52, 211, 153, 0.9)';
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(16, 185, 129, 1)';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      });
+
+      // Axis labels
+      ctx.font = '11px Inter, sans-serif';
+      ctx.fillStyle = '#94a3b8';
+      ctx.textAlign = 'center';
+      ctx.fillText('← Left | Right →', cx, H - 10);
+      ctx.save();
+      ctx.translate(12, cy);
+      ctx.rotate(-Math.PI / 2);
+      ctx.fillText('← Short | Long →', 0, 0);
+      ctx.restore();
+
+      // Title
+      ctx.font = 'bold 16px "Space Grotesk", sans-serif';
+      ctx.fillStyle = '#f1f5f9';
+      ctx.textAlign = 'center';
+      ctx.fillText(club + ' — Shot Dispersion (bucket: ' + bucketDist + ' yds)', cx, 22);
+    }
+
+    function exportChart() {
+      const canvas = document.getElementById('green-canvas');
+      if (!canvas) return;
+      const a = document.createElement('a');
+      a.href = canvas.toDataURL('image/png');
+      a.download = chartClubSelect.value + '_scatter_plot.png';
+      a.click();
+    }
+
+    // ===== KPI DASHBOARD =====
+    // Benchmark: approximate "good amateur" proximity by distance bucket (in yards)
+    // Sources: PGA Tour pros avg ~7yds from 100-125yds; 15-hcp amateurs avg ~12-13yds from 80yds
+    // Scaled roughly: closer shots = tighter expected proximity
+    const BENCHMARKS = {
+      'Wedge': { pro: 2.5, good: 4, avg: 6 },
+      '9 Iron': { pro: 3.5, good: 5.5, avg: 8 },
+      '8 Iron': { pro: 4.5, good: 7, avg: 10 },
+      '7 Iron': { pro: 6, good: 9, avg: 14 },
+      '6 Iron': { pro: 7.5, good: 12, avg: 18 },
+      '5 Iron': { pro: 9, good: 14, avg: 20 },
+      '3 Wood': { pro: 14, good: 22, avg: 32 },
+      'Driver': { pro: 16, good: 25, avg: 38 }
+    };
+
+    const kpiMonthInput = document.getElementById('kpi-month');
+    kpiMonthInput.addEventListener('change', renderKPIs);
+    kpiMonthInput.addEventListener('input', renderKPIs);
+
+    function renderKPIs() {
+      const monthVal = kpiMonthInput.value;
+      const shots = filterByMonth(getShots(), monthVal);
+      const grid = document.getElementById('kpi-grid');
+      const noData = document.getElementById('kpi-no-data');
+      grid.innerHTML = '';
+      let hasData = false;
+
+      CLUBS.forEach((club, idx) => {
+        const allClubShots = shots.filter(s => s.club === club);
+        if (allClubShots.length === 0) return;
+        hasData = true;
+
+        const kpi = calculateKPIs(shots, club);
+        const bucket = DISTANCE_BUCKETS[club];
+        const bench = BENCHMARKS[club];
+        const inBucket = filterShotsByBucket(shots, club);
+        const girPct = allClubShots.length > 0 ? Math.round((inBucket.length / allClubShots.length) * 100) : 0;
+
+        // Avg proximity
+        const avgProx = kpi ? kpi.avgHypotenuseDistance : null;
+        // Score ring: 100% = pro level, 0% = 2x average amateur
+        const ringMax = bench.avg * 2;
+        const ringPct = avgProx !== null ? Math.max(0, Math.min(100, ((ringMax - avgProx) / ringMax) * 100)) : 0;
+        // Ring color
+        let ringColor = 'var(--accent-red)';
+        if (avgProx !== null) {
+          if (avgProx <= bench.good) ringColor = 'var(--brand-green)';
+          else if (avgProx <= bench.avg) ringColor = 'var(--accent-amber)';
+        }
+
+        // Bias calculations
+        const avgV = inBucket.length > 0 ? inBucket.reduce((s, x) => s + x.verticalDistance, 0) / inBucket.length : 0;
+        const avgH = inBucket.length > 0 ? inBucket.reduce((s, x) => s + x.horizontalDistance, 0) / inBucket.length : 0;
+        const maxBias = bucket * 0.6;
+        const hBiasPct = 50 + (avgH / maxBias) * 50; // 0=full left, 100=full right
+        const vBiasPct = 50 + (avgV / maxBias) * 50; // 0=full short, 100=full long
+
+        // SVG ring
+        const circumference = 2 * Math.PI * 34;
+        const dashOffset = circumference - (ringPct / 100) * circumference;
+
+        const card = document.createElement('div');
+        card.className = 'kpi-card';
+        card.style.animationDelay = (idx * 0.08) + 's';
+        card.innerHTML = `
+          <div class="kpi-header">
+            <h3>${club}</h3>
+            <span class="kpi-target-badge">Target: ≤${bucket} yds</span>
+          </div>
+          <div class="kpi-main-metric">
+            <div class="kpi-ring">
+              <svg viewBox="0 0 80 80">
+                <circle class="kpi-ring-bg" cx="40" cy="40" r="34"/>
+                <circle class="kpi-ring-fill" cx="40" cy="40" r="34"
+                  style="stroke:${ringColor}; stroke-dasharray:${circumference}; stroke-dashoffset:${dashOffset};" />
+              </svg>
+              <div class="kpi-ring-label">${Math.round(ringPct)}%<span class="kpi-ring-sub">Score</span></div>
+            </div>
+            <div class="kpi-main-details">
+              <div class="kpi-main-value">${avgProx !== null ? avgProx.toFixed(1) : '—'} <small style="font-size:0.7rem; color:var(--text-muted);">yds</small></div>
+              <div class="kpi-main-label">Average distance to pin</div>
+              <div class="kpi-benchmark">Pro: <strong>${bench.pro}</strong> yds • Good: <strong>${bench.good}</strong> yds • Avg: <strong>${bench.avg}</strong> yds</div>
+            </div>
+          </div>
+          <div class="kpi-breakdown">
+            <div class="kpi-mini">
+              <div class="kpi-mini-value">${kpi ? kpi.avgAbsVerticalDistance.toFixed(1) : '—'}</div>
+              <div class="kpi-mini-label">↕ Avg Vertical (yds)</div>
+            </div>
+            <div class="kpi-mini">
+              <div class="kpi-mini-value">${kpi ? kpi.avgAbsHorizontalDistance.toFixed(1) : '—'}</div>
+              <div class="kpi-mini-label">↔ Avg Horizontal (yds)</div>
+            </div>
+            <div class="kpi-mini">
+              <div class="kpi-mini-value">${girPct}%</div>
+              <div class="kpi-mini-label">In-Bucket Rate</div>
+            </div>
+            <div class="kpi-mini">
+              <div class="kpi-mini-value">${inBucket.length}</div>
+              <div class="kpi-mini-label">Qualifying Shots</div>
+            </div>
+          </div>
+          <div class="kpi-bias">
+            <div class="kpi-bias-title">Miss Tendency</div>
+            <div class="kpi-bias-bar">
+              <span class="kpi-bias-label">L / R</span>
+              <div class="kpi-bias-track">
+                <div class="kpi-bias-center"></div>
+                <div class="kpi-bias-marker" style="left:${Math.max(5, Math.min(95, hBiasPct))}%; background:${Math.abs(avgH) > bucket*0.15 ? 'var(--accent-amber)' : 'var(--brand-green)'};"></div>
+              </div>
+            </div>
+            <div class="kpi-bias-bar">
+              <span class="kpi-bias-label">S / L</span>
+              <div class="kpi-bias-track">
+                <div class="kpi-bias-center"></div>
+                <div class="kpi-bias-marker" style="left:${Math.max(5, Math.min(95, vBiasPct))}%; background:${Math.abs(avgV) > bucket*0.15 ? 'var(--accent-amber)' : 'var(--brand-green)'};"></div>
+              </div>
+            </div>
+          </div>
+          <div class="kpi-footer">
+            <span>${allClubShots.length} total shots recorded</span>
+            <span>${avgProx !== null && avgProx <= bench.good ? '✅ On track' : avgProx !== null && avgProx <= bench.avg ? '⚠️ Room to improve' : '🔴 Focus area'}</span>
+          </div>
+          <div class="kpi-trend" id="trend-${club.replace(/\s/g,'-')}"></div>
+        `;
+        grid.appendChild(card);
+        // Render trend line for this club (using ALL shots regardless of month filter for trend)
+        const trendContainer = document.getElementById('trend-' + club.replace(/\s/g,'-'));
+        renderTrendChart(trendContainer, getShots(), club);
+      });
+      noData.style.display = hasData ? 'none' : 'block';
+    }
+
+    // ===== ADVICE PANEL =====
+    const adviceWindowSelect = document.getElementById('advice-window');
+    adviceWindowSelect.addEventListener('change', renderAdvice);
+
+    function filterByDays(shots, days) {
+      if (!days) return shots; // all time
+      const cutoff = new Date();
+      cutoff.setDate(cutoff.getDate() - Number(days));
+      const cutoffStr = cutoff.toISOString().split('T')[0];
+      return shots.filter(s => s.date && s.date >= cutoffStr);
+    }
+
+    function renderAdvice() {
+      const windowVal = adviceWindowSelect.value;
+      const shots = filterByDays(getShots(), windowVal);
+      const list = document.getElementById('advice-list');
+      const noData = document.getElementById('advice-no-data');
+      list.innerHTML = '';
+      const advice = generateAdvice(shots);
+      if (advice.length === 0) { noData.style.display = 'block'; return; }
+      noData.style.display = 'none';
+      const maxDisp = advice[0].dispersion;
+
+      advice.forEach((item, i) => {
+        const pct = maxDisp > 0 ? (item.dispersion / maxDisp) * 100 : 0;
+        let rankClass = 'good', barColor = 'var(--brand-green)';
+        if (i < Math.ceil(advice.length * 0.33)) { rankClass = 'bad'; barColor = 'var(--accent-red)'; }
+        else if (i < Math.ceil(advice.length * 0.66)) { rankClass = 'mid'; barColor = 'var(--accent-amber)'; }
+        const li = document.createElement('li');
+        li.className = 'advice-item';
+        li.style.animationDelay = (i * 0.07) + 's';
+        li.innerHTML = `
+          <div class="advice-rank ${rankClass}">${i + 1}</div>
+          <div class="advice-details">
+            <div class="advice-club">${item.club}</div>
+            <div class="advice-dispersion">Dispersion: ${item.dispersion.toFixed(2)} yds • ${item.shotCount} shots analysed</div>
+            <div class="advice-bar"><div class="advice-bar-fill" style="width:${pct}%; background:${barColor};"></div></div>
+          </div>
+        `;
+        list.appendChild(li);
+      });
+
+      const clubsWithAdvice = advice.map(a => a.club);
+      const needMore = CLUBS.filter(c => {
+        if (clubsWithAdvice.includes(c)) return false;
+        const f = filterShotsByBucket(shots, c);
+        return f.length > 0 && f.length < 3;
+      });
+      if (needMore.length > 0) {
+        const li = document.createElement('li');
+        li.className = 'advice-item';
+        li.style.borderColor = 'rgba(245,158,11,0.2)';
+        li.innerHTML = `<div class="advice-details"><em style="color:var(--accent-amber);">⚠️ Need more data: ${needMore.join(', ')} (min 3 shots in bucket)</em></div>`;
+        list.appendChild(li);
+      }
+    }
+
+    // ===== CSV IMPORT =====
+    function handleCSVImport(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const resultEl = document.getElementById('import-result');
+      resultEl.textContent = '';
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const lines = e.target.result.split(/\r?\n/).filter(l => l.trim());
+        let startIdx = 0;
+        const first = lines[0].toLowerCase();
+        if (first.includes('club') || first.includes('vertical') || first.includes('date')) startIdx = 1;
+        let imported = 0, errors = [];
+        for (let i = startIdx; i < lines.length; i++) {
+          const cols = lines[i].split(',').map(c => c.trim());
+          if (cols.length < 5) { errors.push(`Row ${i+1}: not enough columns`); continue; }
+          const [club, v, h, d, date] = cols;
+          const val = validateShotInput({ club, verticalDistance: v, horizontalDistance: h, distanceIntoGreen: d, date });
+          if (!val.valid) { errors.push(`Row ${i+1}: ${val.errors.join(', ')}`); continue; }
+          addShot({ club, verticalDistance: Number(v), horizontalDistance: Number(h), distanceIntoGreen: Number(d), date });
+          imported++;
+        }
+        let msg = `✅ Imported ${imported} shot${imported !== 1 ? 's' : ''}.`;
+        if (errors.length > 0) {
+          msg += ` ⚠️ ${errors.length} skipped.`;
+          showToast(msg, 'info', 5000);
+          console.warn('CSV import errors:', errors);
+        } else { showToast(msg, 'success'); }
+        resultEl.textContent = msg;
+        event.target.value = '';
+      };
+      reader.readAsText(file);
+    }
+
+    function clearAllData() {
+      if (!confirm('⚠️ This will permanently delete ALL shot data. Are you sure?')) return;
+      localStorage.removeItem(STORAGE_KEY);
+      updateStats();
+      showToast('🗑️ All data cleared', 'error');
+    }
+
+    // ===== REVIEWS CAROUSEL =====
+    (function() {
+      const carousel = document.getElementById('reviews-carousel');
+      const dotsContainer = document.getElementById('carousel-dots');
+      const cards = carousel.querySelectorAll('.review-card');
+      let current = 0;
+      const total = cards.length;
+
+      // Create dots
+      for (let i = 0; i < total; i++) {
+        const dot = document.createElement('button');
+        dot.className = 'carousel-dot' + (i === 0 ? ' active' : '');
+        dot.setAttribute('aria-label', 'Review ' + (i + 1));
+        dot.addEventListener('click', () => goTo(i));
+        dotsContainer.appendChild(dot);
+      }
+
+      function goTo(idx) {
+        current = idx;
+        carousel.style.transform = `translateX(-${current * (100 + 2.5)}%)`;
+        dotsContainer.querySelectorAll('.carousel-dot').forEach((d, i) => {
+          d.classList.toggle('active', i === current);
+        });
+      }
+
+      // Auto-advance every 5 seconds
+      setInterval(() => { goTo((current + 1) % total); }, 5000);
+    })();
+
+    // ===== TOAST NOTIFICATIONS =====
+    function showToast(message, type = 'success', duration = 3000, undoCallback = null) {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = 'toast toast-' + type;
+      toast.innerHTML = message;
+      if (undoCallback) {
+        const undoBtn = document.createElement('span');
+        undoBtn.className = 'toast-undo';
+        undoBtn.textContent = 'Undo';
+        undoBtn.addEventListener('click', () => { undoCallback(); toast.remove(); });
+        toast.appendChild(undoBtn);
+      }
+      container.appendChild(toast);
+      setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, duration);
+    }
+
+    // ===== UNDO LAST ACTION =====
+    let lastAction = null;
+    function setUndo(action) { lastAction = action; }
+    function undoLastShot() {
+      const shots = getShots();
+      if (shots.length === 0) return;
+      shots.pop();
+      saveShots(shots);
+      updateStats();
+      showToast('↩️ Last shot undone', 'info');
+      lastAction = null;
+    }
+
+    // ===== THEME TOGGLE =====
+    const themeToggle = document.getElementById('theme-toggle');
+    const savedTheme = localStorage.getItem('approachiq-theme');
+    if (savedTheme === 'light') { document.body.classList.add('light'); themeToggle.textContent = '☀️'; }
+    themeToggle.addEventListener('click', () => {
+      document.body.classList.toggle('light');
+      const isLight = document.body.classList.contains('light');
+      themeToggle.textContent = isLight ? '☀️' : '🌙';
+      localStorage.setItem('approachiq-theme', isLight ? 'light' : 'dark');
+    });
+
+    // ===== TREND CHART (per club on KPI cards) =====
+    function renderTrendChart(container, shots, club) {
+      // Group shots by month and calculate avg proximity
+      const bucketShots = filterShotsByBucket(shots, club);
+      if (bucketShots.length < 2) return;
+
+      const byMonth = {};
+      bucketShots.forEach(s => {
+        const month = s.date ? s.date.substring(0, 7) : 'unknown';
+        if (!byMonth[month]) byMonth[month] = [];
+        byMonth[month].push(calculateHypotenuse(s));
+      });
+
+      const months = Object.keys(byMonth).sort();
+      if (months.length < 2) return;
+
+      const avgPerMonth = months.map(m => {
+        const vals = byMonth[m];
+        return vals.reduce((a, b) => a + b, 0) / vals.length;
+      });
+
+      const canvas = document.createElement('canvas');
+      container.appendChild(canvas);
+
+      new Chart(canvas, {
+        type: 'line',
+        data: {
+          labels: months.map(m => { const [y, mo] = m.split('-'); return new Date(y, mo-1).toLocaleDateString('en', {month:'short', year:'2-digit'}); }),
+          datasets: [{
+            data: avgPerMonth,
+            borderColor: '#10b981',
+            backgroundColor: 'rgba(16,185,129,0.1)',
+            fill: true,
+            tension: 0.4,
+            pointRadius: 3,
+            pointBackgroundColor: '#10b981',
+            borderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false }, tooltip: { callbacks: { label: (c) => c.parsed.y.toFixed(1) + ' yds' } } },
+          scales: {
+            x: { display: true, grid: { display: false }, ticks: { font: { size: 9 }, color: '#64748b' } },
+            y: { display: true, grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { font: { size: 9 }, color: '#64748b' }, title: { display: false } }
+          }
+        }
+      });
+    }
+
+    // ===== INIT =====
+    updateStats();
+  </script>
+</body>
+</html>
