@@ -387,6 +387,45 @@
     .advice-bar { height: 5px; border-radius: 3px; margin-top: 0.6rem; background: rgba(255,255,255,0.04); overflow: hidden; }
     .advice-bar-fill { height: 100%; border-radius: 3px; transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
 
+    /* Coaching recommendation cards */
+    .rec-card {
+      padding: 1.5rem; border-radius: var(--radius-sm); margin-bottom: 1rem;
+      border: 1px solid var(--border-glass); background: var(--bg-card);
+      animation: fadeInUp 0.4s ease backwards; position: relative; overflow: hidden;
+    }
+    .rec-card::before {
+      content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%;
+    }
+    .rec-card.priority-1::before { background: var(--accent-red); }
+    .rec-card.priority-2::before { background: var(--accent-amber); }
+    .rec-card.priority-3::before { background: var(--brand-green); }
+    .rec-priority {
+      font-size: 0.65rem; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 1px; margin-bottom: 0.4rem;
+    }
+    .rec-priority.p1 { color: var(--accent-red); }
+    .rec-priority.p2 { color: var(--accent-amber); }
+    .rec-priority.p3 { color: var(--brand-emerald); }
+    .rec-club {
+      font-family: 'Space Grotesk', sans-serif; font-size: 1.3rem;
+      font-weight: 700; color: var(--text-primary); margin-bottom: 0.5rem;
+    }
+    .rec-reason {
+      font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5;
+      font-style: italic;
+    }
+    .rec-stats {
+      display: flex; gap: 1.5rem; margin-top: 0.8rem; padding-top: 0.8rem;
+      border-top: 1px solid var(--border-glass); flex-wrap: wrap;
+    }
+    .rec-stat { font-size: 0.72rem; color: var(--text-muted); }
+    .rec-stat strong { color: var(--text-primary); font-weight: 700; font-family: 'Space Grotesk', sans-serif; }
+
+    .full-ranking-title {
+      font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.5px; color: var(--text-muted); margin: 1.5rem 0 0.8rem;
+    }
+
     .chart-container { position: relative; width: 100%; max-width: 680px; margin: 1.5rem auto; }
     .no-data { text-align: center; color: var(--text-muted); padding: 3rem; font-size: 0.95rem; }
     .filter-row { display: flex; gap: 1rem; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; }
@@ -516,7 +555,7 @@
 
     /* ===== DARK/LIGHT TOGGLE ===== */
     .theme-toggle {
-      position: fixed; top: 1rem; left: 1rem; z-index: 100;
+      position: fixed; top: 1rem; right: 1rem; z-index: 100;
       width: 40px; height: 40px; border-radius: 50%;
       background: var(--bg-secondary); border: 1px solid var(--border-glass);
       display: flex; align-items: center; justify-content: center;
@@ -524,6 +563,75 @@
       box-shadow: var(--shadow-xl);
     }
     .theme-toggle:hover { transform: scale(1.1); border-color: var(--border-accent); }
+
+    /* ===== WEATHER WIDGET ===== */
+    .weather-widget {
+      position: fixed; top: 1rem; right: 4rem; z-index: 100;
+      background: #334155; backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.15); border-radius: var(--radius-sm);
+      padding: 0.6rem 0.9rem; box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+      display: flex; align-items: center; gap: 0.6rem;
+      font-size: 0.7rem; color: #e2e8f0;
+    }
+    body.light .weather-widget {
+      background: #ffffff;
+      border: 1px solid rgba(0,0,0,0.1);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+      color: #1a202c;
+    }
+    .weather-icon { font-size: 1.4rem; }
+    .weather-details { display: flex; flex-direction: column; gap: 0.1rem; }
+    .weather-temp { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 0.9rem; }
+    .weather-info { font-size: 0.6rem; color: #94a3b8; }
+    body.light .weather-info { color: #6b7280; }
+    .weather-loading { font-size: 0.65rem; color: var(--text-muted); }
+    @media (max-width: 900px) { .weather-widget { display: none; } }
+
+    /* ===== STREAK CALENDAR ===== */
+    .streak-calendar {
+      position: fixed; top: 1rem; left: 1rem; z-index: 100;
+      background: #334155; backdrop-filter: blur(20px);
+      border: 2px solid rgba(255, 255, 255, 0.25); border-radius: var(--radius-sm);
+      padding: 0.7rem 0.8rem; box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+      width: 185px; font-size: 0.6rem;
+    }
+    body.light .streak-calendar {
+      background: #ffffff;
+      border: 2px solid rgba(0, 0, 0, 0.12);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+    .streak-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 0.4rem;
+    }
+    .streak-month {
+      font-family: 'Space Grotesk', sans-serif; font-weight: 700;
+      font-size: 0.7rem; color: var(--text-primary);
+    }
+    .streak-count {
+      font-size: 0.6rem; color: var(--brand-emerald); font-weight: 600;
+    }
+    .streak-days {
+      display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px;
+      text-align: center;
+    }
+    .streak-day-label {
+      font-size: 0.5rem; color: #cbd5e1; font-weight: 600;
+      padding: 2px 0;
+    }
+    body.light .streak-day-label { color: #6b7280; }
+    .streak-day {
+      width: 100%; aspect-ratio: 1; border-radius: 4px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.55rem; color: #e2e8f0;
+      background: rgba(255,255,255,0.05);
+    }
+    body.light .streak-day { color: #374151; background: rgba(0,0,0,0.03); }
+    .streak-day.today { border: 1px solid var(--border-accent); }
+    .streak-day.active { background: var(--accent-green-dim); }
+    .streak-day.active .streak-fire { font-size: 0.7rem; }
+    .streak-day.empty { background: transparent; }
+    @media (max-width: 900px) { .streak-calendar { display: none; } }
 
     /* Light mode overrides */
     body.light {
@@ -538,10 +646,12 @@
       --text-muted: #718096;
       --shadow-xl: 0 10px 40px rgba(0, 0, 0, 0.08);
       --shadow-glow: 0 0 20px rgba(16, 185, 129, 0.06);
+      background: linear-gradient(180deg, #c8e6c9 0%, #e8f5e9 30%, #ffffff 100%);
+      min-height: 100vh;
     }
-    body.light .bg-orbs .orb { opacity: 0.15; }
-    body.light .form-group input, body.light .form-group select { background: #f7fafc; color: #1a202c; border-color: #e2e8f0; }
-    body.light .filter-row select { background: #f7fafc; color: #1a202c; border-color: #e2e8f0; }
+    body.light .bg-orbs .orb { opacity: 0.08; }
+    body.light .form-group input, body.light .form-group select { background: rgba(255,255,255,0.8); color: #1a202c; border-color: #c8e6c9; }
+    body.light .filter-row select { background: rgba(255,255,255,0.8); color: #1a202c; border-color: #c8e6c9; }
 
     /* ===== LAYOUT WITH SIDEBAR ADS ===== */
     .page-layout {
@@ -562,31 +672,79 @@
     }
     .sidebar-ad-card {
       width: 160px;
-      padding: 1.2rem 1rem;
+      padding: 1.6rem 1rem;
       border-radius: var(--radius-sm);
       border: 1px solid var(--border-glass);
       background: var(--bg-card);
       text-align: center;
       transition: transform 0.2s;
       position: relative;
+      min-height: 220px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
     }
     .sidebar-ad-card:hover { transform: translateY(-2px); }
     .sidebar-ad-card::before {
       content: 'AD'; position: absolute; top: 6px; right: 8px;
       font-size: 0.5rem; font-weight: 800; color: var(--text-muted); opacity: 0.4; letter-spacing: 1px;
     }
-    .sidebar-ad-icon { font-size: 2rem; margin-bottom: 0.5rem; }
-    .sidebar-ad-brand { font-family: 'Space Grotesk', sans-serif; font-size: 0.75rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.3rem; }
-    .sidebar-ad-text { font-size: 0.65rem; color: var(--text-muted); line-height: 1.4; margin-bottom: 0.6rem; }
+    .sidebar-ad-icon { font-size: 2.5rem; margin-bottom: 0.7rem; }
+    .sidebar-ad-brand { font-family: 'Space Grotesk', sans-serif; font-size: 0.8rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.4rem; }
+    .sidebar-ad-text { font-size: 0.68rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 0.8rem; }
     .sidebar-ad-cta {
-      font-size: 0.6rem; font-weight: 700; text-transform: uppercase; padding: 0.3rem 0.6rem;
-      border-radius: 4px; border: none; cursor: pointer; font-family: inherit;
+      font-size: 0.65rem; font-weight: 700; text-transform: uppercase; padding: 0.4rem 0.8rem;
+      border-radius: 6px; border: none; cursor: pointer; font-family: inherit;
+      transition: all 0.2s;
     }
     @media (max-width: 1200px) { .sidebar-ad { display: none; } .page-layout { grid-template-columns: 1fr; } }
 
     /* ===== TREND CHART ===== */
     .kpi-trend { margin-top: 1rem; padding-top: 0.8rem; border-top: 1px solid var(--border-glass); }
     .kpi-trend canvas { width: 100% !important; height: 80px !important; }
+
+    /* ===== HOLE IN ONE CELEBRATION ===== */
+    .celebration-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.7); z-index: 10000;
+      display: flex; align-items: center; justify-content: center;
+      animation: fadeInUp 0.3s ease;
+    }
+    .celebration-modal {
+      background: var(--bg-card); border: 2px solid var(--border-accent);
+      border-radius: var(--radius); padding: 3rem; text-align: center;
+      max-width: 400px; width: 90%; position: relative; overflow: hidden;
+      box-shadow: 0 0 60px rgba(16, 185, 129, 0.3), var(--shadow-xl);
+      animation: scaleIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .celebration-balloons {
+      font-size: 3rem; margin-bottom: 1rem;
+      animation: balloonFloat 1s ease-in-out infinite alternate;
+    }
+    @keyframes balloonFloat {
+      from { transform: translateY(0); }
+      to { transform: translateY(-10px); }
+    }
+    .celebration-title {
+      font-family: 'Space Grotesk', sans-serif; font-size: 2rem; font-weight: 800;
+      background: var(--gradient-brand);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      margin-bottom: 0.5rem;
+    }
+    .celebration-sub { color: var(--text-secondary); font-size: 1rem; margin-bottom: 1.5rem; }
+    .celebration-close {
+      padding: 0.7rem 2rem; border: none; border-radius: var(--radius-xs);
+      background: var(--gradient-brand); color: white; font-weight: 700;
+      font-family: inherit; font-size: 0.9rem; cursor: pointer;
+      box-shadow: var(--shadow-brand); transition: transform 0.2s;
+    }
+    .celebration-close:hover { transform: scale(1.05); }
+    .confetti { position: absolute; font-size: 1.5rem; animation: confettiFall 2s linear infinite; }
+    @keyframes confettiFall {
+      0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(300px) rotate(720deg); opacity: 0; }
+    }
   </style>
 </head>
 
@@ -596,6 +754,14 @@
 
   <!-- Dark/Light toggle -->
   <button class="theme-toggle" id="theme-toggle" title="Toggle light/dark mode">🌙</button>
+
+  <!-- Weather Widget -->
+  <div class="weather-widget" id="weather-widget">
+    <span class="weather-loading">📍 Loading weather...</span>
+  </div>
+
+  <!-- Streak Calendar -->
+  <div class="streak-calendar" id="streak-calendar"></div>
 
   <!-- Animated background orbs -->
   <div class="bg-orbs">
@@ -765,9 +931,12 @@
   <!-- ADVICE VIEW -->
   <section id="view-advice" class="view" role="tabpanel">
     <div class="card">
-      <h2>Practice Priorities <span class="section-badge">AI Insights</span></h2>
-      <p style="color:var(--text-muted); margin-bottom:1rem; font-size:0.88rem;">
-        Clubs ranked by shot dispersion — higher dispersion means less consistency. Focus your next range session on the clubs at the top.
+      <h2>Practice Recommendations <span class="section-badge">Coach's Corner</span></h2>
+      <p style="color:var(--text-muted); margin-bottom:0.5rem; font-size:0.88rem;">
+        Your personalised practice plan, based on where you'll gain the most strokes.
+      </p>
+      <p style="color:var(--text-muted); margin-bottom:1rem; font-size:0.75rem; font-style:italic;">
+        "Focus on the clubs with the biggest gap to your best. That's where the low-hanging fruit is." — Coach IQ
       </p>
       <div class="filter-row" style="margin-bottom:1.5rem;">
         <label for="advice-window">Period:</label>
@@ -778,9 +947,10 @@
           <option value="">All Time</option>
         </select>
       </div>
-      <ul id="advice-list" class="advice-list"></ul>
+      <div id="advice-recommendations"></div>
+      <div id="advice-full-ranking"></div>
       <div id="advice-no-data" class="no-data" style="display:none;">
-        Need at least 3 shots per club within its distance bucket to generate advice. Keep logging!
+        Need at least 3 shots per club within its distance bucket to generate recommendations. Keep logging!
       </div>
     </div>
   </section>
@@ -874,6 +1044,7 @@
       shots.push(shot);
       saveShots(shots);
       updateStats();
+      renderStreakCalendar();
       return shot;
     }
     function updateStats() {
@@ -975,6 +1146,12 @@
       });
       succEl.textContent = '✅ Shot saved!';
       showToast('✅ Shot saved — ' + data.club, 'success', 4000, undoLastShot);
+
+      // Check for hole in one!
+      if (Number(data.verticalDistance) === 0 && Number(data.horizontalDistance) === 0) {
+        showHoleInOneCelebration();
+      }
+
       document.getElementById('verticalDistance').value = '';
       document.getElementById('horizontalDistance').value = '';
       document.getElementById('distanceIntoGreen').value = '';
@@ -1290,60 +1467,150 @@
       noData.style.display = hasData ? 'none' : 'block';
     }
 
-    // ===== ADVICE PANEL =====
+    // ===== ADVICE PANEL — COACHING RECOMMENDATIONS =====
     const adviceWindowSelect = document.getElementById('advice-window');
     adviceWindowSelect.addEventListener('change', renderAdvice);
 
     function filterByDays(shots, days) {
-      if (!days) return shots; // all time
+      if (!days) return shots;
       const cutoff = new Date();
       cutoff.setDate(cutoff.getDate() - Number(days));
       const cutoffStr = cutoff.toISOString().split('T')[0];
       return shots.filter(s => s.date && s.date >= cutoffStr);
     }
 
+    function generateCoachingReason(club, avgProx, avgV, avgH, dispersion, bestProx, improvementScore) {
+      const reasons = [];
+      // Identify dominant miss pattern
+      const absV = Math.abs(avgV);
+      const absH = Math.abs(avgH);
+
+      if (absV > absH * 1.5) {
+        if (avgV > 0) reasons.push('Consistently misses long of the target — focus on taking one less club or controlling swing length.');
+        else reasons.push('Consistently misses short — commit to a full swing or take one more club.');
+      } else if (absH > absV * 1.5) {
+        if (avgH > 0) reasons.push('Dominant miss is right of target — check alignment and face angle at impact.');
+        else reasons.push('Dominant miss is left of target — review grip pressure and swing path.');
+      } else {
+        reasons.push('Scattered miss pattern with no clear direction — focus on consistent setup and tempo.');
+      }
+
+      // Add context based on improvement opportunity
+      const gap = avgProx - bestProx;
+      if (gap > bestProx * 2) {
+        reasons.push(`Averaging ${avgProx.toFixed(1)} yds from pin vs your best club at ${bestProx.toFixed(1)} yds — significant improvement opportunity here.`);
+      } else if (gap > bestProx) {
+        reasons.push(`${gap.toFixed(1)} yard gap to your best performing club — a focused range session could close this.`);
+      }
+
+      // Add dispersion context
+      if (dispersion > avgProx * 0.8) {
+        reasons.push('High shot-to-shot variability — prioritise repeatable contact over distance.');
+      }
+
+      return reasons.join(' ');
+    }
+
     function renderAdvice() {
       const windowVal = adviceWindowSelect.value;
       const shots = filterByDays(getShots(), windowVal);
-      const list = document.getElementById('advice-list');
+      const recsContainer = document.getElementById('advice-recommendations');
+      const rankingContainer = document.getElementById('advice-full-ranking');
       const noData = document.getElementById('advice-no-data');
-      list.innerHTML = '';
-      const advice = generateAdvice(shots);
-      if (advice.length === 0) { noData.style.display = 'block'; return; }
-      noData.style.display = 'none';
-      const maxDisp = advice[0].dispersion;
+      recsContainer.innerHTML = '';
+      rankingContainer.innerHTML = '';
 
-      advice.forEach((item, i) => {
-        const pct = maxDisp > 0 ? (item.dispersion / maxDisp) * 100 : 0;
-        let rankClass = 'good', barColor = 'var(--brand-green)';
-        if (i < Math.ceil(advice.length * 0.33)) { rankClass = 'bad'; barColor = 'var(--accent-red)'; }
-        else if (i < Math.ceil(advice.length * 0.66)) { rankClass = 'mid'; barColor = 'var(--accent-amber)'; }
-        const li = document.createElement('li');
-        li.className = 'advice-item';
-        li.style.animationDelay = (i * 0.07) + 's';
-        li.innerHTML = `
-          <div class="advice-rank ${rankClass}">${i + 1}</div>
-          <div class="advice-details">
-            <div class="advice-club">${item.club}</div>
-            <div class="advice-dispersion">Dispersion: ${item.dispersion.toFixed(2)} yds • ${item.shotCount} shots analysed</div>
-            <div class="advice-bar"><div class="advice-bar-fill" style="width:${pct}%; background:${barColor};"></div></div>
-          </div>
-        `;
-        list.appendChild(li);
+      // Build performance data for all qualifying clubs
+      const clubData = [];
+      for (const club of CLUBS) {
+        const inBucket = filterShotsByBucket(shots, club);
+        if (inBucket.length < 3) continue;
+        const avgProx = inBucket.reduce((s, x) => s + calculateHypotenuse(x), 0) / inBucket.length;
+        const avgV = inBucket.reduce((s, x) => s + x.verticalDistance, 0) / inBucket.length;
+        const avgH = inBucket.reduce((s, x) => s + x.horizontalDistance, 0) / inBucket.length;
+        const dispersion = standardDeviation(inBucket.map(calculateHypotenuse));
+        clubData.push({ club, avgProx, avgV, avgH, dispersion, shotCount: inBucket.length });
+      }
+
+      if (clubData.length === 0) { noData.style.display = 'block'; return; }
+      noData.style.display = 'none';
+
+      // Find best performing club (lowest avg proximity)
+      const bestProx = Math.min(...clubData.map(c => c.avgProx));
+
+      // Calculate improvement opportunity score: gap to best + dispersion contribution
+      clubData.forEach(c => {
+        const gapToBest = c.avgProx - bestProx;
+        const dispersionWeight = c.dispersion;
+        c.improvementScore = (gapToBest * 0.6) + (dispersionWeight * 0.4);
       });
 
-      const clubsWithAdvice = advice.map(a => a.club);
+      // Sort by improvement score (highest first = needs most work)
+      clubData.sort((a, b) => b.improvementScore - a.improvementScore);
+
+      // Top 3 priority recommendations
+      const priorities = clubData.slice(0, 3);
+      const priorityLabels = ['Priority 1 — Your biggest opportunity', 'Priority 2 — High impact', 'Priority 3 — Worth attention'];
+      const priorityClasses = ['priority-1', 'priority-2', 'priority-3'];
+      const pClasses = ['p1', 'p2', 'p3'];
+
+      priorities.forEach((item, i) => {
+        const reason = generateCoachingReason(item.club, item.avgProx, item.avgV, item.avgH, item.dispersion, bestProx, item.improvementScore);
+        const card = document.createElement('div');
+        card.className = `rec-card ${priorityClasses[i]}`;
+        card.style.animationDelay = (i * 0.1) + 's';
+        card.innerHTML = `
+          <div class="rec-priority ${pClasses[i]}">${priorityLabels[i]}</div>
+          <div class="rec-club">${item.club}</div>
+          <div class="rec-reason">"${reason}"</div>
+          <div class="rec-stats">
+            <div class="rec-stat">Avg to pin: <strong>${item.avgProx.toFixed(1)} yds</strong></div>
+            <div class="rec-stat">Dispersion: <strong>${item.dispersion.toFixed(1)} yds</strong></div>
+            <div class="rec-stat">Improvement score: <strong>${item.improvementScore.toFixed(1)}</strong></div>
+            <div class="rec-stat">Shots: <strong>${item.shotCount}</strong></div>
+          </div>
+        `;
+        recsContainer.appendChild(card);
+      });
+
+      // Full ranking below
+      if (clubData.length > 3) {
+        rankingContainer.innerHTML = '<div class="full-ranking-title">Full Club Ranking</div>';
+        const list = document.createElement('ul');
+        list.className = 'advice-list';
+        clubData.forEach((item, i) => {
+          const pct = clubData[0].improvementScore > 0 ? (item.improvementScore / clubData[0].improvementScore) * 100 : 0;
+          let rankClass = 'good', barColor = 'var(--brand-green)';
+          if (i < Math.ceil(clubData.length * 0.33)) { rankClass = 'bad'; barColor = 'var(--accent-red)'; }
+          else if (i < Math.ceil(clubData.length * 0.66)) { rankClass = 'mid'; barColor = 'var(--accent-amber)'; }
+          const li = document.createElement('li');
+          li.className = 'advice-item';
+          li.style.animationDelay = (i * 0.05) + 's';
+          li.innerHTML = `
+            <div class="advice-rank ${rankClass}">${i + 1}</div>
+            <div class="advice-details">
+              <div class="advice-club">${item.club}</div>
+              <div class="advice-dispersion">Avg to pin: ${item.avgProx.toFixed(1)} yds • Dispersion: ${item.dispersion.toFixed(1)} yds • Score: ${item.improvementScore.toFixed(1)}</div>
+              <div class="advice-bar"><div class="advice-bar-fill" style="width:${pct}%; background:${barColor};"></div></div>
+            </div>
+          `;
+          list.appendChild(li);
+        });
+        rankingContainer.appendChild(list);
+      }
+
+      // Clubs needing more data
+      const qualifiedClubs = clubData.map(c => c.club);
       const needMore = CLUBS.filter(c => {
-        if (clubsWithAdvice.includes(c)) return false;
+        if (qualifiedClubs.includes(c)) return false;
         const f = filterShotsByBucket(shots, c);
         return f.length > 0 && f.length < 3;
       });
       if (needMore.length > 0) {
-        const li = document.createElement('li');
-        li.className = 'advice-item';
-        li.style.borderColor = 'rgba(245,158,11,0.2)';
-        li.innerHTML = `<div class="advice-details"><em style="color:var(--accent-amber);">⚠️ Need more data: ${needMore.join(', ')} (min 3 shots in bucket)</em></div>`;
-        list.appendChild(li);
+        const note = document.createElement('div');
+        note.style.cssText = 'margin-top:1rem; padding:0.8rem 1rem; border-radius:8px; background:rgba(245,158,11,0.05); border:1px solid rgba(245,158,11,0.15); font-size:0.8rem; color:var(--accent-amber);';
+        note.textContent = '⚠️ Need more data for: ' + needMore.join(', ') + ' (minimum 3 shots in bucket)';
+        rankingContainer.appendChild(note);
       }
     }
 
@@ -1509,8 +1776,139 @@
       });
     }
 
+    // ===== HOLE IN ONE CELEBRATION =====
+    function showHoleInOneCelebration() {
+      const overlay = document.createElement('div');
+      overlay.className = 'celebration-overlay';
+      const confettiItems = ['🎉', '🏆', '⭐', '🎊', '🥳', '🎈', '🎈', '🎈'];
+      let confettiHTML = '';
+      for (let i = 0; i < 12; i++) {
+        const emoji = confettiItems[Math.floor(Math.random() * confettiItems.length)];
+        const left = Math.random() * 90 + 5;
+        const delay = Math.random() * 2;
+        confettiHTML += `<span class="confetti" style="left:${left}%; top:-20px; animation-delay:${delay}s;">${emoji}</span>`;
+      }
+      overlay.innerHTML = `
+        <div class="celebration-modal">
+          ${confettiHTML}
+          <div class="celebration-balloons">🎈🏌️‍♂️🎈</div>
+          <div class="celebration-title">HOLE IN ONE!!</div>
+          <div class="celebration-sub">Incredible shot! That's going straight in the clubhouse wall. 🏆</div>
+          <button class="celebration-close" onclick="this.closest('.celebration-overlay').remove()">Amazing! Keep Going</button>
+        </div>
+      `;
+      document.body.appendChild(overlay);
+      // Also close on overlay click
+      overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+    }
+
+    // ===== STREAK CALENDAR =====
+    function renderStreakCalendar() {
+      const cal = document.getElementById('streak-calendar');
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = now.getMonth();
+      const monthName = now.toLocaleDateString('en', { month: 'long', year: 'numeric' });
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      const firstDayOfWeek = new Date(year, month, 1).getDay(); // 0=Sun
+
+      // Get practice days this month
+      const shots = getShots();
+      const monthStr = `${year}-${String(month + 1).padStart(2, '0')}`;
+      const practiceDays = new Set(
+        shots.filter(s => s.date && s.date.startsWith(monthStr))
+             .map(s => parseInt(s.date.split('-')[2]))
+      );
+
+      const today = now.getDate();
+      const streakDays = practiceDays.size;
+
+      let html = `
+        <div class="streak-header">
+          <span class="streak-month">${monthName}</span>
+          <span class="streak-count">🔥 ${streakDays} days</span>
+        </div>
+        <div class="streak-days">
+          <div class="streak-day-label">S</div>
+          <div class="streak-day-label">M</div>
+          <div class="streak-day-label">T</div>
+          <div class="streak-day-label">W</div>
+          <div class="streak-day-label">T</div>
+          <div class="streak-day-label">F</div>
+          <div class="streak-day-label">S</div>
+      `;
+
+      // Empty cells before first day
+      for (let i = 0; i < firstDayOfWeek; i++) {
+        html += '<div class="streak-day empty"></div>';
+      }
+
+      // Days of month
+      for (let d = 1; d <= daysInMonth; d++) {
+        const isToday = d === today;
+        const isActive = practiceDays.has(d);
+        let cls = 'streak-day';
+        if (isToday) cls += ' today';
+        if (isActive) cls += ' active';
+        html += `<div class="${cls}">${isActive ? '<span class="streak-fire">🔥</span>' : d}</div>`;
+      }
+
+      html += '</div>';
+      cal.innerHTML = html;
+    }
+
+    // ===== WEATHER WIDGET =====
+    function getWeatherIcon(code) {
+      // WMO weather codes → emoji
+      if (code === 0) return '☀️';
+      if (code <= 3) return '⛅';
+      if (code <= 48) return '🌫️';
+      if (code <= 57) return '🌧️';
+      if (code <= 65) return '🌧️';
+      if (code <= 67) return '🌨️';
+      if (code <= 77) return '❄️';
+      if (code <= 82) return '🌦️';
+      if (code <= 86) return '🌨️';
+      if (code >= 95) return '⛈️';
+      return '🌤️';
+    }
+
+    function initWeather() {
+      const widget = document.getElementById('weather-widget');
+      if (!navigator.geolocation) {
+        widget.innerHTML = '<span class="weather-loading">📍 Location not supported</span>';
+        return;
+      }
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const { latitude, longitude } = pos.coords;
+          fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true&wind_speed_unit=mph&temperature_unit=celsius`)
+            .then(r => r.json())
+            .then(data => {
+              const w = data.current_weather;
+              const icon = getWeatherIcon(w.weathercode);
+              widget.innerHTML = `
+                <span class="weather-icon">${icon}</span>
+                <div class="weather-details">
+                  <span class="weather-temp">${Math.round(w.temperature)}°C</span>
+                  <span class="weather-info">Wind: ${Math.round(w.windspeed)} mph</span>
+                </div>
+              `;
+            })
+            .catch(() => {
+              widget.innerHTML = '<span class="weather-loading">⚠️ Weather unavailable</span>';
+            });
+        },
+        () => {
+          widget.innerHTML = '<span class="weather-loading">📍 Enable location for weather</span>';
+        }
+      );
+    }
+
     // ===== INIT =====
     updateStats();
+    renderStreakCalendar();
+    initWeather();
   </script>
 </body>
 </html>
