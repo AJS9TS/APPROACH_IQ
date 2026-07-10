@@ -26,6 +26,9 @@ ApproachIQ is a standalone single-file HTML web application that allows golfers 
 - **Rolling_Window**: A time-based filter that includes only shots from the last N days
 - **Improvement_Opportunity_Score**: A weighted metric (60% proximity gap to best club + 40% dispersion) used to prioritise which clubs need the most practice
 - **Miss_Pattern**: The dominant directional tendency of a club's shots (long, short, left, right, or scattered)
+- **PWA**: Progressive Web App — a web application that can be installed to a device home screen and used offline via a service worker and web app manifest
+- **Service_Worker**: A background script registered by the Tracker that intercepts network requests and serves cached assets, enabling offline functionality
+- **Web_App_Manifest**: A JSON file (`manifest.json`) that defines how the Tracker appears when installed on a device, including name, icons, theme colour, and display mode
 
 ## Requirements
 
@@ -211,6 +214,20 @@ ApproachIQ is a standalone single-file HTML web application that allows golfers 
 4. THE Tracker SHALL operate entirely client-side with no backend server dependencies.
 5. THE Tracker SHALL function in modern web browsers (Chrome, Firefox, Safari, Edge — latest two major versions).
 6. THE Tracker SHALL be deployable on GitHub Pages by renaming to index.html and pushing to a repository.
+
+### Requirement 16: Progressive Web App (PWA) Support
+
+**User Story:** As a golfer, I want to install APPROACH IQ on my phone's home screen so that it feels like a native app and works without an internet connection.
+
+#### Acceptance Criteria
+
+1. THE Tracker SHALL include a Web App Manifest (`manifest.json`) declaring the app name, short name, description, theme colour, background colour, display mode (`standalone`), and icon references.
+2. THE Tracker SHALL register a service worker that caches the app shell (index.html, manifest.json, icons) and CDN assets (Chart.js) on first load, enabling offline use.
+3. WHEN the app is used offline after the first load, THE Tracker SHALL serve cached assets and remain fully functional for shot logging and viewing data.
+4. THE Tracker SHALL declare `apple-mobile-web-app-capable`, `apple-mobile-web-app-status-bar-style` (black-translucent), and `apple-mobile-web-app-title` meta tags to support installation via Safari on iOS.
+5. THE Tracker SHALL provide an `apple-touch-icon` (180×180px PNG) that matches the brand logo tile, displayed when the app is saved to an iOS home screen.
+6. THE Tracker SHALL provide PWA icons at 192×192px and 512×512px, both marked as `any maskable`, matching the brand logo tile design (gradient rounded square with golf course artwork).
+7. THE Tracker SHALL set `theme-color` to `#10b981` so the browser chrome adopts the brand green colour when the app is open.
 
 ### Requirement 15: Click-to-Place Shot Entry
 

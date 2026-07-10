@@ -1,0 +1,25 @@
+{
+  "name": "APPROACH IQ",
+  "short_name": "Approach IQ",
+  "description": "Precision Practice Intelligence for the Modern Golfer",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#050a12",
+  "theme_color": "#10b981",
+  "categories": ["sports", "health & fitness"],
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

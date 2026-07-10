@@ -4,6 +4,26 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>APPROACH IQ — Golf Practice Intelligence</title>
+
+  <!-- ===== PWA: Web App Manifest ===== -->
+  <link rel="manifest" href="manifest.json" />
+
+  <!-- ===== PWA: Theme & App Appearance ===== -->
+  <meta name="theme-color" content="#10b981" />
+  <meta name="application-name" content="Approach IQ" />
+  <meta name="description" content="Precision Practice Intelligence for the Modern Golfer" />
+
+  <!-- ===== PWA: Apple / iOS ===== -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Approach IQ" />
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+
+  <!-- ===== PWA: Standard Favicon / Icons ===== -->
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png" />
+  <link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512.png" />
+  <link rel="icon" type="image/svg+xml" href="icons/icon.svg" />
+
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
@@ -2369,6 +2389,16 @@
     updateStats();
     renderStreakCalendar();
     initWeather();
+  </script>
+
+  <!-- ===== PWA: Service Worker Registration ===== -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./service-worker.js')
+          .catch(err => console.warn('Service worker registration failed:', err));
+      });
+    }
   </script>
 </body>
 </html>
