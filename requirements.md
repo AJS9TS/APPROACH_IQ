@@ -201,6 +201,9 @@ ApproachIQ is a standalone single-file HTML web application that allows golfers 
 5. THE Tracker SHALL display sidebar advertisements (3 per side) for golf equipment on screens wider than 1200px, hidden on mobile.
 6. THE Tracker SHALL display a branded footer.
 7. THE Tracker SHALL label the four navigation tabs as: "⛳ Log", "📊 Charts", "📈 KPIs", and "🎯 Coach's Corner".
+8. ON screens wider than 768px, THE Tracker SHALL display navigation as a pill-style tab bar centred below the hero section.
+9. ON screens 768px wide or narrower, THE Tracker SHALL hide the top tab bar and display a fixed bottom navigation bar pinned to the bottom of the viewport, with each tab showing an icon and a short label. The bottom nav SHALL respect the iOS safe area inset so it does not overlap the iPhone home indicator.
+10. WHEN a tab is switched on mobile, THE Tracker SHALL scroll the page to the top with a smooth animation.
 
 ### Requirement 14: Application Architecture
 
@@ -225,8 +228,8 @@ ApproachIQ is a standalone single-file HTML web application that allows golfers 
 2. THE Tracker SHALL register a service worker that caches the app shell (index.html, manifest.json, icons) and CDN assets (Chart.js) on first load, enabling offline use.
 3. WHEN the app is used offline after the first load, THE Tracker SHALL serve cached assets and remain fully functional for shot logging and viewing data.
 4. THE Tracker SHALL declare `apple-mobile-web-app-capable`, `apple-mobile-web-app-status-bar-style` (black-translucent), and `apple-mobile-web-app-title` meta tags to support installation via Safari on iOS.
-5. THE Tracker SHALL provide an `apple-touch-icon` (180×180px PNG) that matches the brand logo tile, displayed when the app is saved to an iOS home screen.
-6. THE Tracker SHALL provide PWA icons at 192×192px and 512×512px, both marked as `any maskable`, matching the brand logo tile design (gradient rounded square with golf course artwork).
+5. THE Tracker SHALL provide an `apple-touch-icon` (180×180px) that matches the brand logo tile, generated at runtime via canvas and injected as a base64 data URI, displayed when the app is saved to an iOS home screen.
+6. THE Tracker SHALL provide a PWA icon at 192×192px matching the brand logo tile design (gradient rounded square with golf course artwork), generated at runtime via canvas and injected as a base64 data URI.
 7. THE Tracker SHALL set `theme-color` to `#10b981` so the browser chrome adopts the brand green colour when the app is open.
 
 ### Requirement 15: Click-to-Place Shot Entry
