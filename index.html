@@ -567,6 +567,7 @@
     /* ===== WEATHER WIDGET ===== */
     .weather-widget {
       position: fixed; top: 1rem; right: 4rem; z-index: 100;
+      transform: translateZ(0);
       background: #334155; backdrop-filter: blur(20px);
       border: 1px solid rgba(255, 255, 255, 0.15); border-radius: var(--radius-sm);
       padding: 0.6rem 0.9rem; box-shadow: 0 8px 32px rgba(0,0,0,0.5);
@@ -590,6 +591,7 @@
     /* ===== STREAK CALENDAR ===== */
     .streak-calendar {
       position: fixed; top: 1rem; left: 1rem; z-index: 100;
+      transform: translateZ(0);
       background: #334155; backdrop-filter: blur(20px);
       border: 2px solid rgba(255, 255, 255, 0.25); border-radius: var(--radius-sm);
       padding: 0.7rem 0.8rem; box-shadow: 0 8px 32px rgba(0,0,0,0.6);
@@ -745,6 +747,117 @@
       0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
       100% { transform: translateY(300px) rotate(720deg); opacity: 0; }
     }
+
+    /* ===== ENTRY MODE TOGGLE ===== */
+    .entry-mode-toggle {
+      display: flex;
+      gap: 4px;
+      padding: 4px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-glass);
+      border-radius: 12px;
+      margin-bottom: 1.5rem;
+      width: fit-content;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
+    }
+    .entry-mode-btn {
+      padding: 0.55rem 1.1rem;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-family: inherit;
+      font-size: 0.8rem;
+      font-weight: 600;
+      border-radius: 9px;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .entry-mode-btn:hover { color: var(--text-secondary); background: rgba(255,255,255,0.04); }
+    .entry-mode-btn.active {
+      background: var(--gradient-brand);
+      color: white;
+      box-shadow: var(--shadow-brand);
+    }
+
+    /* ===== CLICK-TO-PLACE PANEL ===== */
+    .click-entry-panel { display: none; }
+    .click-entry-panel.active { display: block; }
+    .manual-entry-panel { display: block; }
+    .manual-entry-panel.hidden { display: none; }
+
+    .click-canvas-wrap {
+      position: relative;
+      width: 100%;
+      max-width: 420px;
+      margin: 0 auto 1rem;
+    }
+    .click-canvas-wrap canvas {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 1/1;
+      border-radius: var(--radius-sm);
+      cursor: crosshair;
+      display: block;
+      border: 1px solid var(--border-glass);
+    }
+    .click-canvas-wrap canvas:hover { border-color: var(--border-accent); }
+
+    /* Coordinate readout */
+    .coord-readout {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1.2rem;
+      margin: 0.8rem auto 0;
+      max-width: 420px;
+      padding: 0.7rem 1.2rem;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-glass);
+      border-radius: var(--radius-xs);
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      transition: border-color 0.2s;
+    }
+    .coord-readout.has-click { border-color: var(--border-accent); }
+    .coord-val {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 600;
+    }
+    .coord-val .coord-label { font-size: 0.68rem; color: var(--text-muted); font-family: 'Inter', sans-serif; font-weight: 400; text-transform: uppercase; letter-spacing: 0.5px; }
+    .coord-val .coord-number { color: var(--brand-emerald); font-size: 1rem; min-width: 50px; text-align: right; }
+    .coord-val .coord-number.neutral { color: var(--text-secondary); }
+    .coord-sep { color: var(--border-glass); font-size: 1.2rem; }
+    .coord-dist {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      padding: 0.2rem 0.6rem;
+      background: var(--accent-green-dim);
+      border: 1px solid var(--border-accent);
+      border-radius: 6px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+    }
+    .coord-hint {
+      text-align: center;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      margin-top: 0.5rem;
+      max-width: 420px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* Placed marker pulse ring */
+    @keyframes markerPulse {
+      0% { transform: translate(-50%, -50%) scale(1); opacity: 0.8; }
+      100% { transform: translate(-50%, -50%) scale(2.5); opacity: 0; }
+    }
   </style>
 </head>
 
@@ -804,7 +917,7 @@
     <button class="tab active" data-tab="entry" role="tab">⛳ Log</button>
     <button class="tab" data-tab="charts" role="tab">📊 Charts</button>
     <button class="tab" data-tab="kpis" role="tab">📈 KPIs</button>
-    <button class="tab" data-tab="advice" role="tab">🎯 Advice</button>
+    <button class="tab" data-tab="advice" role="tab">🎯 Coach's Corner</button>
   </nav>
 
   <!-- PAGE LAYOUT WITH SIDEBAR ADS -->
@@ -838,8 +951,17 @@
   <section id="view-entry" class="view active" role="tabpanel">
     <div class="card">
       <h2>Log a Shot <span class="section-badge">Quick Entry</span></h2>
+
+      <!-- Entry mode toggle -->
+      <div class="entry-mode-toggle" role="group" aria-label="Entry mode">
+        <button type="button" class="entry-mode-btn active" id="mode-btn-manual" onclick="setEntryMode('manual')">✏️ Manual Entry</button>
+        <button type="button" class="entry-mode-btn" id="mode-btn-click" onclick="setEntryMode('click')">📍 Click to Place</button>
+      </div>
+
       <form id="shot-form">
-        <div class="form-grid">
+
+        <!-- Shared fields: club + date always visible -->
+        <div class="form-grid" style="margin-bottom:1.2rem;">
           <div class="form-group">
             <label for="club">Club</label>
             <select id="club" required>
@@ -858,19 +980,58 @@
             <label for="shotDate">Date</label>
             <input type="date" id="shotDate" required />
           </div>
-          <div class="form-group">
-            <label for="verticalDistance">Vertical to Pin (yds) +long / -short</label>
-            <input type="number" id="verticalDistance" step="0.1" placeholder="e.g. 3 or -2" required />
+        </div>
+
+        <!-- CLICK-TO-PLACE PANEL -->
+        <div class="click-entry-panel" id="click-entry-panel">
+          <div class="click-canvas-wrap">
+            <canvas id="entry-green-canvas" title="Click where your ball landed relative to the pin"></canvas>
           </div>
-          <div class="form-group">
-            <label for="horizontalDistance">Horizontal to Pin (yds) +right / -left</label>
-            <input type="number" id="horizontalDistance" step="0.1" placeholder="e.g. -4 or 5" required />
+          <!-- Live coordinate readout -->
+          <div class="coord-readout" id="coord-readout">
+            <span class="coord-val">
+              <span class="coord-label">Vertical</span>
+              <span class="coord-number neutral" id="coord-v">—</span>
+              <span style="font-size:0.65rem; color:var(--text-muted);">yds</span>
+            </span>
+            <span class="coord-sep">|</span>
+            <span class="coord-val">
+              <span class="coord-label">Horizontal</span>
+              <span class="coord-number neutral" id="coord-h">—</span>
+              <span style="font-size:0.65rem; color:var(--text-muted);">yds</span>
+            </span>
+            <span class="coord-sep">|</span>
+            <span class="coord-dist" id="coord-dist" style="opacity:0.4;">— yds to pin</span>
           </div>
-          <div class="form-group full-width">
-            <label for="distanceIntoGreen">Distance of Shot into Green (yds)</label>
-            <input type="number" id="distanceIntoGreen" step="0.1" min="0" placeholder="e.g. 120" required />
+          <p class="coord-hint" id="coord-hint">Tap the green to place your ball · Pin is at centre</p>
+
+          <!-- Distance into green still needed in click mode -->
+          <div class="form-grid" style="margin-top:1rem;">
+            <div class="form-group full-width">
+              <label for="distanceIntoGreen-click">Distance of Shot into Green (yds)</label>
+              <input type="number" id="distanceIntoGreen-click" step="0.1" min="0" placeholder="e.g. 120" />
+            </div>
           </div>
         </div>
+
+        <!-- MANUAL ENTRY PANEL -->
+        <div class="manual-entry-panel" id="manual-entry-panel">
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="verticalDistance">Vertical to Pin (yds) +long / -short</label>
+              <input type="number" id="verticalDistance" step="0.1" placeholder="e.g. 3 or -2" />
+            </div>
+            <div class="form-group">
+              <label for="horizontalDistance">Horizontal to Pin (yds) +right / -left</label>
+              <input type="number" id="horizontalDistance" step="0.1" placeholder="e.g. -4 or 5" />
+            </div>
+            <div class="form-group full-width">
+              <label for="distanceIntoGreen">Distance of Shot into Green (yds)</label>
+              <input type="number" id="distanceIntoGreen" step="0.1" min="0" placeholder="e.g. 120" />
+            </div>
+          </div>
+        </div>
+
         <div id="form-errors" class="error-msg"></div>
         <div id="form-success" class="success-msg"></div>
         <div id="import-result" class="success-msg"></div>
@@ -1058,9 +1219,9 @@
     function validateShotInput(data) {
       const errors = [];
       if (!data.club || !CLUBS.includes(data.club)) errors.push('club');
-      if (data.verticalDistance === '' || isNaN(Number(data.verticalDistance))) errors.push('verticalDistance');
-      if (data.horizontalDistance === '' || isNaN(Number(data.horizontalDistance))) errors.push('horizontalDistance');
-      if (data.distanceIntoGreen === '' || isNaN(Number(data.distanceIntoGreen)) || Number(data.distanceIntoGreen) < 0) errors.push('distanceIntoGreen');
+      if (data.verticalDistance === '' || data.verticalDistance === undefined || isNaN(Number(data.verticalDistance))) errors.push('verticalDistance');
+      if (data.horizontalDistance === '' || data.horizontalDistance === undefined || isNaN(Number(data.horizontalDistance))) errors.push('horizontalDistance');
+      if (data.distanceIntoGreen === '' || data.distanceIntoGreen === undefined || isNaN(Number(data.distanceIntoGreen)) || Number(data.distanceIntoGreen) < 0) errors.push('distanceIntoGreen');
       if (!data.date || !/^\d{4}-\d{2}-\d{2}$/.test(data.date)) errors.push('date');
       return { valid: errors.length === 0, errors };
     }
@@ -1123,20 +1284,309 @@
     // ===== SHOT ENTRY FORM =====
     const form = document.getElementById('shot-form');
     document.getElementById('shotDate').value = new Date().toISOString().split('T')[0];
+
+    // Track current entry mode and click-placed coordinates
+    let entryMode = 'manual'; // 'manual' | 'click'
+    let clickedCoords = null;  // { verticalDistance, horizontalDistance } or null
+
+    function setEntryMode(mode) {
+      entryMode = mode;
+      document.getElementById('mode-btn-manual').classList.toggle('active', mode === 'manual');
+      document.getElementById('mode-btn-click').classList.toggle('active', mode === 'click');
+      document.getElementById('manual-entry-panel').classList.toggle('hidden', mode !== 'manual');
+      document.getElementById('click-entry-panel').classList.toggle('active', mode === 'click');
+
+      if (mode === 'click') {
+        // Render the entry green after the panel becomes visible
+        requestAnimationFrame(() => renderEntryGreen());
+        // Re-render if the selected club changes (bucket size affects the scale)
+        document.getElementById('club').addEventListener('change', renderEntryGreen);
+      } else {
+        clickedCoords = null;
+        document.getElementById('club').removeEventListener('change', renderEntryGreen);
+      }
+      // Clear any prior errors
+      document.getElementById('form-errors').textContent = '';
+    }
+
+    // ===== ENTRY GREEN CANVAS =====
+    function renderEntryGreen(markerCoords) {
+      const canvas = document.getElementById('entry-green-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+
+      // Sizing — use the container width, square canvas
+      const wrap = canvas.parentElement;
+      const size = Math.min(wrap.getBoundingClientRect().width || 360, 420);
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = size * dpr;
+      canvas.height = size * dpr;
+      canvas.style.width = size + 'px';
+      canvas.style.height = size + 'px';
+      ctx.scale(dpr, dpr);
+
+      const W = size, H = size;
+      const cx = W / 2, cy = H / 2;
+
+      // Determine bucket from selected club (default Wedge if none chosen)
+      const club = document.getElementById('club').value || 'Wedge';
+      const bucketDist = DISTANCE_BUCKETS[club] || 10;
+      const greenRadius = Math.min(W, H) * 0.42;
+      const scale = greenRadius / bucketDist;
+      const numContours = 5;
+      const contourStep = bucketDist / numContours;
+
+      // ---- Background ----
+      ctx.clearRect(0, 0, W, H);
+
+      // Rough/fringe
+      ctx.beginPath();
+      ctx.arc(cx, cy, greenRadius + 8, 0, Math.PI * 2);
+      ctx.fillStyle = '#0f4d28';
+      ctx.fill();
+
+      // Green surface
+      ctx.beginPath();
+      ctx.arc(cx, cy, greenRadius, 0, Math.PI * 2);
+      ctx.fillStyle = '#1a6b3c';
+      ctx.fill();
+      ctx.strokeStyle = '#2d8f52';
+      ctx.lineWidth = 3;
+      ctx.stroke();
+
+      // Contour rings
+      for (let i = 1; i <= numContours; i++) {
+        const dist = contourStep * i;
+        const r = scale * dist;
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, 0, Math.PI * 2);
+        if (i === numContours) {
+          ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+          ctx.lineWidth = 2;
+          ctx.setLineDash([6, 4]);
+        } else {
+          ctx.strokeStyle = `rgba(255,255,255,${0.08 + i * 0.04})`;
+          ctx.lineWidth = 1;
+          ctx.setLineDash([4, 6]);
+        }
+        ctx.stroke();
+        ctx.setLineDash([]);
+        // Distance label
+        ctx.fillStyle = i === numContours ? 'rgba(255,255,255,0.6)' : 'rgba(255,255,255,0.35)';
+        ctx.font = i === numContours ? 'bold 11px Inter, sans-serif' : '10px Inter, sans-serif';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(Math.round(dist) + ' yds', cx + r + 2, cy);
+      }
+
+      // Flag & hole
+      ctx.beginPath();
+      ctx.moveTo(cx, cy + 2);
+      ctx.lineTo(cx, cy - 44);
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 2.5;
+      ctx.setLineDash([]);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(cx, cy - 44);
+      ctx.lineTo(cx + 20, cy - 36);
+      ctx.lineTo(cx, cy - 28);
+      ctx.closePath();
+      ctx.fillStyle = '#f43f5e';
+      ctx.shadowColor = 'rgba(244,63,94,0.4)';
+      ctx.shadowBlur = 8;
+      ctx.fill();
+      ctx.shadowBlur = 0;
+      ctx.beginPath();
+      ctx.arc(cx, cy, 5, 0, Math.PI * 2);
+      ctx.fillStyle = '#0a0a0a';
+      ctx.fill();
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      // Axis labels
+      ctx.font = '11px Inter, sans-serif';
+      ctx.fillStyle = 'rgba(148,163,184,0.7)';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'bottom';
+      ctx.fillText('← Left  |  Right →', cx, H - 6);
+      ctx.save();
+      ctx.translate(12, cy);
+      ctx.rotate(-Math.PI / 2);
+      ctx.textBaseline = 'middle';
+      ctx.fillText('← Short  |  Long →', 0, 0);
+      ctx.restore();
+
+      // Placed marker (if a click has been recorded)
+      const coords = markerCoords || clickedCoords;
+      if (coords) {
+        const px = cx + coords.horizontalDistance * scale;
+        const py = cy - coords.verticalDistance * scale;
+        // Glow ring
+        ctx.beginPath();
+        ctx.arc(px, py, 13, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(52,211,153,0.15)';
+        ctx.fill();
+        // Ball marker
+        ctx.beginPath();
+        ctx.arc(px, py, 7, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(52,211,153,0.95)';
+        ctx.shadowColor = 'rgba(52,211,153,0.6)';
+        ctx.shadowBlur = 10;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+        ctx.strokeStyle = '#10b981';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        // Line from hole to marker
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(px, py);
+        ctx.strokeStyle = 'rgba(52,211,153,0.3)';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([3, 4]);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+    }
+
+    // Handle clicks on the entry green canvas
+    function handleEntryCanvasEvent(e) {
+      e.preventDefault();
+      const canvas = document.getElementById('entry-green-canvas');
+      const rect = canvas.getBoundingClientRect();
+      let clientX, clientY;
+      if (e.touches) {
+        clientX = e.touches[0].clientX;
+        clientY = e.touches[0].clientY;
+      } else {
+        clientX = e.clientX;
+        clientY = e.clientY;
+      }
+
+      const scaleX = canvas.width / (window.devicePixelRatio || 1) / rect.width;
+      const scaleY = canvas.height / (window.devicePixelRatio || 1) / rect.height;
+      const px = (clientX - rect.left) * scaleX;
+      const py = (clientY - rect.top) * scaleY;
+
+      const W = canvas.width / (window.devicePixelRatio || 1);
+      const H = canvas.height / (window.devicePixelRatio || 1);
+      const cx = W / 2, cy = H / 2;
+      const club = document.getElementById('club').value || 'Wedge';
+      const bucketDist = DISTANCE_BUCKETS[club] || 10;
+      const greenRadius = Math.min(W, H) * 0.42;
+      const scale = greenRadius / bucketDist;
+
+      // Convert pixel position to yard coordinates
+      const h = (px - cx) / scale;
+      const v = (cy - py) / scale; // invert y-axis
+
+      // Round to nearest whole yard
+      clickedCoords = {
+        horizontalDistance: Math.round(h),
+        verticalDistance: Math.round(v)
+      };
+
+      updateCoordReadout(clickedCoords);
+      renderEntryGreen(clickedCoords);
+    }
+
+    // Wire up canvas events once DOM is ready
+    (function wireEntryCanvas() {
+      const canvas = document.getElementById('entry-green-canvas');
+      if (!canvas) return;
+      canvas.addEventListener('click', handleEntryCanvasEvent);
+      canvas.addEventListener('touchstart', handleEntryCanvasEvent, { passive: false });
+
+      // Live crosshair tracking on hover (desktop only)
+      canvas.addEventListener('mousemove', (e) => {
+        if (!clickedCoords) {
+          const rect = canvas.getBoundingClientRect();
+          const scaleX = canvas.width / (window.devicePixelRatio || 1) / rect.width;
+          const scaleY = canvas.height / (window.devicePixelRatio || 1) / rect.height;
+          const px = (e.clientX - rect.left) * scaleX;
+          const py = (e.clientY - rect.top) * scaleY;
+          const W = canvas.width / (window.devicePixelRatio || 1);
+          const H = canvas.height / (window.devicePixelRatio || 1);
+          const cx = W / 2, cy = H / 2;
+          const club = document.getElementById('club').value || 'Wedge';
+          const bucketDist = DISTANCE_BUCKETS[club] || 10;
+          const greenRadius = Math.min(W, H) * 0.42;
+          const scale = greenRadius / bucketDist;
+          const h = Math.round((px - cx) / scale);
+          const v = Math.round((cy - py) / scale);
+          updateCoordReadout({ horizontalDistance: h, verticalDistance: v }, true);
+        }
+      });
+      canvas.addEventListener('mouseleave', () => {
+        if (!clickedCoords) resetCoordReadout();
+      });
+    })();
+
+    function updateCoordReadout(coords, isHover) {
+      const vEl = document.getElementById('coord-v');
+      const hEl = document.getElementById('coord-h');
+      const distEl = document.getElementById('coord-dist');
+      const readout = document.getElementById('coord-readout');
+      const hint = document.getElementById('coord-hint');
+
+      const dist = Math.sqrt(coords.verticalDistance ** 2 + coords.horizontalDistance ** 2);
+
+      vEl.textContent = (coords.verticalDistance >= 0 ? '+' : '') + coords.verticalDistance.toFixed(1);
+      vEl.className = 'coord-number' + (Math.abs(coords.verticalDistance) < 0.1 ? ' neutral' : '');
+      hEl.textContent = (coords.horizontalDistance >= 0 ? '+' : '') + coords.horizontalDistance.toFixed(1);
+      hEl.className = 'coord-number' + (Math.abs(coords.horizontalDistance) < 0.1 ? ' neutral' : '');
+      distEl.textContent = dist.toFixed(1) + ' yds to pin';
+      distEl.style.opacity = '1';
+
+      if (!isHover) {
+        readout.classList.add('has-click');
+        hint.textContent = 'Tap again to adjust · or save your shot below';
+      }
+    }
+
+    function resetCoordReadout() {
+      document.getElementById('coord-v').textContent = '—';
+      document.getElementById('coord-v').className = 'coord-number neutral';
+      document.getElementById('coord-h').textContent = '—';
+      document.getElementById('coord-h').className = 'coord-number neutral';
+      document.getElementById('coord-dist').textContent = '— yds to pin';
+      document.getElementById('coord-dist').style.opacity = '0.4';
+    }
+
     form.addEventListener('submit', (e) => {
       e.preventDefault();
       const errEl = document.getElementById('form-errors');
       const succEl = document.getElementById('form-success');
       errEl.textContent = ''; succEl.textContent = '';
-      const data = {
-        club: document.getElementById('club').value,
-        verticalDistance: document.getElementById('verticalDistance').value,
-        horizontalDistance: document.getElementById('horizontalDistance').value,
-        distanceIntoGreen: document.getElementById('distanceIntoGreen').value,
-        date: document.getElementById('shotDate').value
-      };
+
+      let data;
+      if (entryMode === 'click') {
+        if (!clickedCoords) {
+          errEl.textContent = '⚠️ Tap the green to place your ball first.';
+          return;
+        }
+        data = {
+          club: document.getElementById('club').value,
+          verticalDistance: String(clickedCoords.verticalDistance),
+          horizontalDistance: String(clickedCoords.horizontalDistance),
+          distanceIntoGreen: document.getElementById('distanceIntoGreen-click').value,
+          date: document.getElementById('shotDate').value
+        };
+      } else {
+        data = {
+          club: document.getElementById('club').value,
+          verticalDistance: document.getElementById('verticalDistance').value,
+          horizontalDistance: document.getElementById('horizontalDistance').value,
+          distanceIntoGreen: document.getElementById('distanceIntoGreen').value,
+          date: document.getElementById('shotDate').value
+        };
+      }
+
       const result = validateShotInput(data);
       if (!result.valid) { errEl.textContent = '⚠️ Fix: ' + result.errors.join(', '); return; }
+
       addShot({
         club: data.club,
         verticalDistance: Number(data.verticalDistance),
@@ -1152,9 +1602,19 @@
         showHoleInOneCelebration();
       }
 
-      document.getElementById('verticalDistance').value = '';
-      document.getElementById('horizontalDistance').value = '';
-      document.getElementById('distanceIntoGreen').value = '';
+      // Reset form fields depending on mode
+      if (entryMode === 'click') {
+        clickedCoords = null;
+        resetCoordReadout();
+        document.getElementById('coord-readout').classList.remove('has-click');
+        document.getElementById('coord-hint').textContent = 'Tap the green to place your ball · Pin is at centre';
+        document.getElementById('distanceIntoGreen-click').value = '';
+        renderEntryGreen();
+      } else {
+        document.getElementById('verticalDistance').value = '';
+        document.getElementById('horizontalDistance').value = '';
+        document.getElementById('distanceIntoGreen').value = '';
+      }
       setTimeout(() => { succEl.textContent = ''; }, 2500);
     });
 
