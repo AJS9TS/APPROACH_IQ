@@ -14,6 +14,10 @@ ApproachIQ is a standalone single-file HTML web application that allows golfers 
 - **Distance_Into_Green**: The distance from where the shot was played into the green, measured in yards
 - **Hypotenuse_Distance**: The straight-line distance from the shot landing position to the pin, calculated as sqrt(Vertical_Distance² + Horizontal_Distance²)
 - **Green_Canvas**: A custom-drawn golf green visualization showing shot positions relative to the pin, with contour rings at distance intervals
+- **Entry_Green_Canvas**: A separate interactive Green_Canvas rendered inside the Log Shot form, used exclusively for Click-to-Place shot entry
+- **Click_to_Place**: A shot entry mode where the user taps or clicks on the Entry_Green_Canvas to set the ball landing position visually; Vertical_Distance and Horizontal_Distance are derived automatically from the click coordinates
+- **Coordinate_Readout**: A live display beneath the Entry_Green_Canvas showing the current Vertical_Distance, Horizontal_Distance, and Hypotenuse_Distance values corresponding to the cursor position (hover) or placed marker (click)
+- **Entry_Mode**: The active method for inputting shot position data — either Manual Entry (typed numeric inputs) or Click to Place (canvas tap)
 - **Dispersion**: The standard deviation of Hypotenuse_Distance values for a set of shots, representing grouping consistency
 - **Distance_Bucket**: A range threshold specific to each Club used to categorize shots by Distance_Into_Green for KPI calculation
 - **KPI**: Key Performance Indicator — a computed metric summarizing shot accuracy for a Club within a Distance_Bucket
@@ -22,6 +26,9 @@ ApproachIQ is a standalone single-file HTML web application that allows golfers 
 - **Rolling_Window**: A time-based filter that includes only shots from the last N days
 - **Improvement_Opportunity_Score**: A weighted metric (60% proximity gap to best club + 40% dispersion) used to prioritise which clubs need the most practice
 - **Miss_Pattern**: The dominant directional tendency of a club's shots (long, short, left, right, or scattered)
+- **PWA**: Progressive Web App — a web application that can be installed to a device home screen and used offline via a service worker and web app manifest
+- **Service_Worker**: A background script registered by the Tracker that intercepts network requests and serves cached assets, enabling offline functionality
+- **Web_App_Manifest**: A JSON file (`manifest.json`) that defines how the Tracker appears when installed on a device, including name, icons, theme colour, and display mode
 
 ## Requirements
 
@@ -37,6 +44,7 @@ ApproachIQ is a standalone single-file HTML web application that allows golfers 
 4. WHEN a user submits a Shot form with missing required fields, THE Tracker SHALL display a validation error message identifying the missing fields.
 5. THE Tracker SHALL allow Vertical_Distance and Horizontal_Distance to accept positive and negative numeric values.
 6. THE Tracker SHALL default the date field to the current date.
+7. THE Tracker SHALL provide two Entry_Mode options within the Log Shot form: Manual Entry and Click to Place. The Club, Distance_Into_Green, and date fields SHALL be present in both modes.
 
 ### Requirement 2: Shot Data Persistence
 
@@ -192,6 +200,7 @@ ApproachIQ is a standalone single-file HTML web application that allows golfers 
 4. THE Tracker SHALL display a live shot counter and active clubs counter in the hero section.
 5. THE Tracker SHALL display sidebar advertisements (3 per side) for golf equipment on screens wider than 1200px, hidden on mobile.
 6. THE Tracker SHALL display a branded footer.
+7. THE Tracker SHALL label the four navigation tabs as: "⛳ Log", "📊 Charts", "📈 KPIs", and "🎯 Coach's Corner".
 
 ### Requirement 14: Application Architecture
 
@@ -205,3 +214,36 @@ ApproachIQ is a standalone single-file HTML web application that allows golfers 
 4. THE Tracker SHALL operate entirely client-side with no backend server dependencies.
 5. THE Tracker SHALL function in modern web browsers (Chrome, Firefox, Safari, Edge — latest two major versions).
 6. THE Tracker SHALL be deployable on GitHub Pages by renaming to index.html and pushing to a repository.
+
+### Requirement 16: Progressive Web App (PWA) Support
+
+**User Story:** As a golfer, I want to install APPROACH IQ on my phone's home screen so that it feels like a native app and works without an internet connection.
+
+#### Acceptance Criteria
+
+1. THE Tracker SHALL include a Web App Manifest (`manifest.json`) declaring the app name, short name, description, theme colour, background colour, display mode (`standalone`), and icon references.
+2. THE Tracker SHALL register a service worker that caches the app shell (index.html, manifest.json, icons) and CDN assets (Chart.js) on first load, enabling offline use.
+3. WHEN the app is used offline after the first load, THE Tracker SHALL serve cached assets and remain fully functional for shot logging and viewing data.
+4. THE Tracker SHALL declare `apple-mobile-web-app-capable`, `apple-mobile-web-app-status-bar-style` (black-translucent), and `apple-mobile-web-app-title` meta tags to support installation via Safari on iOS.
+5. THE Tracker SHALL provide an `apple-touch-icon` (180×180px PNG) that matches the brand logo tile, displayed when the app is saved to an iOS home screen.
+6. THE Tracker SHALL provide PWA icons at 192×192px and 512×512px, both marked as `any maskable`, matching the brand logo tile design (gradient rounded square with golf course artwork).
+7. THE Tracker SHALL set `theme-color` to `#10b981` so the browser chrome adopts the brand green colour when the app is open.
+
+### Requirement 15: Click-to-Place Shot Entry
+
+**User Story:** As a golfer, I want to tap where my ball landed on a visual green instead of typing numbers, so that logging shots on the range feels fast and intuitive.
+
+#### Acceptance Criteria
+
+1. THE Tracker SHALL provide a toggle in the Log Shot form with two options: "✏️ Manual Entry" (default) and "📍 Click to Place". Only the active mode's input controls SHALL be visible at any time.
+2. IN Click to Place mode, THE Tracker SHALL render an Entry_Green_Canvas inside the Log Shot form, visually identical in style to the Charts tab green (circular green, contour rings labelled with yard distances, flag and hole at centre).
+3. THE Entry_Green_Canvas SHALL scale its coordinate system to the selected Club's Distance_Bucket, so that the outer ring always represents the bucket boundary for the chosen club. WHEN the user changes the Club selector, THE Entry_Green_Canvas SHALL re-render with the updated scale.
+4. WHEN a user clicks or taps anywhere on the Entry_Green_Canvas, THE Tracker SHALL compute Vertical_Distance and Horizontal_Distance by converting the pixel offset from the canvas centre using the current scale (pixels per yard), rounded to the nearest whole integer yard.
+5. WHEN a position is placed, THE Tracker SHALL render a coloured ball marker with a glow effect at the clicked position, and draw a dashed line from the hole to the marker.
+6. THE Tracker SHALL display a Coordinate_Readout panel beneath the Entry_Green_Canvas showing: Vertical_Distance (signed, labelled +long / -short), Horizontal_Distance (signed, labelled +right / -left), and Hypotenuse_Distance ("X.X yds to pin").
+7. ON desktop, THE Coordinate_Readout SHALL update in real time as the cursor moves over the Entry_Green_Canvas (hover preview), before any click is made.
+8. WHEN the user clicks to place a ball, THE Coordinate_Readout SHALL lock to the placed coordinates and the hint text SHALL update to indicate the user can tap again to adjust.
+9. WHEN the user submits the form in Click to Place mode without first placing a ball on the Entry_Green_Canvas, THE Tracker SHALL display a validation error: "Tap the green to place your ball first."
+10. AFTER a successful save in Click to Place mode, THE Tracker SHALL reset the Entry_Green_Canvas (clear the marker), reset the Coordinate_Readout to its empty state, and clear the Distance_Into_Green field.
+11. THE Entry_Green_Canvas SHALL support touch events on mobile devices with the same placement behaviour as mouse clicks on desktop.
+12. THE Club and date fields SHALL remain visible and shared between both entry modes; switching Entry_Mode SHALL not clear values already entered in those fields.
