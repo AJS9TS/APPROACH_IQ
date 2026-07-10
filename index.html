@@ -2611,14 +2611,34 @@
           datasets: [{
             label: 'Handicap Index',
             data,
-            borderColor: '#f97316',
+            borderColor: '#f97316', // fallback, overridden per-segment below
             backgroundColor: gradFill,
             fill: true,
             tension: 0.4,
             pointRadius: 5,
-            pointBackgroundColor: '#f59e0b',
+            pointBackgroundColor: (ctx) => {
+              // Colour each point based on change from previous point
+              const i = ctx.dataIndex;
+              if (i === 0) return '#f59e0b';
+              const diff = data[i] - data[i - 1];
+              if (diff < -0.2) return '#10b981';  // improving (green)
+              if (diff > 0.2)  return '#f43f5e';  // worsening (red)
+              return '#f59e0b';                    // stable (orange)
+            },
             pointBorderColor: '#fff',
             pointBorderWidth: 2,
+            segment: {
+              borderColor: (ctx) => {
+                try {
+                  const y0 = ctx.p0.parsed.y;
+                  const y1 = ctx.p1.parsed.y;
+                  const diff = y1 - y0;
+                  if (diff < -0.2) return '#10b981';
+                  if (diff > 0.2)  return '#f43f5e';
+                  return '#f97316';
+                } catch(e) { return '#f97316'; }
+              }
+            },
             borderWidth: 3
           }]
         },
@@ -2640,7 +2660,8 @@
               ticks: { color: '#64748b', font: { size: 11 } }
             },
             y: {
-              reverse: true, // lower = better, so lower HCP sits higher on chart
+              min: 0,
+              max: 30,
               grid: { color: 'rgba(255,255,255,0.05)' },
               ticks: {
                 color: '#64748b', font: { size: 11 },
@@ -2765,7 +2786,7 @@
     }
 
     // Initialise on load
-    renderHcpChart();
+    try { renderHcpChart(); } catch(e) { console.warn('Handicap chart init error:', e); }
 
     // ===== TOAST NOTIFICATIONS =====
     function showToast(message, type = 'success', duration = 3000, undoCallback = null) {

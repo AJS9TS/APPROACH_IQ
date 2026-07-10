@@ -228,13 +228,14 @@ ApproachIQ is a standalone single-file HTML web application that allows golfers 
 
 1. THE Tracker SHALL display a Handicap Index Tracker section between the reviews carousel and the footer, visible on all screen sizes.
 2. THE Tracker SHALL display the most recent handicap entry as the "current HCP" prominently in the tracker header.
-3. THE Tracker SHALL render a line graph showing handicap index over time, with an orange line (`#f59e0b` / `#f97316` gradient fill) and a background colour distinct from both the dark mode background (`#050a12`) and light mode background (`#f8faf9`). In dark mode the chart background SHALL be `#1e2a3a`; in light mode it SHALL be `#e8edf5`. The Y axis SHALL be reversed so that a lower (better) handicap appears higher on the chart.
-4. WHEN the user clicks the "+ Log Handicap" button, THE Tracker SHALL display a modal popout containing: a numeric input for the handicap value, a date input defaulting to today, and a save button.
-5. THE modal SHALL also display a scrollable history list of all previously logged entries, each showing the handicap value, date, and a delete button.
-6. WHEN fewer than 2 entries exist, THE Tracker SHALL display a "no data" prompt in place of the chart, instructing the user to log their first entry.
-7. WHEN 2 or more entries exist, THE Tracker SHALL render the line chart and display summary statistics: lowest handicap, highest handicap, total change (first to latest), and total entry count.
-8. THE Tracker SHALL persist all handicap entries to localStorage under a dedicated key, independent of shot data.
-9. THE modal SHALL close when the user clicks the overlay background or a close button.
+3. THE Tracker SHALL render a line graph showing handicap index over time, with a background colour distinct from both the dark mode background (`#050a12`) and light mode background (`#f8faf9`). In dark mode the chart background SHALL be `#1e2a3a`; in light mode it SHALL be `#e8edf5`. The Y axis SHALL have a fixed range of 0 (bottom) to 30 (top), so that a lower (improving) handicap trends downward on the chart.
+4. EACH line segment and data point on the handicap chart SHALL be colour-coded based on the direction of change between consecutive entries: green (`#10b981`) when the handicap decreases by more than 0.2 (improving), red (`#f43f5e`) when it increases by more than 0.2 (worsening), and orange (`#f97316`) when the change is within ±0.2 (stable).
+5. WHEN the user clicks the "+ Log Handicap" button, THE Tracker SHALL display a modal popout containing: a numeric input for the handicap value, a date input defaulting to today, and a save button.
+6. THE modal SHALL also display a scrollable history list of all previously logged entries, each showing the handicap value, date, and a delete button.
+7. WHEN fewer than 2 entries exist, THE Tracker SHALL display a "no data" prompt in place of the chart, instructing the user to log their first entry.
+8. WHEN 2 or more entries exist, THE Tracker SHALL render the line chart and display summary statistics: lowest handicap, highest handicap, total change (first to latest), and total entry count.
+9. THE Tracker SHALL persist all handicap entries to localStorage under a dedicated key, independent of shot data.
+10. THE modal SHALL close when the user clicks the overlay background or a close button.
 
 ### Requirement 18: Mobile Carousel Sizing
 
