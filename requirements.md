@@ -29,6 +29,8 @@ ApproachIQ is a standalone single-file HTML web application that allows golfers 
 - **PWA**: Progressive Web App — a web application that can be installed to a device home screen and used offline via a service worker and web app manifest
 - **Service_Worker**: A background script registered by the Tracker that intercepts network requests and serves cached assets, enabling offline functionality
 - **Web_App_Manifest**: A JSON file (`manifest.json`) that defines how the Tracker appears when installed on a device, including name, icons, theme colour, and display mode
+- **Handicap_Index**: A numerical measure of a golfer's playing ability, updated periodically as rounds are submitted. Lower values indicate better performance.
+- **Handicap_Tracker**: The section of the Tracker that records and charts a user's Handicap_Index entries over time
 
 ## Requirements
 
@@ -217,6 +219,30 @@ ApproachIQ is a standalone single-file HTML web application that allows golfers 
 4. THE Tracker SHALL operate entirely client-side with no backend server dependencies.
 5. THE Tracker SHALL function in modern web browsers (Chrome, Firefox, Safari, Edge — latest two major versions).
 6. THE Tracker SHALL be deployable on GitHub Pages by renaming to index.html and pushing to a repository.
+
+### Requirement 17: Handicap Index Tracker
+
+**User Story:** As a golfer, I want to track my handicap index over time alongside my practice data, so that I can see whether my range work is translating into real score improvements.
+
+#### Acceptance Criteria
+
+1. THE Tracker SHALL display a Handicap Index Tracker section between the reviews carousel and the footer, visible on all screen sizes.
+2. THE Tracker SHALL display the most recent handicap entry as the "current HCP" prominently in the tracker header.
+3. THE Tracker SHALL render a line graph showing handicap index over time, with an orange line (`#f59e0b` / `#f97316` gradient fill) and a background colour distinct from both the dark mode background (`#050a12`) and light mode background (`#f8faf9`). In dark mode the chart background SHALL be `#1e2a3a`; in light mode it SHALL be `#e8edf5`. The Y axis SHALL be reversed so that a lower (better) handicap appears higher on the chart.
+4. WHEN the user clicks the "+ Log Handicap" button, THE Tracker SHALL display a modal popout containing: a numeric input for the handicap value, a date input defaulting to today, and a save button.
+5. THE modal SHALL also display a scrollable history list of all previously logged entries, each showing the handicap value, date, and a delete button.
+6. WHEN fewer than 2 entries exist, THE Tracker SHALL display a "no data" prompt in place of the chart, instructing the user to log their first entry.
+7. WHEN 2 or more entries exist, THE Tracker SHALL render the line chart and display summary statistics: lowest handicap, highest handicap, total change (first to latest), and total entry count.
+8. THE Tracker SHALL persist all handicap entries to localStorage under a dedicated key, independent of shot data.
+9. THE modal SHALL close when the user clicks the overlay background or a close button.
+
+### Requirement 18: Mobile Carousel Sizing
+
+**User Story:** As a mobile user, I want the reviews carousel to be readable and well-proportioned on a small screen.
+
+#### Acceptance Criteria
+
+1. ON screens 768px wide or narrower, THE Tracker SHALL reduce review card padding, font sizes, and section margins so the carousel fits comfortably without overflow or cramped text.
 
 ### Requirement 16: Progressive Web App (PWA) Support
 

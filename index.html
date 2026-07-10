@@ -689,6 +689,169 @@
     }
     .carousel-dot.active { background: var(--brand-green); transform: scale(1.3); box-shadow: 0 0 10px rgba(16,185,129,0.4); }
 
+    /* Mobile carousel fixes */
+    @media (max-width: 768px) {
+      .reviews-section { margin: 1.5rem auto 0; padding: 0 1rem; }
+      .review-card { padding: 1.2rem; }
+      .review-text { font-size: 0.85rem; line-height: 1.6; }
+      .review-stars { font-size: 1rem; margin-bottom: 0.5rem; }
+      .review-author { font-size: 0.8rem; }
+      .reviews-title { font-size: 1.1rem; margin-bottom: 1rem; }
+    }
+
+    /* ===== HANDICAP TRACKER ===== */
+    .handicap-section {
+      max-width: 1000px; margin: 2.5rem auto 0; padding: 0 1.5rem;
+    }
+    .handicap-card {
+      background: var(--bg-card);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid var(--border-glass);
+      border-radius: var(--radius);
+      padding: 2rem;
+      box-shadow: var(--shadow-xl);
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.25s, box-shadow 0.25s;
+    }
+    .handicap-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, #f59e0b, #f97316, #ef4444);
+      opacity: 0.8;
+    }
+    .handicap-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-xl), 0 0 40px rgba(245,158,11,0.08); }
+
+    .handicap-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 1.5rem; flex-wrap: wrap; gap: 0.8rem;
+    }
+    .handicap-header h2 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.4rem; font-weight: 700;
+      color: var(--text-primary);
+      display: flex; align-items: center; gap: 0.5rem;
+      margin: 0;
+    }
+    .handicap-badge {
+      font-size: 0.65rem; font-family: 'Inter', sans-serif;
+      padding: 0.2rem 0.6rem; border-radius: 6px;
+      background: rgba(245,158,11,0.12);
+      color: #f59e0b;
+      font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+      border: 1px solid rgba(245,158,11,0.2);
+    }
+    .handicap-current {
+      display: flex; align-items: baseline; gap: 0.5rem;
+    }
+    .handicap-current-val {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 2.4rem; font-weight: 800;
+      color: #f59e0b;
+      line-height: 1;
+    }
+    .handicap-current-label {
+      font-size: 0.75rem; color: var(--text-muted);
+    }
+    .handicap-add-btn {
+      display: flex; align-items: center; gap: 0.4rem;
+      padding: 0.55rem 1.1rem;
+      border: 1px solid rgba(245,158,11,0.3);
+      border-radius: var(--radius-xs);
+      background: rgba(245,158,11,0.08);
+      color: #f59e0b;
+      font-family: inherit; font-size: 0.8rem; font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-transform: uppercase; letter-spacing: 0.3px;
+    }
+    .handicap-add-btn:hover { background: rgba(245,158,11,0.16); transform: translateY(-1px); }
+
+    .handicap-chart-wrap {
+      position: relative;
+      /* Distinct background — slate blue-grey, different from both dark (#050a12) and light (#f8faf9) */
+      background: #1e2a3a;
+      border-radius: var(--radius-sm);
+      padding: 1rem 0.5rem 0.5rem;
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+    body.light .handicap-chart-wrap { background: #e8edf5; border-color: rgba(0,0,0,0.08); }
+
+    .handicap-no-data {
+      text-align: center; padding: 2.5rem 1rem;
+      color: var(--text-muted); font-size: 0.9rem;
+    }
+    .handicap-no-data .hcp-cta {
+      display: inline-block; margin-top: 0.8rem;
+      font-size: 0.8rem; color: #f59e0b; font-weight: 600;
+      opacity: 0.8;
+    }
+
+    .handicap-footer {
+      display: flex; gap: 1.5rem; margin-top: 1rem;
+      font-size: 0.72rem; color: var(--text-muted); flex-wrap: wrap;
+    }
+    .handicap-footer strong { color: var(--text-secondary); font-family: 'Space Grotesk', sans-serif; }
+
+    /* Handicap popout modal */
+    .hcp-modal-overlay {
+      position: fixed; inset: 0; z-index: 5000;
+      background: rgba(0,0,0,0.6);
+      display: flex; align-items: center; justify-content: center;
+      padding: 1rem;
+      animation: fadeInUp 0.2s ease;
+    }
+    .hcp-modal {
+      background: var(--bg-card);
+      border: 1px solid rgba(245,158,11,0.25);
+      border-radius: var(--radius);
+      padding: 2rem;
+      width: 100%; max-width: 380px;
+      box-shadow: 0 0 60px rgba(245,158,11,0.15), var(--shadow-xl);
+      animation: scaleIn 0.25s cubic-bezier(0.34,1.56,0.64,1);
+      position: relative;
+    }
+    .hcp-modal h3 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.2rem; font-weight: 700;
+      color: var(--text-primary); margin-bottom: 1.2rem;
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+    .hcp-modal .form-group { margin-bottom: 1rem; }
+    .hcp-modal-close {
+      position: absolute; top: 1rem; right: 1rem;
+      background: transparent; border: none;
+      color: var(--text-muted); font-size: 1.2rem;
+      cursor: pointer; padding: 0.25rem; line-height: 1;
+      transition: color 0.2s;
+    }
+    .hcp-modal-close:hover { color: var(--text-primary); }
+    .hcp-history {
+      margin-top: 1.2rem; padding-top: 1rem;
+      border-top: 1px solid var(--border-glass);
+      max-height: 180px; overflow-y: auto;
+    }
+    .hcp-history-title {
+      font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.5px;
+      color: var(--text-muted); margin-bottom: 0.6rem; font-weight: 700;
+    }
+    .hcp-history-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 0.4rem 0; border-bottom: 1px solid var(--border-glass);
+      font-size: 0.8rem;
+    }
+    .hcp-history-row:last-child { border-bottom: none; }
+    .hcp-history-val { font-family: 'Space Grotesk', sans-serif; font-weight: 700; color: #f59e0b; }
+    .hcp-history-date { color: var(--text-muted); font-size: 0.72rem; }
+    .hcp-history-del {
+      background: transparent; border: none; color: var(--text-muted);
+      cursor: pointer; font-size: 0.85rem; padding: 0 0.2rem;
+      transition: color 0.2s;
+    }
+    .hcp-history-del:hover { color: var(--accent-red); }
+
     /* ===== FOOTER ===== */
     .app-footer {
       text-align: center; padding: 2rem; margin-top: 2rem;
@@ -1324,6 +1487,37 @@
       </div>
     </aside>
   </div>
+
+  <!-- HANDICAP TRACKER -->
+  <section class="handicap-section" id="handicap-section">
+    <div class="handicap-card" id="handicap-card">
+      <div class="handicap-header">
+        <h2>♟ Handicap Index <span class="handicap-badge">Tracker</span></h2>
+        <div style="display:flex; align-items:center; gap:1.2rem; flex-wrap:wrap;">
+          <div class="handicap-current">
+            <span class="handicap-current-val" id="hcp-current-val">—</span>
+            <span class="handicap-current-label">current HCP</span>
+          </div>
+          <button class="handicap-add-btn" id="hcp-add-btn" onclick="openHcpModal(event)">
+            + Log Handicap
+          </button>
+        </div>
+      </div>
+      <div class="handicap-chart-wrap" id="hcp-chart-wrap">
+        <div class="handicap-no-data" id="hcp-no-data">
+          No handicap history yet.<br>
+          <span class="hcp-cta">Click "+ Log Handicap" to record your first entry.</span>
+        </div>
+        <canvas id="hcp-chart" style="display:none;"></canvas>
+      </div>
+      <div class="handicap-footer" id="hcp-footer" style="display:none;">
+        <span>Lowest: <strong id="hcp-lowest">—</strong></span>
+        <span>Highest: <strong id="hcp-highest">—</strong></span>
+        <span>Change: <strong id="hcp-change">—</strong></span>
+        <span>Entries: <strong id="hcp-count">—</strong></span>
+      </div>
+    </div>
+  </section>
 
   <!-- REVIEWS CAROUSEL -->
   <section class="reviews-section">
@@ -2336,6 +2530,242 @@
       // Auto-advance every 5 seconds
       setInterval(() => { goTo((current + 1) % total); }, 5000);
     })();
+
+    // ===== HANDICAP TRACKER =====
+    const HCP_STORAGE_KEY = 'approachiq-handicap-history';
+    let hcpChartInstance = null;
+
+    function getHcpEntries() {
+      try {
+        const raw = localStorage.getItem(HCP_STORAGE_KEY);
+        return raw ? JSON.parse(raw) : [];
+      } catch(e) { return []; }
+    }
+
+    function saveHcpEntries(entries) {
+      localStorage.setItem(HCP_STORAGE_KEY, JSON.stringify(entries));
+    }
+
+    function renderHcpChart() {
+      const entries = getHcpEntries().sort((a, b) => a.date.localeCompare(b.date));
+      const noDataEl = document.getElementById('hcp-no-data');
+      const canvas = document.getElementById('hcp-chart');
+      const footer = document.getElementById('hcp-footer');
+      const currentVal = document.getElementById('hcp-current-val');
+
+      if (entries.length === 0) {
+        noDataEl.style.display = 'block';
+        canvas.style.display = 'none';
+        footer.style.display = 'none';
+        currentVal.textContent = '—';
+        return;
+      }
+
+      // Update current HCP display
+      const latest = entries[entries.length - 1];
+      currentVal.textContent = parseFloat(latest.hcp).toFixed(1);
+
+      if (entries.length < 2) {
+        noDataEl.style.display = 'block';
+        noDataEl.innerHTML = 'Add one more entry to see your trend chart.<br><span class="hcp-cta">You need at least 2 entries.</span>';
+        canvas.style.display = 'none';
+        footer.style.display = 'none';
+        return;
+      }
+
+      noDataEl.style.display = 'none';
+      canvas.style.display = 'block';
+      footer.style.display = 'flex';
+
+      // Summary stats
+      const vals = entries.map(e => parseFloat(e.hcp));
+      const lowest = Math.min(...vals);
+      const highest = Math.max(...vals);
+      const change = (vals[vals.length - 1] - vals[0]).toFixed(1);
+      const changeStr = change > 0 ? '+' + change : String(change);
+      document.getElementById('hcp-lowest').textContent = lowest.toFixed(1);
+      document.getElementById('hcp-highest').textContent = highest.toFixed(1);
+      document.getElementById('hcp-change').textContent = changeStr;
+      document.getElementById('hcp-count').textContent = entries.length;
+
+      // Labels — format date nicely
+      const labels = entries.map(e => {
+        const [y, m, d] = e.date.split('-');
+        return new Date(y, m - 1, d).toLocaleDateString('en', { day: 'numeric', month: 'short', year: '2-digit' });
+      });
+      const data = vals;
+
+      // Destroy previous chart instance
+      if (hcpChartInstance) { hcpChartInstance.destroy(); hcpChartInstance = null; }
+
+      // Gradient fill under line
+      const ctx = canvas.getContext('2d');
+      const gradFill = ctx.createLinearGradient(0, 0, 0, 200);
+      gradFill.addColorStop(0, 'rgba(249,115,22,0.25)');
+      gradFill.addColorStop(1, 'rgba(249,115,22,0)');
+
+      hcpChartInstance = new Chart(canvas, {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [{
+            label: 'Handicap Index',
+            data,
+            borderColor: '#f97316',
+            backgroundColor: gradFill,
+            fill: true,
+            tension: 0.4,
+            pointRadius: 5,
+            pointBackgroundColor: '#f59e0b',
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2,
+            borderWidth: 3
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          aspectRatio: 2.5,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: (c) => ' HCP ' + c.parsed.y.toFixed(1)
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: { color: 'rgba(255,255,255,0.05)' },
+              ticks: { color: '#64748b', font: { size: 11 } }
+            },
+            y: {
+              reverse: true, // lower = better, so lower HCP sits higher on chart
+              grid: { color: 'rgba(255,255,255,0.05)' },
+              ticks: {
+                color: '#64748b', font: { size: 11 },
+                callback: (v) => v.toFixed(1)
+              },
+              title: { display: true, text: 'Handicap Index', color: '#64748b', font: { size: 11 } }
+            }
+          }
+        }
+      });
+    }
+
+    // Popout modal
+    function openHcpModal(e) {
+      e.stopPropagation();
+      // Remove any existing modal
+      const existing = document.getElementById('hcp-modal-overlay');
+      if (existing) existing.remove();
+
+      const overlay = document.createElement('div');
+      overlay.className = 'hcp-modal-overlay';
+      overlay.id = 'hcp-modal-overlay';
+
+      overlay.innerHTML = `
+        <div class="hcp-modal" id="hcp-modal-inner">
+          <button class="hcp-modal-close" onclick="closeHcpModal()" aria-label="Close">✕</button>
+          <h3>♟ Log Handicap Index</h3>
+          <div class="form-group">
+            <label style="display:block; margin-bottom:0.4rem; font-weight:600; font-size:0.72rem; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.8px;">Handicap Index</label>
+            <input type="number" id="hcp-input-val" step="0.1" min="0" max="54" placeholder="e.g. 14.2"
+              style="width:100%; padding:0.8rem 1rem; border:1px solid var(--border-glass); border-radius:var(--radius-xs); font-size:0.95rem; font-family:inherit; background:var(--bg-secondary); color:var(--text-primary); outline:none;" />
+          </div>
+          <div class="form-group">
+            <label style="display:block; margin-bottom:0.4rem; font-weight:600; font-size:0.72rem; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.8px;">Date</label>
+            <input type="date" id="hcp-input-date"
+              style="width:100%; padding:0.8rem 1rem; border:1px solid var(--border-glass); border-radius:var(--radius-xs); font-size:0.95rem; font-family:inherit; background:var(--bg-secondary); color:var(--text-primary); outline:none;" />
+          </div>
+          <div id="hcp-modal-error" style="color:var(--accent-red); font-size:0.82rem; min-height:1.2rem; margin-bottom:0.5rem;"></div>
+          <button onclick="saveHcpEntry()"
+            style="width:100%; padding:0.75rem; border:none; border-radius:var(--radius-xs); background:linear-gradient(135deg,#f59e0b,#f97316); color:white; font-weight:700; font-family:inherit; font-size:0.9rem; cursor:pointer;">
+            Save Entry
+          </button>
+          <div class="hcp-history" id="hcp-history-list"></div>
+        </div>
+      `;
+
+      // Set today's date
+      overlay.querySelector('#hcp-input-date').value = new Date().toISOString().split('T')[0];
+
+      // Close on overlay click
+      overlay.addEventListener('click', (ev) => {
+        if (ev.target === overlay) closeHcpModal();
+      });
+
+      document.body.appendChild(overlay);
+      renderHcpHistory();
+      overlay.querySelector('#hcp-input-val').focus();
+    }
+
+    function closeHcpModal() {
+      const overlay = document.getElementById('hcp-modal-overlay');
+      if (overlay) overlay.remove();
+    }
+
+    function saveHcpEntry() {
+      const valInput = document.getElementById('hcp-input-val');
+      const dateInput = document.getElementById('hcp-input-date');
+      const errEl = document.getElementById('hcp-modal-error');
+      const val = parseFloat(valInput.value);
+      const date = dateInput.value;
+      errEl.textContent = '';
+
+      if (isNaN(val) || val < 0 || val > 54) {
+        errEl.textContent = '⚠️ Enter a valid handicap between 0 and 54.';
+        return;
+      }
+      if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+        errEl.textContent = '⚠️ Please select a valid date.';
+        return;
+      }
+
+      const entries = getHcpEntries();
+      entries.push({ hcp: val, date });
+      saveHcpEntries(entries);
+      valInput.value = '';
+      renderHcpHistory();
+      renderHcpChart();
+      showToast('✅ Handicap ' + val.toFixed(1) + ' saved', 'success');
+    }
+
+    function deleteHcpEntry(idx) {
+      const entries = getHcpEntries();
+      entries.splice(idx, 1);
+      saveHcpEntries(entries);
+      renderHcpHistory();
+      renderHcpChart();
+    }
+
+    function renderHcpHistory() {
+      const list = document.getElementById('hcp-history-list');
+      if (!list) return;
+      const entries = getHcpEntries().sort((a, b) => b.date.localeCompare(a.date));
+      if (entries.length === 0) {
+        list.innerHTML = '<div class="hcp-history-title">No entries yet</div>';
+        return;
+      }
+      let html = '<div class="hcp-history-title">History</div>';
+      // Need original indices for deletion — re-sort keeping original index
+      const indexed = getHcpEntries().map((e, i) => ({ ...e, origIdx: i }))
+        .sort((a, b) => b.date.localeCompare(a.date));
+      indexed.forEach(({ hcp, date, origIdx }) => {
+        const [y, m, d] = date.split('-');
+        const fmt = new Date(y, m - 1, d).toLocaleDateString('en', { day: 'numeric', month: 'short', year: 'numeric' });
+        html += `
+          <div class="hcp-history-row">
+            <span class="hcp-history-val">${parseFloat(hcp).toFixed(1)}</span>
+            <span class="hcp-history-date">${fmt}</span>
+            <button class="hcp-history-del" onclick="deleteHcpEntry(${origIdx})" aria-label="Delete entry">🗑</button>
+          </div>`;
+      });
+      list.innerHTML = html;
+    }
+
+    // Initialise on load
+    renderHcpChart();
 
     // ===== TOAST NOTIFICATIONS =====
     function showToast(message, type = 'success', duration = 3000, undoCallback = null) {
