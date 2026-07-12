@@ -17,7 +17,7 @@ ApproachIQ is a standalone single-file HTML web application that allows golfers 
 - **Entry_Green_Canvas**: A separate interactive Green_Canvas rendered inside the Log Shot form, used exclusively for Click-to-Place shot entry
 - **Click_to_Place**: A shot entry mode where the user taps or clicks on the Entry_Green_Canvas to set the ball landing position visually; Vertical_Distance and Horizontal_Distance are derived automatically from the click coordinates
 - **Coordinate_Readout**: A live display beneath the Entry_Green_Canvas showing the current Vertical_Distance, Horizontal_Distance, and Hypotenuse_Distance values corresponding to the cursor position (hover) or placed marker (click)
-- **Entry_Mode**: The active method for inputting shot position data — either Manual Entry (typed numeric inputs) or Click to Place (canvas tap)
+- **Entry_Mode**: The active method for inputting shot position data — Manual Entry (typed numeric inputs), Click to Place (canvas tap), or Quick Log (zone-based tap with auto-save)
 - **Dispersion**: The standard deviation of Hypotenuse_Distance values for a set of shots, representing grouping consistency
 - **Distance_Bucket**: A proximity threshold specific to each Club representing the maximum acceptable result distance (Hypotenuse_Distance) from the pin. Shots finishing within this threshold are considered "in bucket" and qualify for detailed KPI analysis.
 - **KPI**: Key Performance Indicator — a computed metric summarizing shot accuracy for a Club within a Distance_Bucket
