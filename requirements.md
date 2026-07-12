@@ -47,7 +47,7 @@ ApproachIQ is a standalone single-file HTML web application that allows golfers 
 4. WHEN a user submits a Shot form with missing required fields, THE Tracker SHALL display a validation error message identifying the missing fields.
 5. THE Tracker SHALL allow Vertical_Distance and Horizontal_Distance to accept positive and negative numeric values.
 6. THE Tracker SHALL default the date field to the current date.
-7. THE Tracker SHALL provide two Entry_Mode options within the Log Shot form: Manual Entry and Click to Place. The Club, Distance_Into_Green, and date fields SHALL be present in both modes.
+7. THE Tracker SHALL provide three Entry_Mode options within the Log Shot form: Manual Entry, Click to Place, and Quick Log.
 
 ### Requirement 2: Shot Data Persistence
 
@@ -251,6 +251,7 @@ ApproachIQ is a standalone single-file HTML web application that allows golfers 
 8. WHEN 2 or more entries exist, THE Tracker SHALL render the line chart and display summary statistics: lowest handicap, highest handicap, total change (first to latest), and total entry count.
 9. THE Tracker SHALL persist all handicap entries to localStorage under a dedicated key, independent of shot data.
 10. THE modal SHALL close when the user clicks the overlay background or a close button.
+11. THE Tracker SHALL provide a "Clear Last" button on the handicap tracker that removes the most recent entry. Repeated clicks SHALL continue removing entries until none remain, at which point all handicap data is cleared.
 
 ### Requirement 18: Mobile Carousel Sizing
 
@@ -292,3 +293,25 @@ ApproachIQ is a standalone single-file HTML web application that allows golfers 
 10. AFTER a successful save in Click to Place mode, THE Tracker SHALL reset the Entry_Green_Canvas (clear the marker), reset the Coordinate_Readout to its empty state, and clear the Distance_Into_Green field.
 11. THE Entry_Green_Canvas SHALL support touch events on mobile devices with the same placement behaviour as mouse clicks on desktop.
 12. THE Club and date fields SHALL remain visible and shared between both entry modes; switching Entry_Mode SHALL not clear values already entered in those fields.
+
+### Requirement 20: Quick Log Mode (On-Course Entry)
+
+**User Story:** As a weekend golfer, I want to rapidly log my approach shots during a round with minimal taps, so that I can track all 18 holes without slowing down play.
+
+#### Acceptance Criteria
+
+1. THE Tracker SHALL provide a third Entry_Mode option labelled "⚡ Quick Log" in the Log Shot form toggle, alongside Manual and Click to Place.
+2. IN Quick Log mode, THE Tracker SHALL display a grid of 8 large club buttons (W, 9i, 8i, 7i, 6i, 5i, 3W, DR) instead of a dropdown selector. The user taps one to select the club for the next shot.
+3. THE selected club button SHALL be visually highlighted with a green active state until a different club is tapped.
+4. IN Quick Log mode, THE Tracker SHALL display a circular zone-based green with 9 tap zones: centre (pin), long, short, left, right, long-left, long-right, short-left, short-right — plus a "Missed Green" button outside the circle for shots that missed the green entirely.
+5. WHEN the user taps a zone, THE Tracker SHALL immediately auto-save the shot using the selected club, the zone's mapped coordinates, and today's date. No separate submit button is required.
+6. THE Tracker SHALL map zones to approximate yard coordinates: centre (0,0), cardinal directions (±8,0 or 0,±8), diagonals (±6,±6), and missed green (18,0).
+7. WHEN a zone is tapped without a club selected, THE Tracker SHALL display a warning: "Pick a club first."
+8. AFTER each auto-save, THE Tracker SHALL reset the club selection (deselect the active club button) so the user must pick a club again for the next shot. This prevents accidental logging with the wrong club.
+8. AFTER each auto-save, THE Tracker SHALL display a brief flash confirmation showing the club and zone (e.g. "✓ 7 Iron — long left") that auto-dismisses after 2 seconds.
+9. THE Tracker SHALL display a running shot counter showing total shots logged in the current Quick Log session.
+10. THE Quick Log mode SHALL NOT require the user to enter a date — it SHALL default to today's date automatically.
+11. IN Quick Log mode, THE Tracker SHALL hide the shared club dropdown, date field, Save/Import/Clear buttons, and CSV hint — only the big club grid and zone green SHALL be visible.
+12. WHEN the shot counter reaches 18, THE Tracker SHALL display a popup offering two options: "Save & End Round" (resets the counter to 0 and shows a confirmation toast) or "Keep Going" (dismisses the popup and allows continued logging for consecutive rounds).
+13. THE Tracker SHALL display an "Undo" button next to the shot counter that removes the most recently logged shot, decrements the counter, and shows a confirmation toast.
+14. THE zone green SHALL display a dashed contour ring at 50% radius indicating the boundary between the inner "close" zones and the outer zones, labelled with the approximate distance (~3 yds) to give the user a visual sense of scale.
