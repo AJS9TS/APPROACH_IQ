@@ -19,7 +19,7 @@ ApproachIQ is a standalone single-file HTML web application that allows golfers 
 - **Coordinate_Readout**: A live display beneath the Entry_Green_Canvas showing the current Vertical_Distance, Horizontal_Distance, and Hypotenuse_Distance values corresponding to the cursor position (hover) or placed marker (click)
 - **Entry_Mode**: The active method for inputting shot position data — either Manual Entry (typed numeric inputs) or Click to Place (canvas tap)
 - **Dispersion**: The standard deviation of Hypotenuse_Distance values for a set of shots, representing grouping consistency
-- **Distance_Bucket**: A range threshold specific to each Club used to categorize shots by Distance_Into_Green for KPI calculation
+- **Distance_Bucket**: A proximity threshold specific to each Club representing the maximum acceptable result distance (Hypotenuse_Distance) from the pin. Shots finishing within this threshold are considered "in bucket" and qualify for detailed KPI analysis.
 - **KPI**: Key Performance Indicator — a computed metric summarizing shot accuracy for a Club within a Distance_Bucket
 - **Benchmark**: Reference proximity values for Pro, Good Amateur, and Average Amateur levels per club
 - **Toast**: A non-blocking slide-in notification that auto-dismisses after a set duration
@@ -29,6 +29,9 @@ ApproachIQ is a standalone single-file HTML web application that allows golfers 
 - **PWA**: Progressive Web App — a web application that can be installed to a device home screen and used offline via a service worker and web app manifest
 - **Service_Worker**: A background script registered by the Tracker that intercepts network requests and serves cached assets, enabling offline functionality
 - **Web_App_Manifest**: A JSON file (`manifest.json`) that defines how the Tracker appears when installed on a device, including name, icons, theme colour, and display mode
+- **Handicap_Index**: A numerical measure of a golfer's playing ability, updated periodically as rounds are submitted. Lower values indicate better performance.
+- **Handicap_Tracker**: The section of the Tracker that records and charts a user's Handicap_Index entries over time
+- **Practice_Impact**: A Coach's Corner analysis that correlates changes in per-club shot dispersion with Handicap_Index movement over the same time period, identifying which clubs likely contributed to handicap improvement or decline
 
 ## Requirements
 
@@ -38,13 +41,13 @@ ApproachIQ is a standalone single-file HTML web application that allows golfers 
 
 #### Acceptance Criteria
 
-1. THE Tracker SHALL provide a form to input a Shot with the following fields: Club, Vertical_Distance (yards), Horizontal_Distance (yards), Distance_Into_Green (yards), and date.
+1. THE Tracker SHALL provide a form to input a Shot with the following fields: Club, Vertical_Distance (yards), Horizontal_Distance (yards), and date.
 2. THE Tracker SHALL support the following Club values: Wedge, 9 Iron, 8 Iron, 7 Iron, 6 Iron, 5 Iron, 3 Wood, and Driver.
 3. WHEN a user submits a valid Shot form, THE Tracker SHALL persist the Shot data to localStorage.
 4. WHEN a user submits a Shot form with missing required fields, THE Tracker SHALL display a validation error message identifying the missing fields.
 5. THE Tracker SHALL allow Vertical_Distance and Horizontal_Distance to accept positive and negative numeric values.
 6. THE Tracker SHALL default the date field to the current date.
-7. THE Tracker SHALL provide two Entry_Mode options within the Log Shot form: Manual Entry and Click to Place. The Club, Distance_Into_Green, and date fields SHALL be present in both modes.
+7. THE Tracker SHALL provide three Entry_Mode options within the Log Shot form: Manual Entry, Click to Place, and Quick Log.
 
 ### Requirement 2: Shot Data Persistence
 
@@ -63,7 +66,7 @@ ApproachIQ is a standalone single-file HTML web application that allows golfers 
 #### Acceptance Criteria
 
 1. THE Tracker SHALL provide an "Import CSV" button that opens the browser file picker filtered to .csv files.
-2. THE Tracker SHALL parse CSV files with columns in the order: Club, Vertical_Distance, Horizontal_Distance, Distance_Into_Green, Date (YYYY-MM-DD).
+2. THE Tracker SHALL parse CSV files with columns in the order: Club, Vertical_Distance, Horizontal_Distance, Date (YYYY-MM-DD).
 3. THE Tracker SHALL auto-detect and skip a header row if it contains column name keywords (club, vertical, date).
 4. THE Tracker SHALL validate each row individually and import only valid rows.
 5. WHEN rows contain invalid data, THE Tracker SHALL skip those rows and report the count of skipped rows with error details.
@@ -82,7 +85,9 @@ ApproachIQ is a standalone single-file HTML web application that allows golfers 
 5. THE Tracker SHALL plot each shot as a coloured marker at the correct position relative to the pin.
 6. WHEN a user selects a Club, THE Tracker SHALL display only shots for that club on the green.
 7. THE Tracker SHALL provide a month filter to show only shots from a selected month.
+8. THE Tracker SHALL dynamically populate the month filter dropdown with all months that contain shot data, sorted newest first, plus an "All Time" default option.
 8. THE Tracker SHALL render the canvas responsively, scaling to fit the container width while maintaining a 1:1 aspect ratio at device pixel ratio for crisp rendering.
+9. WHEN the browser window is resized or the device orientation changes, THE Tracker SHALL re-render visible canvas charts to fit the new viewport dimensions.
 
 ### Requirement 5: Chart Export
 
@@ -103,14 +108,17 @@ ApproachIQ is a standalone single-file HTML web application that allows golfers 
 
 1. THE Tracker SHALL display a large KPI card for each Club that has recorded Shot data.
 2. THE Tracker SHALL calculate and display: average absolute Vertical_Distance, average absolute Horizontal_Distance, and average Hypotenuse_Distance per Club within the Distance_Bucket.
-3. THE Tracker SHALL apply the following Distance_Bucket thresholds: Wedge 10 yds, 9 Iron 13 yds, 8 Iron 15 yds, 7 Iron 25 yds, 6 Iron 30 yds, 5 Iron 30 yds, 3 Wood 50 yds, Driver 55 yds.
+3. THE Tracker SHALL apply the following Distance_Bucket thresholds based on result proximity (Hypotenuse_Distance to pin): Wedge 10 yds, 9 Iron 13 yds, 8 Iron 15 yds, 7 Iron 25 yds, 6 Iron 30 yds, 5 Iron 30 yds, 3 Wood 50 yds, Driver 55 yds. A shot qualifies for KPI calculation when its Hypotenuse_Distance is within the club's bucket threshold.
 4. THE Tracker SHALL display a performance score ring (0-100%) comparing the user's average proximity to benchmark values (Pro, Good Amateur, Average Amateur).
 5. THE Tracker SHALL display benchmark reference values (Pro, Good, Average) for each club.
-6. THE Tracker SHALL display an In-Bucket Rate percentage (shots within bucket / total shots for that club).
+6. THE Tracker SHALL display an In-Bucket Rate percentage representing the proportion of shots for that club that finished within the Distance_Bucket threshold of the pin (Hypotenuse_Distance ≤ bucket).
 7. THE Tracker SHALL display a Miss Tendency bias indicator showing average directional miss (left/right, short/long) on a visual track.
 8. THE Tracker SHALL display a status indicator per club: "On track" (≤ good benchmark), "Room to improve" (≤ average benchmark), or "Focus area" (above average).
 9. WHEN a Club has no Shot data within the Distance_Bucket, THE Tracker SHALL display a message indicating insufficient data.
 10. THE Tracker SHALL provide a month filter to show KPIs for a selected month only.
+11. THE Tracker SHALL provide a Standard/Detailed toggle on the KPI page. "Standard" SHALL be the default view.
+12. IN Standard view, THE Tracker SHALL display a simplified card per club showing: performance score (ring), average distance to pin, and target distance (Distance_Bucket threshold).
+13. IN Detailed view, THE Tracker SHALL display the full KPI card with all metrics as specified in ACs 1-9 above.
 
 ### Requirement 7: Trend Line Chart
 
@@ -123,13 +131,22 @@ ApproachIQ is a standalone single-file HTML web application that allows golfers 
 3. THE trend chart SHALL only render when a club has data spanning 2 or more months.
 4. THE trend chart SHALL use a smooth line with filled area beneath.
 
-### Requirement 8: Practice Recommendations (Coach's Corner)
+### Requirement 8: Today's Practice & Recommendations (Coach's Corner)
 
-**User Story:** As a golfer, I want to receive personalised coaching-style recommendations on which clubs to prioritise in practice, so that I can make the most efficient use of my range time.
+**User Story:** As a golfer, I want a simple, actionable practice plan when I open the app, so that I know exactly what to work on at the range without overthinking it.
 
 #### Acceptance Criteria
 
-1. THE Tracker SHALL calculate an Improvement Opportunity Score for each qualifying club, weighted 60% on the gap between that club's average proximity and the best performing club, and 40% on dispersion.
+1. THE Tracker SHALL display a "Today's Practice" session plan at the top of the Coach's Corner tab, above the priority recommendations.
+2. THE Tracker SHALL generate up to 3 different session plans based on the user's data, each focusing on different club groupings:
+   - **Session A ("Work on your weaknesses"):** top 2 priority clubs by improvement score.
+   - **Session B ("Sharpen the mid-range"):** the 3rd and 4th priority clubs, or a mix if fewer clubs qualify.
+   - **Session C ("Contrast drill — worst vs best"):** the highest-priority club paired with the user's strongest club.
+3. THE Tracker SHALL display left and right arrow buttons allowing the user to cycle between available session plans. Only the active plan SHALL be visible at a time. The arrows SHALL wrap around (last → first, first → last).
+4. EACH session plan SHALL include: warm up with the user's most consistent club (5 shots), focused work on 2 clubs (10 and 8 shots respectively) with plain-English tips based on miss direction, and a 5-shot finish with free club choice.
+5. EACH session plan SHALL display an estimated ball count and session duration (~20 minutes), and indicate which data period it is based on.
+6. WHEN insufficient data exists (fewer than 3 shots per club in bucket), THE Tracker SHALL display a message prompting the user to log more shots to unlock the plan.
+6. THE Tracker SHALL calculate an Improvement Opportunity Score for each qualifying club, weighted 60% on the gap between that club's average proximity and the best performing club, and 40% on dispersion.
 2. THE Tracker SHALL identify the top 3 worst performing clubs and present them as Priority 1, 2, and 3 recommendations.
 3. EACH recommendation SHALL include a natural-language coaching reason that identifies the dominant miss pattern:
    - IF a club consistently misses long, THE Tracker SHALL advise "take one less club or control swing length."
@@ -201,6 +218,9 @@ ApproachIQ is a standalone single-file HTML web application that allows golfers 
 5. THE Tracker SHALL display sidebar advertisements (3 per side) for golf equipment on screens wider than 1200px, hidden on mobile.
 6. THE Tracker SHALL display a branded footer.
 7. THE Tracker SHALL label the four navigation tabs as: "⛳ Log", "📊 Charts", "📈 KPIs", and "🎯 Coach's Corner".
+8. ON screens wider than 768px, THE Tracker SHALL display navigation as a pill-style tab bar centred below the hero section.
+9. ON screens 768px wide or narrower, THE Tracker SHALL hide the top tab bar and display a fixed bottom navigation bar pinned to the bottom of the viewport, with each tab showing an icon and a short label. The bottom nav SHALL respect the iOS safe area inset so it does not overlap the iPhone home indicator.
+10. WHEN a tab is switched on mobile, THE Tracker SHALL scroll the page to the top with a smooth animation.
 
 ### Requirement 14: Application Architecture
 
@@ -215,6 +235,32 @@ ApproachIQ is a standalone single-file HTML web application that allows golfers 
 5. THE Tracker SHALL function in modern web browsers (Chrome, Firefox, Safari, Edge — latest two major versions).
 6. THE Tracker SHALL be deployable on GitHub Pages by renaming to index.html and pushing to a repository.
 
+### Requirement 17: Handicap Index Tracker
+
+**User Story:** As a golfer, I want to track my handicap index over time alongside my practice data, so that I can see whether my range work is translating into real score improvements.
+
+#### Acceptance Criteria
+
+1. THE Tracker SHALL display a Handicap Index Tracker section between the reviews carousel and the footer, visible on all screen sizes.
+2. THE Tracker SHALL display the most recent handicap entry as the "current HCP" prominently in the tracker header.
+3. THE Tracker SHALL render a line graph showing handicap index over time, with a background colour distinct from both the dark mode background (`#050a12`) and light mode background (`#f8faf9`). In dark mode the chart background SHALL be `#1e2a3a`; in light mode it SHALL be `#e8edf5`. The Y axis SHALL have a fixed range of 0 (bottom) to 30 (top), so that a lower (improving) handicap trends downward on the chart.
+4. EACH line segment and data point on the handicap chart SHALL be colour-coded based on the direction of change between consecutive entries: green (`#10b981`) when the handicap decreases by more than 0.2 (improving), red (`#f43f5e`) when it increases by more than 0.2 (worsening), and orange (`#f97316`) when the change is within ±0.2 (stable).
+5. WHEN the user clicks the "+ Log Handicap" button, THE Tracker SHALL display a modal popout containing: a numeric input for the handicap value, a date input defaulting to today, and a save button.
+6. THE modal SHALL also display a scrollable history list of all previously logged entries, each showing the handicap value, date, and a delete button.
+7. WHEN fewer than 2 entries exist, THE Tracker SHALL display a "no data" prompt in place of the chart, instructing the user to log their first entry.
+8. WHEN 2 or more entries exist, THE Tracker SHALL render the line chart and display summary statistics: lowest handicap, highest handicap, total change (first to latest), and total entry count.
+9. THE Tracker SHALL persist all handicap entries to localStorage under a dedicated key, independent of shot data.
+10. THE modal SHALL close when the user clicks the overlay background or a close button.
+11. THE Tracker SHALL provide a "Clear Last" button on the handicap tracker that removes the most recent entry. Repeated clicks SHALL continue removing entries until none remain, at which point all handicap data is cleared.
+
+### Requirement 18: Mobile Carousel Sizing
+
+**User Story:** As a mobile user, I want the reviews carousel to be readable and well-proportioned on a small screen.
+
+#### Acceptance Criteria
+
+1. ON screens 768px wide or narrower, THE Tracker SHALL reduce review card padding, font sizes, and section margins so the carousel fits comfortably without overflow or cramped text.
+
 ### Requirement 16: Progressive Web App (PWA) Support
 
 **User Story:** As a golfer, I want to install APPROACH IQ on my phone's home screen so that it feels like a native app and works without an internet connection.
@@ -225,8 +271,8 @@ ApproachIQ is a standalone single-file HTML web application that allows golfers 
 2. THE Tracker SHALL register a service worker that caches the app shell (index.html, manifest.json, icons) and CDN assets (Chart.js) on first load, enabling offline use.
 3. WHEN the app is used offline after the first load, THE Tracker SHALL serve cached assets and remain fully functional for shot logging and viewing data.
 4. THE Tracker SHALL declare `apple-mobile-web-app-capable`, `apple-mobile-web-app-status-bar-style` (black-translucent), and `apple-mobile-web-app-title` meta tags to support installation via Safari on iOS.
-5. THE Tracker SHALL provide an `apple-touch-icon` (180×180px PNG) that matches the brand logo tile, displayed when the app is saved to an iOS home screen.
-6. THE Tracker SHALL provide PWA icons at 192×192px and 512×512px, both marked as `any maskable`, matching the brand logo tile design (gradient rounded square with golf course artwork).
+5. THE Tracker SHALL provide an `apple-touch-icon` (180×180px) that matches the brand logo tile, generated at runtime via canvas and injected as a base64 data URI, displayed when the app is saved to an iOS home screen.
+6. THE Tracker SHALL provide a PWA icon at 192×192px matching the brand logo tile design (gradient rounded square with golf course artwork), generated at runtime via canvas and injected as a base64 data URI.
 7. THE Tracker SHALL set `theme-color` to `#10b981` so the browser chrome adopts the brand green colour when the app is open.
 
 ### Requirement 15: Click-to-Place Shot Entry
@@ -247,3 +293,25 @@ ApproachIQ is a standalone single-file HTML web application that allows golfers 
 10. AFTER a successful save in Click to Place mode, THE Tracker SHALL reset the Entry_Green_Canvas (clear the marker), reset the Coordinate_Readout to its empty state, and clear the Distance_Into_Green field.
 11. THE Entry_Green_Canvas SHALL support touch events on mobile devices with the same placement behaviour as mouse clicks on desktop.
 12. THE Club and date fields SHALL remain visible and shared between both entry modes; switching Entry_Mode SHALL not clear values already entered in those fields.
+
+### Requirement 20: Quick Log Mode (On-Course Entry)
+
+**User Story:** As a weekend golfer, I want to rapidly log my approach shots during a round with minimal taps, so that I can track all 18 holes without slowing down play.
+
+#### Acceptance Criteria
+
+1. THE Tracker SHALL provide a third Entry_Mode option labelled "⚡ Quick Log" in the Log Shot form toggle, alongside Manual and Click to Place.
+2. IN Quick Log mode, THE Tracker SHALL display a grid of 8 large club buttons (W, 9i, 8i, 7i, 6i, 5i, 3W, DR) instead of a dropdown selector. The user taps one to select the club for the next shot.
+3. THE selected club button SHALL be visually highlighted with a green active state until a different club is tapped.
+4. IN Quick Log mode, THE Tracker SHALL display a circular zone-based green with 9 tap zones: centre (pin), long, short, left, right, long-left, long-right, short-left, short-right — plus a "Missed Green" button outside the circle for shots that missed the green entirely.
+5. WHEN the user taps a zone, THE Tracker SHALL immediately auto-save the shot using the selected club, the zone's mapped coordinates, and today's date. No separate submit button is required.
+6. THE Tracker SHALL map zones to approximate yard coordinates: centre (0,0), cardinal directions (±8,0 or 0,±8), diagonals (±6,±6), and missed green (18,0).
+7. WHEN a zone is tapped without a club selected, THE Tracker SHALL display a warning: "Pick a club first."
+8. AFTER each auto-save, THE Tracker SHALL reset the club selection (deselect the active club button) so the user must pick a club again for the next shot. This prevents accidental logging with the wrong club.
+8. AFTER each auto-save, THE Tracker SHALL display a brief flash confirmation showing the club and zone (e.g. "✓ 7 Iron — long left") that auto-dismisses after 2 seconds.
+9. THE Tracker SHALL display a running shot counter showing total shots logged in the current Quick Log session.
+10. THE Quick Log mode SHALL NOT require the user to enter a date — it SHALL default to today's date automatically.
+11. IN Quick Log mode, THE Tracker SHALL hide the shared club dropdown, date field, Save/Import/Clear buttons, and CSV hint — only the big club grid and zone green SHALL be visible.
+12. WHEN the shot counter reaches 18, THE Tracker SHALL display a popup offering two options: "Save & End Round" (resets the counter to 0 and shows a confirmation toast) or "Keep Going" (dismisses the popup and allows continued logging for consecutive rounds).
+13. THE Tracker SHALL display an "Undo" button next to the shot counter that removes the most recently logged shot, decrements the counter, and shows a confirmation toast.
+14. THE zone green SHALL display a dashed contour ring at 50% radius indicating the boundary between the inner "close" zones and the outer zones, labelled with the approximate distance (~3 yds) to give the user a visual sense of scale.

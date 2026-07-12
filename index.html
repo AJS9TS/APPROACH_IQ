@@ -17,26 +17,113 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Approach IQ" />
-  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" id="apple-touch-icon-link" />
 
   <!-- ===== PWA: Standard Favicon / Icons ===== -->
-  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png" />
-  <link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512.png" />
   <link rel="icon" type="image/svg+xml" href="icons/icon.svg" />
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png" id="icon-192-link" />
+
+  <!-- Generate icon as base64 at runtime — no external PNG files required -->
+  <script>
+    (function generateAppIcon() {
+      function drawIcon(size) {
+        const canvas = document.createElement('canvas');
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext('2d');
+        const s = size;
+        const r = s * 0.22;
+
+        // Rounded rect clip path
+        ctx.beginPath();
+        ctx.moveTo(r, 0);
+        ctx.lineTo(s - r, 0); ctx.quadraticCurveTo(s, 0, s, r);
+        ctx.lineTo(s, s - r); ctx.quadraticCurveTo(s, s, s - r, s);
+        ctx.lineTo(r, s);     ctx.quadraticCurveTo(0, s, 0, s - r);
+        ctx.lineTo(0, r);     ctx.quadraticCurveTo(0, 0, r, 0);
+        ctx.closePath();
+
+        // Gradient background
+        const grad = ctx.createLinearGradient(0, 0, s, s);
+        grad.addColorStop(0,   '#10b981');
+        grad.addColorStop(0.5, '#06b6d4');
+        grad.addColorStop(1,   '#3b82f6');
+        ctx.fillStyle = grad;
+        ctx.fill();
+        ctx.save();
+        ctx.clip();
+
+        // Shine
+        const shine = ctx.createLinearGradient(0, 0, 0, s * 0.5);
+        shine.addColorStop(0, 'rgba(255,255,255,0.18)');
+        shine.addColorStop(1, 'rgba(255,255,255,0)');
+        ctx.fillStyle = shine;
+        ctx.fillRect(0, 0, s, s * 0.5);
+
+        // Golf artwork — scale from 48×48 viewBox, centred with padding
+        const sc = s / 48 * 0.85;
+        const ox = (s - 48 * sc) / 2;
+        const oy = (s - 48 * sc) / 2;
+        ctx.translate(ox, oy);
+        ctx.scale(sc, sc);
+
+        // Green
+        ctx.beginPath(); ctx.ellipse(24,28,18,14,0,0,Math.PI*2);
+        ctx.fillStyle = 'rgba(45,143,82,0.9)'; ctx.fill();
+        ctx.beginPath(); ctx.ellipse(24,28,14,10,0,0,Math.PI*2);
+        ctx.fillStyle = 'rgba(52,211,153,0.35)'; ctx.fill();
+        // Fairway
+        ctx.beginPath(); ctx.moveTo(20,42); ctx.quadraticCurveTo(24,35,28,42);
+        ctx.lineTo(32,48); ctx.lineTo(16,48); ctx.closePath();
+        ctx.fillStyle = 'rgba(26,107,60,0.65)'; ctx.fill();
+        // Flag pole
+        ctx.beginPath(); ctx.moveTo(26,28); ctx.lineTo(26,8);
+        ctx.strokeStyle = 'white'; ctx.lineWidth = 1.5; ctx.lineCap = 'round'; ctx.stroke();
+        // Flag
+        ctx.beginPath(); ctx.moveTo(26,8); ctx.lineTo(36,12); ctx.lineTo(26,16);
+        ctx.closePath(); ctx.fillStyle = '#f43f5e'; ctx.fill();
+        // Hole
+        ctx.beginPath(); ctx.arc(26,28,2,0,Math.PI*2);
+        ctx.fillStyle = '#050a12'; ctx.fill();
+        ctx.strokeStyle = 'white'; ctx.lineWidth = 0.8; ctx.stroke();
+        // Bunker
+        ctx.beginPath(); ctx.ellipse(12,32,5,3,0,0,Math.PI*2);
+        ctx.fillStyle = 'rgba(251,191,36,0.45)'; ctx.fill();
+        // Water
+        ctx.beginPath(); ctx.ellipse(38,34,4,2.5,0,0,Math.PI*2);
+        ctx.fillStyle = 'rgba(6,182,212,0.45)'; ctx.fill();
+
+        ctx.restore();
+        return canvas.toDataURL('image/png');
+      }
+
+      // Inject apple-touch-icon (180px) and favicon (192px) as data URIs
+      document.addEventListener('DOMContentLoaded', function() {
+        try {
+          const icon180 = drawIcon(180);
+          const icon192 = drawIcon(192);
+          const atiLink = document.getElementById('apple-touch-icon-link');
+          if (atiLink) atiLink.href = icon180;
+          const i192Link = document.getElementById('icon-192-link');
+          if (i192Link) i192Link.href = icon192;
+        } catch(e) { /* non-critical — fallback to SVG */ }
+      });
+    })();
+  </script>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-primary: #050a12;
-      --bg-secondary: #0c1222;
-      --bg-card: rgba(12, 18, 34, 0.85);
-      --bg-glass: rgba(255, 255, 255, 0.02);
-      --border-glass: rgba(255, 255, 255, 0.06);
-      --border-accent: rgba(16, 185, 129, 0.2);
-      --text-primary: #f1f5f9;
-      --text-secondary: #94a3b8;
-      --text-muted: #475569;
+      --bg-primary: #030711;
+      --bg-secondary: #111827;
+      --bg-card: rgba(17, 24, 39, 0.95);
+      --bg-glass: rgba(255, 255, 255, 0.04);
+      --border-glass: rgba(255, 255, 255, 0.12);
+      --border-accent: rgba(16, 185, 129, 0.3);
+      --text-primary: #f8fafc;
+      --text-secondary: #cbd5e1;
+      --text-muted: #64748b;
       --brand-green: #10b981;
       --brand-emerald: #34d399;
       --brand-teal: #14b8a6;
@@ -171,7 +258,7 @@
       animation: pulse 2s ease-in-out infinite;
     }
 
-    /* ===== TABS ===== */
+    /* ===== TABS (desktop) ===== */
     .tabs {
       display: flex;
       justify-content: center;
@@ -208,6 +295,63 @@
       text-shadow: 0 1px 2px rgba(0,0,0,0.2);
     }
 
+    /* ===== BOTTOM NAV (mobile only) ===== */
+    .bottom-nav {
+      display: none;
+    }
+    @media (max-width: 768px) {
+      /* Hide top tabs, show bottom nav */
+      .tabs { display: none; }
+
+      .bottom-nav {
+        display: flex;
+        position: fixed;
+        bottom: 0; left: 0; right: 0;
+        z-index: 200;
+        background: rgba(12, 18, 34, 0.97);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-top: 1px solid var(--border-glass);
+        padding-bottom: env(safe-area-inset-bottom, 0px); /* iPhone home bar */
+        box-shadow: 0 -4px 24px rgba(0,0,0,0.4);
+      }
+
+      .bottom-nav-btn {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.2rem;
+        padding: 0.6rem 0.25rem;
+        border: none;
+        background: transparent;
+        color: var(--text-muted);
+        font-family: inherit;
+        font-size: 0.6rem;
+        font-weight: 600;
+        cursor: pointer;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        transition: color 0.2s;
+        min-height: 56px; /* Apple 44pt minimum tap target */
+      }
+      .bottom-nav-btn .nav-icon { font-size: 1.3rem; line-height: 1; }
+      .bottom-nav-btn:hover { color: var(--text-secondary); }
+      .bottom-nav-btn.active { color: var(--brand-emerald); }
+      .bottom-nav-btn.active .nav-icon {
+        filter: drop-shadow(0 0 6px rgba(52,211,153,0.5));
+      }
+
+      /* Add bottom padding to views so content clears the nav bar */
+      .view { padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px)); }
+    }
+
+    body.light .bottom-nav {
+      background: rgba(255,255,255,0.97);
+      border-top: 1px solid rgba(0,0,0,0.08);
+    }
+
     /* ===== VIEWS ===== */
     .view { display: none; padding: 0 1.5rem 3rem; max-width: 1000px; margin: 0 auto; animation: fadeInUp 0.4s ease; }
     .view.active { display: block; }
@@ -232,7 +376,7 @@
       top: 0; left: 0; right: 0;
       height: 2px;
       background: var(--gradient-brand);
-      opacity: 0.6;
+      opacity: 0.8;
     }
     .card:hover { transform: translateY(-3px); box-shadow: var(--shadow-xl), var(--shadow-glow); }
 
@@ -403,7 +547,7 @@
 
     .advice-details { flex: 1; }
     .advice-club { font-weight: 700; font-size: 1rem; font-family: 'Space Grotesk', sans-serif; }
-    .advice-dispersion { font-size: 0.78rem; color: var(--text-muted); margin-top: 0.25rem; }
+    .advice-dispersion { font-size: 0.78rem; color: var(--text-secondary); margin-top: 0.25rem; }
     .advice-bar { height: 5px; border-radius: 3px; margin-top: 0.6rem; background: rgba(255,255,255,0.04); overflow: hidden; }
     .advice-bar-fill { height: 100%; border-radius: 3px; transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
 
@@ -438,7 +582,7 @@
       display: flex; gap: 1.5rem; margin-top: 0.8rem; padding-top: 0.8rem;
       border-top: 1px solid var(--border-glass); flex-wrap: wrap;
     }
-    .rec-stat { font-size: 0.72rem; color: var(--text-muted); }
+    .rec-stat { font-size: 0.72rem; color: var(--text-secondary); }
     .rec-stat strong { color: var(--text-primary); font-weight: 700; font-family: 'Space Grotesk', sans-serif; }
 
     .full-ranking-title {
@@ -446,7 +590,78 @@
       letter-spacing: 0.5px; color: var(--text-muted); margin: 1.5rem 0 0.8rem;
     }
 
-    .chart-container { position: relative; width: 100%; max-width: 680px; margin: 1.5rem auto; }
+    /* ===== PRACTICE IMPACT CARD ===== */
+    .impact-card {
+      margin-bottom: 2rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-glass);
+      overflow: hidden;
+      animation: fadeInUp 0.4s ease backwards;
+    }
+    .impact-header {
+      padding: 1rem 1.3rem;
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+    }
+    .impact-header.positive { background: rgba(16,185,129,0.08); border-bottom: 1px solid rgba(16,185,129,0.15); }
+    .impact-header.mixed    { background: rgba(245,158,11,0.08); border-bottom: 1px solid rgba(245,158,11,0.15); }
+    .impact-header.negative { background: rgba(244,63,94,0.08);  border-bottom: 1px solid rgba(244,63,94,0.15); }
+    .impact-icon { font-size: 1.6rem; flex-shrink: 0; }
+    .impact-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1rem; font-weight: 700; color: var(--text-primary);
+    }
+    .impact-subtitle { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.15rem; }
+    .impact-body { padding: 1.2rem 1.3rem; background: var(--bg-card); }
+    .impact-hcp-change {
+      display: flex; align-items: baseline; gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    .impact-hcp-delta {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 2rem; font-weight: 800; line-height: 1;
+    }
+    .impact-hcp-delta.positive { color: var(--brand-emerald); }
+    .impact-hcp-delta.negative { color: var(--accent-red); }
+    .impact-hcp-delta.neutral  { color: var(--accent-amber); }
+    .impact-hcp-label { font-size: 0.78rem; color: var(--text-muted); }
+    .impact-clubs {
+      display: flex; flex-direction: column; gap: 0.6rem; margin-top: 0.8rem;
+    }
+    .impact-club-row {
+      display: flex; align-items: center; gap: 0.8rem;
+      padding: 0.6rem 0.8rem;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border-glass);
+      border-radius: var(--radius-xs);
+    }
+    .impact-club-name {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700; font-size: 0.9rem; color: var(--text-primary);
+      min-width: 80px;
+    }
+    .impact-club-stats { flex: 1; font-size: 0.75rem; color: var(--text-secondary); line-height: 1.5; }
+    .impact-club-stats strong { color: var(--text-secondary); }
+    .impact-club-badge {
+      font-size: 0.65rem; font-weight: 700; padding: 0.2rem 0.5rem;
+      border-radius: 5px; text-transform: uppercase; letter-spacing: 0.4px; flex-shrink: 0;
+    }
+    .impact-club-badge.improved { background: rgba(16,185,129,0.12); color: var(--brand-emerald); border: 1px solid rgba(16,185,129,0.2); }
+    .impact-club-badge.declined { background: rgba(244,63,94,0.12); color: var(--accent-red); border: 1px solid rgba(244,63,94,0.2); }
+    .impact-club-badge.stable   { background: rgba(245,158,11,0.12); color: var(--accent-amber); border: 1px solid rgba(245,158,11,0.2); }
+    .impact-disclaimer {
+      margin-top: 1rem; font-size: 0.7rem; color: var(--text-muted);
+      font-style: italic; padding-top: 0.8rem; border-top: 1px solid var(--border-glass);
+    }
+    .impact-no-data {
+      padding: 1rem 1.3rem; font-size: 0.82rem; color: var(--text-muted);
+      background: rgba(255,255,255,0.01); border-radius: var(--radius-sm);
+      border: 1px dashed var(--border-glass); margin-bottom: 1.5rem;
+    }
+
+    .chart-container { position: relative; width: 100%; max-width: 680px; margin: 1.5rem auto; overflow: hidden; }
+    @media (max-width: 768px) { .chart-container { max-width: 100%; } }
     .no-data { text-align: center; color: var(--text-muted); padding: 3rem; font-size: 0.95rem; }
     .filter-row { display: flex; gap: 1rem; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; }
     .filter-row select {
@@ -536,7 +751,7 @@
       border-radius: 6px; font-size: 0.7rem; color: var(--brand-emerald); font-weight: 600;
     }
     .carousel-dots {
-      display: flex; justify-content: center; gap: 0.5rem; margin-top: 1.2rem;
+      display: flex; justify-content: center; gap: 0.5rem; margin-top: 1.2rem; padding-bottom: 1.5rem;
     }
     .carousel-dot {
       width: 10px; height: 10px; border-radius: 50%;
@@ -544,6 +759,169 @@
       transition: all 0.3s; border: none;
     }
     .carousel-dot.active { background: var(--brand-green); transform: scale(1.3); box-shadow: 0 0 10px rgba(16,185,129,0.4); }
+
+    /* Mobile carousel fixes */
+    @media (max-width: 768px) {
+      .reviews-section { margin: 1.5rem auto 0; padding: 0 1rem; }
+      .review-card { padding: 1.2rem; }
+      .review-text { font-size: 0.85rem; line-height: 1.6; }
+      .review-stars { font-size: 1rem; margin-bottom: 0.5rem; }
+      .review-author { font-size: 0.8rem; }
+      .reviews-title { font-size: 1.1rem; margin-bottom: 1rem; }
+    }
+
+    /* ===== HANDICAP TRACKER ===== */
+    .handicap-section {
+      max-width: 1000px; margin: 2.5rem auto 0; padding: 0 1.5rem;
+    }
+    .handicap-card {
+      background: var(--bg-card);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid var(--border-glass);
+      border-radius: var(--radius);
+      padding: 2rem;
+      box-shadow: var(--shadow-xl);
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.25s, box-shadow 0.25s;
+    }
+    .handicap-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, #f59e0b, #f97316, #ef4444);
+      opacity: 0.8;
+    }
+    .handicap-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-xl), 0 0 40px rgba(245,158,11,0.08); }
+
+    .handicap-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 1.5rem; flex-wrap: wrap; gap: 0.8rem;
+    }
+    .handicap-header h2 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.4rem; font-weight: 700;
+      color: var(--text-primary);
+      display: flex; align-items: center; gap: 0.5rem;
+      margin: 0;
+    }
+    .handicap-badge {
+      font-size: 0.65rem; font-family: 'Inter', sans-serif;
+      padding: 0.2rem 0.6rem; border-radius: 6px;
+      background: rgba(245,158,11,0.12);
+      color: #f59e0b;
+      font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+      border: 1px solid rgba(245,158,11,0.2);
+    }
+    .handicap-current {
+      display: flex; align-items: baseline; gap: 0.5rem;
+    }
+    .handicap-current-val {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 2.4rem; font-weight: 800;
+      color: #f59e0b;
+      line-height: 1;
+    }
+    .handicap-current-label {
+      font-size: 0.75rem; color: var(--text-muted);
+    }
+    .handicap-add-btn {
+      display: flex; align-items: center; gap: 0.4rem;
+      padding: 0.55rem 1.1rem;
+      border: 1px solid rgba(245,158,11,0.3);
+      border-radius: var(--radius-xs);
+      background: rgba(245,158,11,0.08);
+      color: #f59e0b;
+      font-family: inherit; font-size: 0.8rem; font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-transform: uppercase; letter-spacing: 0.3px;
+    }
+    .handicap-add-btn:hover { background: rgba(245,158,11,0.16); transform: translateY(-1px); }
+
+    .handicap-chart-wrap {
+      position: relative;
+      /* Distinct background — slate blue-grey, different from both dark (#050a12) and light (#f8faf9) */
+      background: #1e2a3a;
+      border-radius: var(--radius-sm);
+      padding: 1rem 0.5rem 0.5rem;
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+    body.light .handicap-chart-wrap { background: #e8edf5; border-color: rgba(0,0,0,0.08); }
+
+    .handicap-no-data {
+      text-align: center; padding: 2.5rem 1rem;
+      color: var(--text-muted); font-size: 0.9rem;
+    }
+    .handicap-no-data .hcp-cta {
+      display: inline-block; margin-top: 0.8rem;
+      font-size: 0.8rem; color: #f59e0b; font-weight: 600;
+      opacity: 0.8;
+    }
+
+    .handicap-footer {
+      display: flex; gap: 1.5rem; margin-top: 1rem;
+      font-size: 0.72rem; color: var(--text-muted); flex-wrap: wrap;
+    }
+    .handicap-footer strong { color: var(--text-secondary); font-family: 'Space Grotesk', sans-serif; }
+
+    /* Handicap popout modal */
+    .hcp-modal-overlay {
+      position: fixed; inset: 0; z-index: 5000;
+      background: rgba(0,0,0,0.6);
+      display: flex; align-items: center; justify-content: center;
+      padding: 1rem;
+      animation: fadeInUp 0.2s ease;
+    }
+    .hcp-modal {
+      background: var(--bg-card);
+      border: 1px solid rgba(245,158,11,0.25);
+      border-radius: var(--radius);
+      padding: 2rem;
+      width: 100%; max-width: 380px;
+      box-shadow: 0 0 60px rgba(245,158,11,0.15), var(--shadow-xl);
+      animation: scaleIn 0.25s cubic-bezier(0.34,1.56,0.64,1);
+      position: relative;
+    }
+    .hcp-modal h3 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.2rem; font-weight: 700;
+      color: var(--text-primary); margin-bottom: 1.2rem;
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+    .hcp-modal .form-group { margin-bottom: 1rem; }
+    .hcp-modal-close {
+      position: absolute; top: 1rem; right: 1rem;
+      background: transparent; border: none;
+      color: var(--text-muted); font-size: 1.2rem;
+      cursor: pointer; padding: 0.25rem; line-height: 1;
+      transition: color 0.2s;
+    }
+    .hcp-modal-close:hover { color: var(--text-primary); }
+    .hcp-history {
+      margin-top: 1.2rem; padding-top: 1rem;
+      border-top: 1px solid var(--border-glass);
+      max-height: 180px; overflow-y: auto;
+    }
+    .hcp-history-title {
+      font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.5px;
+      color: var(--text-muted); margin-bottom: 0.6rem; font-weight: 700;
+    }
+    .hcp-history-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 0.4rem 0; border-bottom: 1px solid var(--border-glass);
+      font-size: 0.8rem;
+    }
+    .hcp-history-row:last-child { border-bottom: none; }
+    .hcp-history-val { font-family: 'Space Grotesk', sans-serif; font-weight: 700; color: #f59e0b; }
+    .hcp-history-date { color: var(--text-muted); font-size: 0.72rem; }
+    .hcp-history-del {
+      background: transparent; border: none; color: var(--text-muted);
+      cursor: pointer; font-size: 0.85rem; padding: 0 0.2rem;
+      transition: color 0.2s;
+    }
+    .hcp-history-del:hover { color: var(--accent-red); }
 
     /* ===== FOOTER ===== */
     .app-footer {
@@ -588,8 +966,8 @@
     .weather-widget {
       position: fixed; top: 1rem; right: 4rem; z-index: 100;
       transform: translateZ(0);
-      background: #334155; backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.15); border-radius: var(--radius-sm);
+      background: #1e293b; backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.2); border-radius: var(--radius-sm);
       padding: 0.6rem 0.9rem; box-shadow: 0 8px 32px rgba(0,0,0,0.5);
       display: flex; align-items: center; gap: 0.6rem;
       font-size: 0.7rem; color: #e2e8f0;
@@ -612,8 +990,8 @@
     .streak-calendar {
       position: fixed; top: 1rem; left: 1rem; z-index: 100;
       transform: translateZ(0);
-      background: #334155; backdrop-filter: blur(20px);
-      border: 2px solid rgba(255, 255, 255, 0.25); border-radius: var(--radius-sm);
+      background: #1e293b; backdrop-filter: blur(20px);
+      border: 2px solid rgba(255, 255, 255, 0.2); border-radius: var(--radius-sm);
       padding: 0.7rem 0.8rem; box-shadow: 0 8px 32px rgba(0,0,0,0.6);
       width: 185px; font-size: 0.6rem;
     }
@@ -714,7 +1092,7 @@
     }
     .sidebar-ad-icon { font-size: 2.5rem; margin-bottom: 0.7rem; }
     .sidebar-ad-brand { font-family: 'Space Grotesk', sans-serif; font-size: 0.8rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.4rem; }
-    .sidebar-ad-text { font-size: 0.68rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 0.8rem; }
+    .sidebar-ad-text { font-size: 0.68rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 0.8rem; }
     .sidebar-ad-cta {
       font-size: 0.65rem; font-weight: 700; text-transform: uppercase; padding: 0.4rem 0.8rem;
       border-radius: 6px; border: none; cursor: pointer; font-family: inherit;
@@ -830,10 +1208,12 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      flex-wrap: nowrap;
       gap: 1.2rem;
       margin: 0.8rem auto 0;
-      max-width: 420px;
+      max-width: 540px;
       padding: 0.7rem 1.2rem;
+      min-height: 3.2rem;
       background: var(--bg-secondary);
       border: 1px solid var(--border-glass);
       border-radius: var(--radius-xs);
@@ -856,7 +1236,10 @@
     .coord-dist {
       font-size: 0.75rem;
       color: var(--text-muted);
-      padding: 0.2rem 0.6rem;
+      padding: 0.35rem 0.9rem;
+      min-width: 110px;
+      text-align: center;
+      white-space: nowrap;
       background: var(--accent-green-dim);
       border: 1px solid var(--border-accent);
       border-radius: 6px;
@@ -877,6 +1260,155 @@
     @keyframes markerPulse {
       0% { transform: translate(-50%, -50%) scale(1); opacity: 0.8; }
       100% { transform: translate(-50%, -50%) scale(2.5); opacity: 0; }
+    }
+
+    /* ===== QUICK LOG MODE ===== */
+    .quick-log-panel { display: none; }
+    .quick-log-panel.active { display: block; }
+
+    .ql-club-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.5rem;
+      margin-bottom: 1.2rem;
+    }
+    .ql-club-btn {
+      padding: 0.9rem 0.4rem;
+      border: 2px solid var(--border-glass);
+      border-radius: var(--radius-xs);
+      background: var(--bg-secondary);
+      color: var(--text-secondary);
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 700;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .ql-club-btn:hover { border-color: var(--border-accent); color: var(--text-primary); }
+    .ql-club-btn.active {
+      border-color: var(--brand-green);
+      background: var(--accent-green-dim);
+      color: var(--brand-emerald);
+      box-shadow: 0 0 12px rgba(16,185,129,0.15);
+    }
+
+    .ql-zone-wrap {
+      position: relative;
+      width: 100%;
+      max-width: 320px;
+      margin: 0 auto 2.5rem;
+      aspect-ratio: 1/1;
+    }
+    .ql-zone-green {
+      position: absolute; inset: 0;
+      border-radius: 50%;
+      background: radial-gradient(circle, #1a6b3c 0%, #0f4d28 70%, #0a3319 100%);
+      border: 3px solid #2d8f52;
+    }
+    /* Contour ring showing inner "close" zone boundary */
+    .ql-zone-green::after {
+      content: '';
+      position: absolute;
+      top: 25%; left: 25%; width: 50%; height: 50%;
+      border-radius: 50%;
+      border: 2px dashed rgba(255,255,255,0.25);
+      pointer-events: none;
+    }
+    .ql-zone-btn {
+      position: absolute;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      transition: all 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.6rem;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      color: rgba(255,255,255,0.5);
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      border-radius: 50%;
+    }
+    .ql-zone-btn:hover { background: rgba(52,211,153,0.2); color: rgba(255,255,255,0.9); }
+    .ql-zone-btn:active { background: rgba(52,211,153,0.4); transform: scale(0.95); }
+    .ql-zone-btn.flash {
+      background: rgba(52,211,153,0.5);
+      color: white;
+    }
+
+    /* Zone positioning — centre pin, 8 directional zones + centre */
+    .ql-zone-centre { width: 28%; height: 28%; top: 36%; left: 36%; z-index: 2; }
+    .ql-zone-long   { width: 28%; height: 20%; top: 5%; left: 36%; }
+    .ql-zone-short  { width: 28%; height: 20%; bottom: 5%; left: 36%; }
+    .ql-zone-left   { width: 20%; height: 28%; top: 36%; left: 5%; }
+    .ql-zone-right  { width: 20%; height: 28%; top: 36%; right: 5%; }
+    .ql-zone-long-left  { width: 22%; height: 22%; top: 10%; left: 10%; }
+    .ql-zone-long-right { width: 22%; height: 22%; top: 10%; right: 10%; }
+    .ql-zone-short-left { width: 22%; height: 22%; bottom: 10%; left: 10%; }
+    .ql-zone-short-right { width: 22%; height: 22%; bottom: 10%; right: 10%; }
+
+    /* Missed green — outside the circle */
+    .ql-zone-miss {
+      position: absolute;
+      bottom: -2.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      width: auto;
+      padding: 0.5rem 1.2rem;
+      border: 2px solid rgba(244,63,94,0.3);
+      background: rgba(244,63,94,0.08);
+      color: var(--accent-red);
+      font-size: 0.72rem;
+      font-weight: 700;
+      font-family: 'Inter', sans-serif;
+      border-radius: var(--radius-xs);
+      cursor: pointer;
+      transition: all 0.15s;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+    .ql-zone-miss:hover { background: rgba(244,63,94,0.15); }
+    .ql-zone-miss:active { transform: translateX(-50%) scale(0.95); }
+    .ql-zone-miss.flash { background: rgba(244,63,94,0.3); color: white; }
+
+    /* Pin marker at centre */
+    .ql-pin {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 1.5rem;
+      z-index: 3;
+      pointer-events: none;
+    }
+
+    .ql-status {
+      text-align: center;
+      margin-top: 0.8rem;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      font-weight: 600;
+    }
+    .ql-status .ql-count {
+      font-family: 'Space Grotesk', sans-serif;
+      color: var(--brand-emerald);
+      font-size: 1.1rem;
+    }
+    .ql-instruction {
+      text-align: center;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      margin-bottom: 0.8rem;
+    }
+    .ql-saved-flash {
+      text-align: center;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--brand-emerald);
+      min-height: 1.4rem;
+      margin-top: 0.4rem;
     }
   </style>
 </head>
@@ -932,12 +1464,32 @@
     </div>
   </header>
 
-  <!-- NAVIGATION -->
+  <!-- NAVIGATION (desktop top tabs) -->
   <nav class="tabs" role="tablist">
     <button class="tab active" data-tab="entry" role="tab">⛳ Log</button>
     <button class="tab" data-tab="charts" role="tab">📊 Charts</button>
     <button class="tab" data-tab="kpis" role="tab">📈 KPIs</button>
     <button class="tab" data-tab="advice" role="tab">🎯 Coach's Corner</button>
+  </nav>
+
+  <!-- BOTTOM NAV (mobile only) -->
+  <nav class="bottom-nav" role="tablist" aria-label="Main navigation" id="bottom-nav">
+    <button class="bottom-nav-btn active" data-tab="entry" role="tab" aria-selected="true">
+      <span class="nav-icon">⛳</span>
+      <span>Log</span>
+    </button>
+    <button class="bottom-nav-btn" data-tab="charts" role="tab" aria-selected="false">
+      <span class="nav-icon">📊</span>
+      <span>Charts</span>
+    </button>
+    <button class="bottom-nav-btn" data-tab="kpis" role="tab" aria-selected="false">
+      <span class="nav-icon">📈</span>
+      <span>KPIs</span>
+    </button>
+    <button class="bottom-nav-btn" data-tab="advice" role="tab" aria-selected="false">
+      <span class="nav-icon">🎯</span>
+      <span>Coach</span>
+    </button>
   </nav>
 
   <!-- PAGE LAYOUT WITH SIDEBAR ADS -->
@@ -974,14 +1526,15 @@
 
       <!-- Entry mode toggle -->
       <div class="entry-mode-toggle" role="group" aria-label="Entry mode">
-        <button type="button" class="entry-mode-btn active" id="mode-btn-manual" onclick="setEntryMode('manual')">✏️ Manual Entry</button>
-        <button type="button" class="entry-mode-btn" id="mode-btn-click" onclick="setEntryMode('click')">📍 Click to Place</button>
+        <button type="button" class="entry-mode-btn active" id="mode-btn-manual" onclick="setEntryMode('manual')">✏️ Manual</button>
+        <button type="button" class="entry-mode-btn" id="mode-btn-click" onclick="setEntryMode('click')">📍 Place</button>
+        <button type="button" class="entry-mode-btn" id="mode-btn-quick" onclick="setEntryMode('quick')">⚡ Quick Log</button>
       </div>
 
       <form id="shot-form">
 
-        <!-- Shared fields: club + date always visible -->
-        <div class="form-grid" style="margin-bottom:1.2rem;">
+        <!-- Shared fields: club + date (hidden in quick log mode) -->
+        <div class="form-grid" style="margin-bottom:1.2rem;" id="shared-fields-row">
           <div class="form-group">
             <label for="club">Club</label>
             <select id="club" required>
@@ -1024,14 +1577,6 @@
             <span class="coord-dist" id="coord-dist" style="opacity:0.4;">— yds to pin</span>
           </div>
           <p class="coord-hint" id="coord-hint">Tap the green to place your ball · Pin is at centre</p>
-
-          <!-- Distance into green still needed in click mode -->
-          <div class="form-grid" style="margin-top:1rem;">
-            <div class="form-group full-width">
-              <label for="distanceIntoGreen-click">Distance of Shot into Green (yds)</label>
-              <input type="number" id="distanceIntoGreen-click" step="0.1" min="0" placeholder="e.g. 120" />
-            </div>
-          </div>
         </div>
 
         <!-- MANUAL ENTRY PANEL -->
@@ -1045,10 +1590,47 @@
               <label for="horizontalDistance">Horizontal to Pin (yds) +right / -left</label>
               <input type="number" id="horizontalDistance" step="0.1" placeholder="e.g. -4 or 5" />
             </div>
-            <div class="form-group full-width">
-              <label for="distanceIntoGreen">Distance of Shot into Green (yds)</label>
-              <input type="number" id="distanceIntoGreen" step="0.1" min="0" placeholder="e.g. 120" />
+          </div>
+        </div>
+
+        <!-- QUICK LOG PANEL -->
+        <div class="quick-log-panel" id="quick-log-panel">
+          <p class="ql-instruction">1. Tap your club &nbsp;→&nbsp; 2. Tap where it landed</p>
+
+          <!-- Club grid — big buttons -->
+          <div class="ql-club-grid">
+            <button type="button" class="ql-club-btn" data-ql-club="Wedge">W</button>
+            <button type="button" class="ql-club-btn" data-ql-club="9 Iron">9i</button>
+            <button type="button" class="ql-club-btn" data-ql-club="8 Iron">8i</button>
+            <button type="button" class="ql-club-btn" data-ql-club="7 Iron">7i</button>
+            <button type="button" class="ql-club-btn" data-ql-club="6 Iron">6i</button>
+            <button type="button" class="ql-club-btn" data-ql-club="5 Iron">5i</button>
+            <button type="button" class="ql-club-btn" data-ql-club="3 Wood">3W</button>
+            <button type="button" class="ql-club-btn" data-ql-club="Driver">DR</button>
+          </div>
+
+          <!-- Zone green — tap where it landed -->
+          <div class="ql-zone-wrap">
+            <div class="ql-zone-green">
+              <span class="ql-pin">⛳</span>
+              <span style="position:absolute; top:27%; left:50%; transform:translateX(-50%); font-size:0.55rem; color:rgba(255,255,255,0.45); font-weight:600; pointer-events:none; font-family:'Inter',sans-serif;">~3 yds</span>
+              <button type="button" class="ql-zone-btn ql-zone-centre" data-ql-zone="centre" title="Pin high, on line">Pin</button>
+              <button type="button" class="ql-zone-btn ql-zone-long" data-ql-zone="long" title="Long">Long</button>
+              <button type="button" class="ql-zone-btn ql-zone-short" data-ql-zone="short" title="Short">Short</button>
+              <button type="button" class="ql-zone-btn ql-zone-left" data-ql-zone="left" title="Left">Left</button>
+              <button type="button" class="ql-zone-btn ql-zone-right" data-ql-zone="right" title="Right">Right</button>
+              <button type="button" class="ql-zone-btn ql-zone-long-left" data-ql-zone="long-left" title="Long left">L/L</button>
+              <button type="button" class="ql-zone-btn ql-zone-long-right" data-ql-zone="long-right" title="Long right">L/R</button>
+              <button type="button" class="ql-zone-btn ql-zone-short-left" data-ql-zone="short-left" title="Short left">S/L</button>
+              <button type="button" class="ql-zone-btn ql-zone-short-right" data-ql-zone="short-right" title="Short right">S/R</button>
             </div>
+            <button type="button" class="ql-zone-btn ql-zone-miss" data-ql-zone="miss" title="Missed the green entirely">Missed Green</button>
+          </div>
+
+          <div class="ql-saved-flash" id="ql-saved-flash"></div>
+          <div class="ql-status">
+            Shots logged: <span class="ql-count" id="ql-shot-count">0</span>
+            <button type="button" id="ql-undo-btn" onclick="qlUndoLast()" style="margin-left:0.8rem; padding:0.3rem 0.7rem; border:1px solid rgba(244,63,94,0.3); border-radius:6px; background:rgba(244,63,94,0.08); color:var(--accent-red); font-family:inherit; font-size:0.72rem; font-weight:700; cursor:pointer; transition:all 0.2s; text-transform:uppercase;">↩ Undo</button>
           </div>
         </div>
 
@@ -1061,7 +1643,7 @@
           <button type="button" class="btn btn-danger" onclick="clearAllData()">Clear All</button>
           <input type="file" id="csv-file-input" accept=".csv" style="display:none;" onchange="handleCSVImport(event)" />
         </div>
-        <div class="csv-hint">CSV format: <code>Club, Vertical Distance, Horizontal Distance, Distance Into Green, Date (YYYY-MM-DD)</code></div>
+        <div class="csv-hint">CSV format: <code>Club, Vertical Distance, Horizontal Distance, Date (YYYY-MM-DD)</code></div>
       </form>
     </div>
   </section>
@@ -1087,7 +1669,7 @@
         <button class="btn btn-primary" onclick="exportChart()">📥 Export PNG</button>
       </div>
       <div class="chart-container" style="max-width:600px;">
-        <canvas id="green-canvas" style="width:100%; height:auto; aspect-ratio:1/1;"></canvas>
+        <canvas id="green-canvas"></canvas>
       </div>
       <div id="chart-no-data" class="no-data" style="display:none;">No data for this club yet. Start logging shots!</div>
     </div>
@@ -1103,6 +1685,10 @@
       <div class="filter-row" style="margin-top:1rem;">
         <label for="kpi-month">Month:</label>
         <select id="kpi-month"><option value="">All Time</option></select>
+        <div class="entry-mode-toggle" style="margin-left:auto; margin-bottom:0;">
+          <button type="button" class="entry-mode-btn active" id="kpi-mode-standard" onclick="setKpiMode('standard')">Standard</button>
+          <button type="button" class="entry-mode-btn" id="kpi-mode-detailed" onclick="setKpiMode('detailed')">Detailed</button>
+        </div>
       </div>
     </div>
     <div id="kpi-grid" class="kpi-grid"></div>
@@ -1112,13 +1698,8 @@
   <!-- ADVICE VIEW -->
   <section id="view-advice" class="view" role="tabpanel">
     <div class="card">
-      <h2>Practice Recommendations <span class="section-badge">Coach's Corner</span></h2>
-      <p style="color:var(--text-muted); margin-bottom:0.5rem; font-size:0.88rem;">
-        Your personalised practice plan, based on where you'll gain the most strokes.
-      </p>
-      <p style="color:var(--text-muted); margin-bottom:1rem; font-size:0.75rem; font-style:italic;">
-        "Focus on the clubs with the biggest gap to your best. That's where the low-hanging fruit is." — Coach IQ
-      </p>
+      <h2>Today's Practice <span class="section-badge">Coach's Corner</span></h2>
+      <div id="todays-practice" style="margin-bottom:1.5rem;"></div>
       <div class="filter-row" style="margin-bottom:1.5rem;">
         <label for="advice-window">Period:</label>
         <select id="advice-window">
@@ -1128,6 +1709,8 @@
           <option value="">All Time</option>
         </select>
       </div>
+      <!-- Practice Impact section — injected here when data is available -->
+      <div id="advice-impact"></div>
       <div id="advice-recommendations"></div>
       <div id="advice-full-ranking"></div>
       <div id="advice-no-data" class="no-data" style="display:none;">
@@ -1160,6 +1743,40 @@
       </div>
     </aside>
   </div>
+
+  <!-- HANDICAP TRACKER -->
+  <section class="handicap-section" id="handicap-section">
+    <div class="handicap-card" id="handicap-card">
+      <div class="handicap-header">
+        <h2>♟ Handicap Index <span class="handicap-badge">Tracker</span></h2>
+        <div style="display:flex; align-items:center; gap:1.2rem; flex-wrap:wrap;">
+          <div class="handicap-current">
+            <span class="handicap-current-val" id="hcp-current-val">—</span>
+            <span class="handicap-current-label">current HCP</span>
+          </div>
+          <button class="handicap-add-btn" id="hcp-add-btn" onclick="openHcpModal(event)">
+            + Log Handicap
+          </button>
+          <button class="handicap-add-btn" style="background:rgba(244,63,94,0.08); color:var(--accent-red); border-color:rgba(244,63,94,0.3);" onclick="clearLastHcpEntry(event)">
+            ✕ Clear Last
+          </button>
+        </div>
+      </div>
+      <div class="handicap-chart-wrap" id="hcp-chart-wrap">
+        <div class="handicap-no-data" id="hcp-no-data">
+          No handicap history yet.<br>
+          <span class="hcp-cta">Click "+ Log Handicap" to record your first entry.</span>
+        </div>
+        <canvas id="hcp-chart" style="display:none;"></canvas>
+      </div>
+      <div class="handicap-footer" id="hcp-footer" style="display:none;">
+        <span>Lowest: <strong id="hcp-lowest">—</strong></span>
+        <span>Highest: <strong id="hcp-highest">—</strong></span>
+        <span>Change: <strong id="hcp-change">—</strong></span>
+        <span>Entries: <strong id="hcp-count">—</strong></span>
+      </div>
+    </div>
+  </section>
 
   <!-- REVIEWS CAROUSEL -->
   <section class="reviews-section">
@@ -1199,6 +1816,7 @@
   <!-- FOOTER -->
   <footer class="app-footer">
     <span class="footer-brand">APPROACH IQ</span> — Built for golfers who want to improve, not just play.
+    <div style="margin-top:0.8rem; text-align:right; font-size:0.6rem; color:var(--text-muted); opacity:0.7;">Powered by AWS Kiro</div>
   </footer>
 
   <script>
@@ -1226,6 +1844,7 @@
       saveShots(shots);
       updateStats();
       renderStreakCalendar();
+      populateMonthSelects();
       return shot;
     }
     function updateStats() {
@@ -1241,14 +1860,14 @@
       if (!data.club || !CLUBS.includes(data.club)) errors.push('club');
       if (data.verticalDistance === '' || data.verticalDistance === undefined || isNaN(Number(data.verticalDistance))) errors.push('verticalDistance');
       if (data.horizontalDistance === '' || data.horizontalDistance === undefined || isNaN(Number(data.horizontalDistance))) errors.push('horizontalDistance');
-      if (data.distanceIntoGreen === '' || data.distanceIntoGreen === undefined || isNaN(Number(data.distanceIntoGreen)) || Number(data.distanceIntoGreen) < 0) errors.push('distanceIntoGreen');
       if (!data.date || !/^\d{4}-\d{2}-\d{2}$/.test(data.date)) errors.push('date');
       return { valid: errors.length === 0, errors };
     }
 
     // ===== KPI CALCULATIONS =====
     function filterShotsByBucket(shots, club) {
-      return shots.filter(s => s.club === club && s.distanceIntoGreen <= DISTANCE_BUCKETS[club]);
+      // Include shots where the result proximity (hypotenuse to pin) is within the bucket threshold
+      return shots.filter(s => s.club === club && calculateHypotenuse(s) <= DISTANCE_BUCKETS[club]);
     }
     function calculateHypotenuse(shot) {
       return Math.sqrt(shot.verticalDistance ** 2 + shot.horizontalDistance ** 2);
@@ -1288,46 +1907,200 @@
 
     // ===== TAB NAVIGATION =====
     const tabs = document.querySelectorAll('.tab');
+    const bottomNavBtns = document.querySelectorAll('.bottom-nav-btn');
     const views = document.querySelectorAll('.view');
-    tabs.forEach(tab => {
-      tab.addEventListener('click', () => {
-        tabs.forEach(t => t.classList.remove('active'));
-        views.forEach(v => v.classList.remove('active'));
-        tab.classList.add('active');
-        document.getElementById('view-' + tab.dataset.tab).classList.add('active');
-        if (tab.dataset.tab === 'charts') renderChart();
-        if (tab.dataset.tab === 'kpis') renderKPIs();
-        if (tab.dataset.tab === 'advice') renderAdvice();
+
+    function switchTab(tabName) {
+      // Sync both top tabs and bottom nav
+      tabs.forEach(t => t.classList.toggle('active', t.dataset.tab === tabName));
+      bottomNavBtns.forEach(b => {
+        b.classList.toggle('active', b.dataset.tab === tabName);
+        b.setAttribute('aria-selected', b.dataset.tab === tabName ? 'true' : 'false');
       });
-    });
+      views.forEach(v => v.classList.remove('active'));
+      document.getElementById('view-' + tabName).classList.add('active');
+      if (tabName === 'charts') renderChart();
+      if (tabName === 'kpis') renderKPIs();
+      if (tabName === 'advice') renderAdvice();
+      // Scroll to top on mobile tab switch
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    tabs.forEach(tab => tab.addEventListener('click', () => switchTab(tab.dataset.tab)));
+    bottomNavBtns.forEach(btn => btn.addEventListener('click', () => switchTab(btn.dataset.tab)));
 
     // ===== SHOT ENTRY FORM =====
     const form = document.getElementById('shot-form');
     document.getElementById('shotDate').value = new Date().toISOString().split('T')[0];
 
     // Track current entry mode and click-placed coordinates
-    let entryMode = 'manual'; // 'manual' | 'click'
+    let entryMode = 'manual'; // 'manual' | 'click' | 'quick'
     let clickedCoords = null;  // { verticalDistance, horizontalDistance } or null
+    let qlSelectedClub = null; // quick log selected club
+    let qlSessionCount = 0;    // shots logged this quick-log session
 
     function setEntryMode(mode) {
       entryMode = mode;
       document.getElementById('mode-btn-manual').classList.toggle('active', mode === 'manual');
       document.getElementById('mode-btn-click').classList.toggle('active', mode === 'click');
+      document.getElementById('mode-btn-quick').classList.toggle('active', mode === 'quick');
       document.getElementById('manual-entry-panel').classList.toggle('hidden', mode !== 'manual');
       document.getElementById('click-entry-panel').classList.toggle('active', mode === 'click');
+      document.getElementById('quick-log-panel').classList.toggle('active', mode === 'quick');
+
+      // Hide shared fields (club dropdown + date) and form buttons in quick log mode
+      document.getElementById('shared-fields-row').style.display = mode === 'quick' ? 'none' : '';
+      document.querySelector('.btn-row').style.display = mode === 'quick' ? 'none' : '';
+      document.querySelector('.csv-hint').style.display = mode === 'quick' ? 'none' : '';
 
       if (mode === 'click') {
-        // Render the entry green after the panel becomes visible
         requestAnimationFrame(() => renderEntryGreen());
-        // Re-render if the selected club changes (bucket size affects the scale)
         document.getElementById('club').addEventListener('change', renderEntryGreen);
       } else {
         clickedCoords = null;
         document.getElementById('club').removeEventListener('change', renderEntryGreen);
       }
+
+      if (mode === 'quick') {
+        initQuickLog();
+      }
+
       // Clear any prior errors
       document.getElementById('form-errors').textContent = '';
     }
+
+    // ===== QUICK LOG =====
+    const ZONE_COORDS = {
+      'centre':      { v: 0,   h: 0   },
+      'long':        { v: 8,   h: 0   },
+      'short':       { v: -8,  h: 0   },
+      'left':        { v: 0,   h: -8  },
+      'right':       { v: 0,   h: 8   },
+      'long-left':   { v: 6,   h: -6  },
+      'long-right':  { v: 6,   h: 6   },
+      'short-left':  { v: -6,  h: -6  },
+      'short-right': { v: -6,  h: 6   },
+      'miss':        { v: 18,  h: 0   }
+    };
+
+    function initQuickLog() {
+      qlSelectedClub = null;
+      document.querySelectorAll('.ql-club-btn').forEach(btn => btn.classList.remove('active'));
+      document.getElementById('ql-saved-flash').textContent = '';
+      document.getElementById('ql-shot-count').textContent = qlSessionCount;
+    }
+
+    function showRoundCompletePopup() {
+      const existing = document.getElementById('ql-round-popup');
+      if (existing) existing.remove();
+
+      const overlay = document.createElement('div');
+      overlay.className = 'hcp-modal-overlay';
+      overlay.id = 'ql-round-popup';
+      overlay.innerHTML = `
+        <div class="hcp-modal">
+          <h3 style="text-align:center;">⛳ Round Complete!</h3>
+          <p style="color:var(--text-secondary); text-align:center; margin-bottom:1.2rem; font-size:0.9rem;">
+            You've logged <strong>${qlSessionCount}</strong> shots. Nice session!
+          </p>
+          <div style="display:flex; gap:0.8rem; flex-direction:column;">
+            <button onclick="endQuickLogSession()" style="width:100%; padding:0.75rem; border:none; border-radius:var(--radius-xs); background:var(--gradient-brand); color:white; font-weight:700; font-family:inherit; font-size:0.9rem; cursor:pointer;">
+              Save & End Round
+            </button>
+            <button onclick="continueQuickLogSession()" style="width:100%; padding:0.75rem; border:none; border-radius:var(--radius-xs); background:rgba(245,158,11,0.1); border:1px solid rgba(245,158,11,0.3); color:#f59e0b; font-weight:700; font-family:inherit; font-size:0.85rem; cursor:pointer;">
+              Keep Going (another 9/18)
+            </button>
+          </div>
+        </div>
+      `;
+      overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+      document.body.appendChild(overlay);
+    }
+
+    function endQuickLogSession() {
+      const popup = document.getElementById('ql-round-popup');
+      if (popup) popup.remove();
+      showToast('✅ Round saved — ' + qlSessionCount + ' shots logged', 'success');
+      qlSessionCount = 0;
+      document.getElementById('ql-shot-count').textContent = '0';
+    }
+
+    function continueQuickLogSession() {
+      const popup = document.getElementById('ql-round-popup');
+      if (popup) popup.remove();
+      showToast('🏌️ Keep going — shots will keep counting', 'info');
+    }
+
+    function qlUndoLast() {
+      if (qlSessionCount <= 0) {
+        showToast('Nothing to undo', 'info');
+        return;
+      }
+      const shots = getShots();
+      if (shots.length === 0) return;
+      shots.pop();
+      saveShots(shots);
+      qlSessionCount--;
+      document.getElementById('ql-shot-count').textContent = qlSessionCount;
+      updateStats();
+      showToast('↩️ Last shot undone', 'info');
+    }
+
+    // Wire up quick log club buttons
+    (function wireQuickLog() {
+      // Club selection
+      document.querySelectorAll('.ql-club-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          document.querySelectorAll('.ql-club-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          qlSelectedClub = btn.dataset.qlClub;
+        });
+      });
+
+      // Zone taps — auto-save
+      document.querySelectorAll('.ql-zone-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          if (!qlSelectedClub) {
+            document.getElementById('ql-saved-flash').textContent = '⚠️ Pick a club first';
+            setTimeout(() => { document.getElementById('ql-saved-flash').textContent = ''; }, 2000);
+            return;
+          }
+
+          const zone = btn.dataset.qlZone;
+          const coords = ZONE_COORDS[zone];
+          if (!coords) return;
+
+          // Save the shot immediately
+          addShot({
+            club: qlSelectedClub,
+            verticalDistance: coords.v,
+            horizontalDistance: coords.h,
+            date: new Date().toISOString().split('T')[0]
+          });
+
+          qlSessionCount++;
+          document.getElementById('ql-shot-count').textContent = qlSessionCount;
+
+          // Flash feedback
+          btn.classList.add('flash');
+          const flashEl = document.getElementById('ql-saved-flash');
+          flashEl.textContent = '✓ ' + qlSelectedClub + ' — ' + (zone === 'centre' ? 'Pin!' : zone.replace('-', ' '));
+          setTimeout(() => { btn.classList.remove('flash'); }, 400);
+          setTimeout(() => { flashEl.textContent = ''; }, 2000);
+
+          // Reset club selection — user must pick again for next shot
+          qlSelectedClub = null;
+          document.querySelectorAll('.ql-club-btn').forEach(b => b.classList.remove('active'));
+
+          // Show round complete popup at 18 shots
+          if (qlSessionCount === 18) {
+            setTimeout(() => showRoundCompletePopup(), 500);
+          }
+        });
+      });
+    })();
 
     // ===== ENTRY GREEN CANVAS =====
     function renderEntryGreen(markerCoords) {
@@ -1591,7 +2364,6 @@
           club: document.getElementById('club').value,
           verticalDistance: String(clickedCoords.verticalDistance),
           horizontalDistance: String(clickedCoords.horizontalDistance),
-          distanceIntoGreen: document.getElementById('distanceIntoGreen-click').value,
           date: document.getElementById('shotDate').value
         };
       } else {
@@ -1599,7 +2371,6 @@
           club: document.getElementById('club').value,
           verticalDistance: document.getElementById('verticalDistance').value,
           horizontalDistance: document.getElementById('horizontalDistance').value,
-          distanceIntoGreen: document.getElementById('distanceIntoGreen').value,
           date: document.getElementById('shotDate').value
         };
       }
@@ -1611,7 +2382,6 @@
         club: data.club,
         verticalDistance: Number(data.verticalDistance),
         horizontalDistance: Number(data.horizontalDistance),
-        distanceIntoGreen: Number(data.distanceIntoGreen),
         date: data.date
       });
       succEl.textContent = '✅ Shot saved!';
@@ -1628,12 +2398,10 @@
         resetCoordReadout();
         document.getElementById('coord-readout').classList.remove('has-click');
         document.getElementById('coord-hint').textContent = 'Tap the green to place your ball · Pin is at centre';
-        document.getElementById('distanceIntoGreen-click').value = '';
         renderEntryGreen();
       } else {
         document.getElementById('verticalDistance').value = '';
         document.getElementById('horizontalDistance').value = '';
-        document.getElementById('distanceIntoGreen').value = '';
       }
       setTimeout(() => { succEl.textContent = ''; }, 2500);
     });
@@ -1645,12 +2413,47 @@
       return shots.filter(s => s.date && s.date.startsWith(monthValue));
     }
 
+    // Populate month dropdowns from available shot data
+    function populateMonthSelects() {
+      const shots = getShots();
+      const months = new Set();
+      shots.forEach(s => {
+        if (s.date && s.date.length >= 7) months.add(s.date.substring(0, 7));
+      });
+      const sorted = Array.from(months).sort().reverse(); // newest first
+
+      ['chart-month', 'kpi-month'].forEach(id => {
+        const sel = document.getElementById(id);
+        if (!sel) return;
+        const currentVal = sel.value;
+        sel.innerHTML = '<option value="">All Time</option>';
+        sorted.forEach(m => {
+          const [y, mo] = m.split('-');
+          const label = new Date(y, mo - 1).toLocaleDateString('en', { month: 'long', year: 'numeric' });
+          sel.innerHTML += `<option value="${m}">${label}</option>`;
+        });
+        // Restore previous selection if still valid
+        if (currentVal && sorted.includes(currentVal)) sel.value = currentVal;
+      });
+    }
+    populateMonthSelects();
+
     // ===== GOLF GREEN CHART =====
     const chartClubSelect = document.getElementById('chart-club');
     const chartMonthInput = document.getElementById('chart-month');
     chartClubSelect.addEventListener('change', renderChart);
     chartMonthInput.addEventListener('change', renderChart);
     chartMonthInput.addEventListener('input', renderChart);
+
+    // Re-render charts on window resize (phone rotation, browser resize)
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        if (document.getElementById('view-charts').classList.contains('active')) renderChart();
+        if (document.getElementById('view-entry').classList.contains('active') && entryMode === 'click') renderEntryGreen();
+      }, 200);
+    });
 
     function renderChart() {
       const club = chartClubSelect.value;
@@ -1667,9 +2470,12 @@
       // Responsive canvas sizing
       const rect = canvas.parentElement.getBoundingClientRect();
       const size = Math.min(rect.width, 600);
-      canvas.width = size * window.devicePixelRatio;
-      canvas.height = size * window.devicePixelRatio;
-      ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = size * dpr;
+      canvas.height = size * dpr;
+      canvas.style.width = size + 'px';
+      canvas.style.height = size + 'px';
+      ctx.scale(dpr, dpr);
 
       const W = size, H = size;
       const cx = W / 2, cy = H / 2;
@@ -1833,6 +2639,15 @@
     kpiMonthInput.addEventListener('change', renderKPIs);
     kpiMonthInput.addEventListener('input', renderKPIs);
 
+    let kpiMode = 'standard'; // 'standard' | 'detailed'
+
+    function setKpiMode(mode) {
+      kpiMode = mode;
+      document.getElementById('kpi-mode-standard').classList.toggle('active', mode === 'standard');
+      document.getElementById('kpi-mode-detailed').classList.toggle('active', mode === 'detailed');
+      renderKPIs();
+    }
+
     function renderKPIs() {
       const monthVal = kpiMonthInput.value;
       const shots = filterByMonth(getShots(), monthVal);
@@ -1878,71 +2693,104 @@
         const card = document.createElement('div');
         card.className = 'kpi-card';
         card.style.animationDelay = (idx * 0.08) + 's';
-        card.innerHTML = `
-          <div class="kpi-header">
-            <h3>${club}</h3>
-            <span class="kpi-target-badge">Target: ≤${bucket} yds</span>
-          </div>
-          <div class="kpi-main-metric">
-            <div class="kpi-ring">
-              <svg viewBox="0 0 80 80">
-                <circle class="kpi-ring-bg" cx="40" cy="40" r="34"/>
-                <circle class="kpi-ring-fill" cx="40" cy="40" r="34"
-                  style="stroke:${ringColor}; stroke-dasharray:${circumference}; stroke-dashoffset:${dashOffset};" />
-              </svg>
-              <div class="kpi-ring-label">${Math.round(ringPct)}%<span class="kpi-ring-sub">Score</span></div>
+
+        if (kpiMode === 'standard') {
+          // ===== STANDARD VIEW: Score, Avg Distance to Pin, Target Distance =====
+          card.innerHTML = `
+            <div class="kpi-header">
+              <h3>${club}</h3>
+              <span class="kpi-target-badge">Target: ≤${bucket} yds</span>
             </div>
-            <div class="kpi-main-details">
-              <div class="kpi-main-value">${avgProx !== null ? avgProx.toFixed(1) : '—'} <small style="font-size:0.7rem; color:var(--text-muted);">yds</small></div>
-              <div class="kpi-main-label">Average distance to pin</div>
-              <div class="kpi-benchmark">Pro: <strong>${bench.pro}</strong> yds • Good: <strong>${bench.good}</strong> yds • Avg: <strong>${bench.avg}</strong> yds</div>
-            </div>
-          </div>
-          <div class="kpi-breakdown">
-            <div class="kpi-mini">
-              <div class="kpi-mini-value">${kpi ? kpi.avgAbsVerticalDistance.toFixed(1) : '—'}</div>
-              <div class="kpi-mini-label">↕ Avg Vertical (yds)</div>
-            </div>
-            <div class="kpi-mini">
-              <div class="kpi-mini-value">${kpi ? kpi.avgAbsHorizontalDistance.toFixed(1) : '—'}</div>
-              <div class="kpi-mini-label">↔ Avg Horizontal (yds)</div>
-            </div>
-            <div class="kpi-mini">
-              <div class="kpi-mini-value">${girPct}%</div>
-              <div class="kpi-mini-label">In-Bucket Rate</div>
-            </div>
-            <div class="kpi-mini">
-              <div class="kpi-mini-value">${inBucket.length}</div>
-              <div class="kpi-mini-label">Qualifying Shots</div>
-            </div>
-          </div>
-          <div class="kpi-bias">
-            <div class="kpi-bias-title">Miss Tendency</div>
-            <div class="kpi-bias-bar">
-              <span class="kpi-bias-label">L / R</span>
-              <div class="kpi-bias-track">
-                <div class="kpi-bias-center"></div>
-                <div class="kpi-bias-marker" style="left:${Math.max(5, Math.min(95, hBiasPct))}%; background:${Math.abs(avgH) > bucket*0.15 ? 'var(--accent-amber)' : 'var(--brand-green)'};"></div>
+            <div class="kpi-main-metric">
+              <div class="kpi-ring">
+                <svg viewBox="0 0 80 80">
+                  <circle class="kpi-ring-bg" cx="40" cy="40" r="34"/>
+                  <circle class="kpi-ring-fill" cx="40" cy="40" r="34"
+                    style="stroke:${ringColor}; stroke-dasharray:${circumference}; stroke-dashoffset:${dashOffset};" />
+                </svg>
+                <div class="kpi-ring-label">${Math.round(ringPct)}%<span class="kpi-ring-sub">Score</span></div>
+              </div>
+              <div class="kpi-main-details">
+                <div class="kpi-main-value">${avgProx !== null ? avgProx.toFixed(1) : '—'} <small style="font-size:0.7rem; color:var(--text-muted);">yds</small></div>
+                <div class="kpi-main-label">Average distance to pin</div>
               </div>
             </div>
-            <div class="kpi-bias-bar">
-              <span class="kpi-bias-label">S / L</span>
-              <div class="kpi-bias-track">
-                <div class="kpi-bias-center"></div>
-                <div class="kpi-bias-marker" style="left:${Math.max(5, Math.min(95, vBiasPct))}%; background:${Math.abs(avgV) > bucket*0.15 ? 'var(--accent-amber)' : 'var(--brand-green)'};"></div>
+            <div class="kpi-footer">
+              <span>${allClubShots.length} total shots</span>
+              <span>${avgProx !== null && avgProx <= bench.good ? '✅ On track' : avgProx !== null && avgProx <= bench.avg ? '⚠️ Room to improve' : '🔴 Focus area'}</span>
+            </div>
+          `;
+        } else {
+          // ===== DETAILED VIEW: Full KPI card =====
+          card.innerHTML = `
+            <div class="kpi-header">
+              <h3>${club}</h3>
+              <span class="kpi-target-badge">Target: ≤${bucket} yds</span>
+            </div>
+            <div class="kpi-main-metric">
+              <div class="kpi-ring">
+                <svg viewBox="0 0 80 80">
+                  <circle class="kpi-ring-bg" cx="40" cy="40" r="34"/>
+                  <circle class="kpi-ring-fill" cx="40" cy="40" r="34"
+                    style="stroke:${ringColor}; stroke-dasharray:${circumference}; stroke-dashoffset:${dashOffset};" />
+                </svg>
+                <div class="kpi-ring-label">${Math.round(ringPct)}%<span class="kpi-ring-sub">Score</span></div>
+              </div>
+              <div class="kpi-main-details">
+                <div class="kpi-main-value">${avgProx !== null ? avgProx.toFixed(1) : '—'} <small style="font-size:0.7rem; color:var(--text-muted);">yds</small></div>
+                <div class="kpi-main-label">Average distance to pin</div>
+                <div class="kpi-benchmark">Pro: <strong>${bench.pro}</strong> yds • Good: <strong>${bench.good}</strong> yds • Avg: <strong>${bench.avg}</strong> yds</div>
               </div>
             </div>
-          </div>
-          <div class="kpi-footer">
-            <span>${allClubShots.length} total shots recorded</span>
-            <span>${avgProx !== null && avgProx <= bench.good ? '✅ On track' : avgProx !== null && avgProx <= bench.avg ? '⚠️ Room to improve' : '🔴 Focus area'}</span>
-          </div>
-          <div class="kpi-trend" id="trend-${club.replace(/\s/g,'-')}"></div>
-        `;
+            <div class="kpi-breakdown">
+              <div class="kpi-mini">
+                <div class="kpi-mini-value">${kpi ? kpi.avgAbsVerticalDistance.toFixed(1) : '—'}</div>
+                <div class="kpi-mini-label">↕ Avg Vertical (yds)</div>
+              </div>
+              <div class="kpi-mini">
+                <div class="kpi-mini-value">${kpi ? kpi.avgAbsHorizontalDistance.toFixed(1) : '—'}</div>
+                <div class="kpi-mini-label">↔ Avg Horizontal (yds)</div>
+              </div>
+              <div class="kpi-mini">
+                <div class="kpi-mini-value">${girPct}%</div>
+                <div class="kpi-mini-label">In-Bucket Rate</div>
+              </div>
+              <div class="kpi-mini">
+                <div class="kpi-mini-value">${inBucket.length}</div>
+                <div class="kpi-mini-label">Qualifying Shots</div>
+              </div>
+            </div>
+            <div class="kpi-bias">
+              <div class="kpi-bias-title">Miss Tendency</div>
+              <div class="kpi-bias-bar">
+                <span class="kpi-bias-label">L / R</span>
+                <div class="kpi-bias-track">
+                  <div class="kpi-bias-center"></div>
+                  <div class="kpi-bias-marker" style="left:${Math.max(5, Math.min(95, hBiasPct))}%; background:${Math.abs(avgH) > bucket*0.15 ? 'var(--accent-amber)' : 'var(--brand-green)'};"></div>
+                </div>
+              </div>
+              <div class="kpi-bias-bar">
+                <span class="kpi-bias-label">S / L</span>
+                <div class="kpi-bias-track">
+                  <div class="kpi-bias-center"></div>
+                  <div class="kpi-bias-marker" style="left:${Math.max(5, Math.min(95, vBiasPct))}%; background:${Math.abs(avgV) > bucket*0.15 ? 'var(--accent-amber)' : 'var(--brand-green)'};"></div>
+                </div>
+              </div>
+            </div>
+            <div class="kpi-footer">
+              <span>${allClubShots.length} total shots recorded</span>
+              <span>${avgProx !== null && avgProx <= bench.good ? '✅ On track' : avgProx !== null && avgProx <= bench.avg ? '⚠️ Room to improve' : '🔴 Focus area'}</span>
+            </div>
+            <div class="kpi-trend" id="trend-${club.replace(/\s/g,'-')}"></div>
+          `;
+        }
+
         grid.appendChild(card);
-        // Render trend line for this club (using ALL shots regardless of month filter for trend)
-        const trendContainer = document.getElementById('trend-' + club.replace(/\s/g,'-'));
-        renderTrendChart(trendContainer, getShots(), club);
+        // Render trend line for this club (using ALL shots regardless of month filter for trend) — only in detailed mode
+        if (kpiMode === 'detailed') {
+          const trendContainer = document.getElementById('trend-' + club.replace(/\s/g,'-'));
+          renderTrendChart(trendContainer, getShots(), club);
+        }
       });
       noData.style.display = hasData ? 'none' : 'block';
     }
@@ -1991,14 +2839,180 @@
       return reasons.join(' ');
     }
 
+    function renderPracticeImpact() {
+      const container = document.getElementById('advice-impact');
+      if (!container) return;
+      container.innerHTML = '';
+
+      // Need at least 2 handicap entries to show impact
+      const hcpEntries = getHcpEntries().sort((a, b) => a.date.localeCompare(b.date));
+      if (hcpEntries.length < 2) {
+        container.innerHTML = '<div class="impact-no-data">📊 Log at least 2 handicap entries to see how your practice is impacting your game.</div>';
+        return;
+      }
+
+      // Use the two most recent handicap entries to define the analysis window
+      const latest = hcpEntries[hcpEntries.length - 1];
+      const previous = hcpEntries[hcpEntries.length - 2];
+      const windowStart = previous.date;
+      const windowEnd = latest.date;
+      const hcpDelta = parseFloat(latest.hcp) - parseFloat(previous.hcp);
+
+      // Get all shots within this window
+      const allShots = getShots();
+      const windowShots = allShots.filter(s => s.date && s.date >= windowStart && s.date <= windowEnd);
+
+      // Also get shots BEFORE the window for comparison (previous period of same length)
+      const daysBetween = Math.max(1, Math.round((new Date(windowEnd) - new Date(windowStart)) / (1000 * 60 * 60 * 24)));
+      const priorStart = new Date(new Date(windowStart).getTime() - daysBetween * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+      const priorShots = allShots.filter(s => s.date && s.date >= priorStart && s.date < windowStart);
+
+      if (windowShots.length < 3) {
+        container.innerHTML = '<div class="impact-no-data">📊 Not enough practice data between your last two handicap entries to analyse impact. Keep logging shots!</div>';
+        return;
+      }
+
+      // Calculate dispersion per club for both periods
+      const clubInsights = [];
+      for (const club of CLUBS) {
+        const currentClubShots = windowShots.filter(s => s.club === club);
+        const priorClubShots = priorShots.filter(s => s.club === club);
+
+        if (currentClubShots.length < 3) continue;
+
+        const currentDisp = standardDeviation(currentClubShots.map(calculateHypotenuse));
+        const currentAvgProx = currentClubShots.reduce((s, x) => s + calculateHypotenuse(x), 0) / currentClubShots.length;
+
+        let dispChange = null;
+        let priorDisp = null;
+        if (priorClubShots.length >= 3) {
+          priorDisp = standardDeviation(priorClubShots.map(calculateHypotenuse));
+          dispChange = ((currentDisp - priorDisp) / priorDisp) * 100; // negative = improved
+        }
+
+        clubInsights.push({
+          club,
+          shotCount: currentClubShots.length,
+          currentDisp,
+          priorDisp,
+          dispChange,
+          currentAvgProx
+        });
+      }
+
+      if (clubInsights.length === 0) {
+        container.innerHTML = '<div class="impact-no-data">📊 Need at least 3 shots per club within the handicap window to analyse impact.</div>';
+        return;
+      }
+
+      // Determine overall sentiment
+      const improvingClubs = clubInsights.filter(c => c.dispChange !== null && c.dispChange < -5);
+      const decliningClubs = clubInsights.filter(c => c.dispChange !== null && c.dispChange > 5);
+
+      let sentiment, icon, headerClass, title, subtitle;
+      if (hcpDelta < -0.2 && improvingClubs.length > 0) {
+        sentiment = 'positive';
+        icon = '📉';
+        headerClass = 'positive';
+        title = 'Your practice is paying off';
+        subtitle = `Handicap dropped ${Math.abs(hcpDelta).toFixed(1)} shots — here\'s what likely contributed.`;
+      } else if (hcpDelta > 0.2) {
+        sentiment = 'negative';
+        icon = '📈';
+        headerClass = 'negative';
+        title = 'Handicap trending up';
+        subtitle = decliningClubs.length > 0
+          ? `Up ${hcpDelta.toFixed(1)} shots — some clubs showed wider dispersion in this period.`
+          : `Up ${hcpDelta.toFixed(1)} shots — but your dispersion data looks stable. Could be course/conditions.`;
+      } else {
+        sentiment = 'mixed';
+        icon = '🔄';
+        headerClass = 'mixed';
+        title = improvingClubs.length > 0 ? 'Dispersion improving — handicap holding' : 'Holding steady';
+        subtitle = improvingClubs.length > 0
+          ? 'Your consistency is getting better but it hasn\'t converted to the card yet. Keep going.'
+          : `Handicap moved ${Math.abs(hcpDelta).toFixed(1)} shots — within normal variation.`;
+      }
+
+      // Format date range
+      const fmtDate = (d) => { const [y,m,dd] = d.split('-'); return new Date(y,m-1,dd).toLocaleDateString('en',{day:'numeric',month:'short'}); };
+      const periodLabel = `${fmtDate(windowStart)} — ${fmtDate(windowEnd)} (${daysBetween} days)`;
+
+      // Build club rows HTML
+      let clubRowsHtml = '';
+      // Sort: biggest improvers first
+      clubInsights.sort((a, b) => (a.dispChange || 0) - (b.dispChange || 0));
+      clubInsights.forEach(c => {
+        let badgeClass, badgeText;
+        if (c.dispChange === null) {
+          badgeClass = 'stable'; badgeText = 'New';
+        } else if (c.dispChange < -5) {
+          badgeClass = 'improved'; badgeText = `↓ ${Math.abs(c.dispChange).toFixed(0)}%`;
+        } else if (c.dispChange > 5) {
+          badgeClass = 'declined'; badgeText = `↑ ${Math.abs(c.dispChange).toFixed(0)}%`;
+        } else {
+          badgeClass = 'stable'; badgeText = '≈ Stable';
+        }
+
+        const statsText = c.dispChange !== null
+          ? `${c.shotCount} shots · Disp: ${c.currentDisp.toFixed(1)} yds (was ${c.priorDisp.toFixed(1)}) · Avg to pin: <strong>${c.currentAvgProx.toFixed(1)} yds</strong>`
+          : `${c.shotCount} shots · Disp: ${c.currentDisp.toFixed(1)} yds · Avg to pin: <strong>${c.currentAvgProx.toFixed(1)} yds</strong>`;
+
+        clubRowsHtml += `
+          <div class="impact-club-row">
+            <span class="impact-club-name">${c.club}</span>
+            <span class="impact-club-stats">${statsText}</span>
+            <span class="impact-club-badge ${badgeClass}">${badgeText}</span>
+          </div>`;
+      });
+
+      // Assemble card
+      const deltaClass = hcpDelta < -0.2 ? 'positive' : hcpDelta > 0.2 ? 'negative' : 'neutral';
+      const deltaDisplay = (hcpDelta > 0 ? '+' : '') + hcpDelta.toFixed(1);
+
+      container.innerHTML = `
+        <div class="impact-card">
+          <div class="impact-header ${headerClass}">
+            <span class="impact-icon">${icon}</span>
+            <div>
+              <div class="impact-title">${title}</div>
+              <div class="impact-subtitle">${periodLabel}</div>
+            </div>
+          </div>
+          <div class="impact-body">
+            <div class="impact-hcp-change">
+              <span class="impact-hcp-delta ${deltaClass}">${deltaDisplay}</span>
+              <span class="impact-hcp-label">handicap change this period</span>
+            </div>
+            <div class="impact-clubs">${clubRowsHtml}</div>
+            <div class="impact-disclaimer">
+              Correlation between practice and handicap is indicative, not causal. Many factors affect on-course scoring including conditions, course difficulty, and mental game.
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function switchPracticePlan(idx) {
+      const container = document.getElementById('practice-plans-container');
+      if (!container) return;
+      const slides = container.querySelectorAll('.practice-plan-slide');
+      slides.forEach((slide, i) => {
+        slide.style.display = i === idx ? '' : 'none';
+      });
+      // Update dots across all visible plans (dots are rendered inside each slide, so rebuild isn't needed — they're static)
+    }
+
     function renderAdvice() {
       const windowVal = adviceWindowSelect.value;
       const shots = filterByDays(getShots(), windowVal);
       const recsContainer = document.getElementById('advice-recommendations');
       const rankingContainer = document.getElementById('advice-full-ranking');
       const noData = document.getElementById('advice-no-data');
+      const todaysPractice = document.getElementById('todays-practice');
       recsContainer.innerHTML = '';
       rankingContainer.innerHTML = '';
+      todaysPractice.innerHTML = '';
 
       // Build performance data for all qualifying clubs
       const clubData = [];
@@ -2012,8 +3026,11 @@
         clubData.push({ club, avgProx, avgV, avgH, dispersion, shotCount: inBucket.length });
       }
 
-      if (clubData.length === 0) { noData.style.display = 'block'; return; }
+      if (clubData.length === 0) { noData.style.display = 'block'; renderPracticeImpact(); return; }
       noData.style.display = 'none';
+
+      // Render practice impact correlation card
+      renderPracticeImpact();
 
       // Find best performing club (lowest avg proximity)
       const bestProx = Math.min(...clubData.map(c => c.avgProx));
@@ -2027,6 +3044,107 @@
 
       // Sort by improvement score (highest first = needs most work)
       clubData.sort((a, b) => b.improvementScore - a.improvementScore);
+
+      // ===== TODAY'S PRACTICE PLAN =====
+      if (todaysPractice && clubData.length > 0) {
+        const bestClub = clubData[clubData.length - 1]; // strongest club for confidence finish
+
+        // Generate up to 3 different session plans using different club groupings
+        const plans = [];
+        const planLabels = ['Session A', 'Session B', 'Session C'];
+        const planIcons = ['🎯', '🔄', '⚡'];
+
+        // Plan A: top 2 priority clubs (biggest weaknesses)
+        if (clubData.length >= 2) {
+          plans.push({ focus: clubData.slice(0, 2), label: 'Work on your weaknesses', icon: '🎯' });
+        }
+        // Plan B: middle clubs (maintenance work)
+        if (clubData.length >= 4) {
+          plans.push({ focus: clubData.slice(2, 4), label: 'Sharpen the mid-range', icon: '🔄' });
+        } else if (clubData.length >= 3) {
+          plans.push({ focus: [clubData[2], clubData[0]], label: 'Mix it up', icon: '🔄' });
+        }
+        // Plan C: best club + worst club (contrast drill)
+        if (clubData.length >= 3) {
+          plans.push({ focus: [clubData[0], clubData[clubData.length - 1]], label: 'Contrast drill — worst vs best', icon: '⚡' });
+        }
+
+        if (plans.length === 0) {
+          plans.push({ focus: clubData.slice(0, Math.min(2, clubData.length)), label: 'Work on your weaknesses', icon: '🎯' });
+        }
+
+        // Build all plan cards
+        function buildPlanHtml(plan, idx) {
+          let html = '<div class="practice-plan-slide" data-plan-idx="' + idx + '" style="' + (idx === 0 ? '' : 'display:none;') + '">';
+          html += '<div style="padding:1rem 1.2rem; background:var(--bg-secondary); border:1px solid var(--border-glass); border-radius:var(--radius-sm);">';
+          html += '<div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.8rem;">';
+          html += '<div style="display:flex; align-items:center; gap:0.5rem;">';
+          html += '<span style="font-size:1.3rem;">' + plan.icon + '</span>';
+          html += '<div>';
+          html += '<div style="font-family:\'Space Grotesk\',sans-serif; font-weight:700; font-size:0.95rem; color:var(--text-primary);">' + plan.label + '</div>';
+          html += '<div style="font-size:0.7rem; color:var(--text-muted);">Option ' + (idx + 1) + ' of ' + plans.length + '</div>';
+          html += '</div></div>';
+          if (plans.length > 1) {
+            html += '<div style="display:flex; gap:0.4rem; align-items:center;">';
+            html += '<button onclick="switchPracticePlan(' + ((idx - 1 + plans.length) % plans.length) + ')" style="background:transparent; border:1px solid var(--border-glass); border-radius:6px; color:var(--text-secondary); cursor:pointer; padding:0.3rem 0.6rem; font-size:0.85rem; line-height:1; transition:border-color 0.2s;" onmouseover="this.style.borderColor=\'var(--brand-green)\'" onmouseout="this.style.borderColor=\'var(--border-glass)\'">&#8592;</button>';
+            html += '<button onclick="switchPracticePlan(' + ((idx + 1) % plans.length) + ')" style="background:transparent; border:1px solid var(--border-glass); border-radius:6px; color:var(--text-secondary); cursor:pointer; padding:0.3rem 0.6rem; font-size:0.85rem; line-height:1; transition:border-color 0.2s;" onmouseover="this.style.borderColor=\'var(--brand-green)\'" onmouseout="this.style.borderColor=\'var(--border-glass)\'">&#8594;</button>';
+            html += '</div>';
+          }
+          html += '</div>';
+
+          html += '<ol style="margin:0; padding-left:1.2rem; font-size:0.85rem; color:var(--text-secondary); line-height:2;">';
+
+          // Warm up with best club (if not already in focus)
+          const focusClubNames = plan.focus.map(c => c.club);
+          if (bestClub && !focusClubNames.includes(bestClub.club)) {
+            html += '<li><strong>Warm up:</strong> 5 shots with your <strong style="color:var(--brand-emerald);">' + bestClub.club + '</strong> — your most consistent club.</li>';
+          }
+
+          // Focus work
+          plan.focus.forEach((c, i) => {
+            const shotCount = 10 - (i * 2);
+            const bucket = DISTANCE_BUCKETS[c.club];
+            let tip = '';
+            const absV = Math.abs(c.avgV);
+            const absH = Math.abs(c.avgH);
+            if (absV > absH * 1.3) {
+              tip = c.avgV > 0 ? ' Focus on distance control — you tend to go long.' : ' Focus on committing to the swing — you tend to come up short.';
+            } else if (absH > absV * 1.3) {
+              tip = c.avgH > 0 ? ' Pay attention to alignment — your miss is right.' : ' Check your grip and path — your miss is left.';
+            } else {
+              tip = ' Focus on a consistent setup and tempo.';
+            }
+            html += '<li><strong>Focus ' + (i+1) + ':</strong> ' + shotCount + ' shots with your <strong style="color:var(--accent-amber);">' + c.club + '</strong> (target within ' + bucket + ' yds).' + tip + '</li>';
+          });
+
+          html += '<li><strong>Finish:</strong> 5 shots with any club, picking a specific target each time. Commit to the shot.</li>';
+          html += '</ol>';
+
+          const warmUpShots = (bestClub && !focusClubNames.includes(bestClub.club)) ? 5 : 0;
+          const focusShots = plan.focus.reduce((s, _, i) => s + (10 - i * 2), 0);
+          const totalShots = warmUpShots + focusShots + 5;
+          html += '<div style="margin-top:0.8rem; font-size:0.72rem; color:var(--text-muted); display:flex; gap:1rem; flex-wrap:wrap;">';
+          html += '<span>~' + totalShots + ' balls</span>';
+          html += '<span>~20 mins</span>';
+          html += '<span>Based on your last ' + (windowVal ? windowVal + ' days' : 'all-time') + ' data</span>';
+          html += '</div>';
+
+          if (plans.length > 1) {
+            html += '<div style="margin-top:0.6rem; font-size:0.7rem; color:var(--text-muted); font-style:italic;">Not feeling this one? Use the arrows to see other options.</div>';
+          }
+
+          html += '</div></div>';
+          return html;
+        }
+
+        let allPlansHtml = '<div id="practice-plans-container">';
+        plans.forEach((plan, idx) => { allPlansHtml += buildPlanHtml(plan, idx); });
+        allPlansHtml += '</div>';
+
+        todaysPractice.innerHTML = allPlansHtml;
+      } else if (todaysPractice) {
+        todaysPractice.innerHTML = '<div style="padding:1rem; font-size:0.82rem; color:var(--text-muted); border:1px dashed var(--border-glass); border-radius:var(--radius-sm);">Log at least 3 shots per club to unlock your personalised practice plan.</div>';
+      }
 
       // Top 3 priority recommendations
       const priorities = clubData.slice(0, 3);
@@ -2109,11 +3227,11 @@
         let imported = 0, errors = [];
         for (let i = startIdx; i < lines.length; i++) {
           const cols = lines[i].split(',').map(c => c.trim());
-          if (cols.length < 5) { errors.push(`Row ${i+1}: not enough columns`); continue; }
-          const [club, v, h, d, date] = cols;
-          const val = validateShotInput({ club, verticalDistance: v, horizontalDistance: h, distanceIntoGreen: d, date });
+          if (cols.length < 4) { errors.push(`Row ${i+1}: not enough columns`); continue; }
+          const [club, v, h, date] = cols;
+          const val = validateShotInput({ club, verticalDistance: v, horizontalDistance: h, date });
           if (!val.valid) { errors.push(`Row ${i+1}: ${val.errors.join(', ')}`); continue; }
-          addShot({ club, verticalDistance: Number(v), horizontalDistance: Number(h), distanceIntoGreen: Number(d), date });
+          addShot({ club, verticalDistance: Number(v), horizontalDistance: Number(h), date });
           imported++;
         }
         let msg = `✅ Imported ${imported} shot${imported !== 1 ? 's' : ''}.`;
@@ -2163,6 +3281,280 @@
       // Auto-advance every 5 seconds
       setInterval(() => { goTo((current + 1) % total); }, 5000);
     })();
+
+    // ===== HANDICAP TRACKER =====
+    const HCP_STORAGE_KEY = 'approachiq-handicap-history';
+    let hcpChartInstance = null;
+
+    function getHcpEntries() {
+      try {
+        const raw = localStorage.getItem(HCP_STORAGE_KEY);
+        return raw ? JSON.parse(raw) : [];
+      } catch(e) { return []; }
+    }
+
+    function saveHcpEntries(entries) {
+      localStorage.setItem(HCP_STORAGE_KEY, JSON.stringify(entries));
+    }
+
+    function renderHcpChart() {
+      const entries = getHcpEntries().sort((a, b) => a.date.localeCompare(b.date));
+      const noDataEl = document.getElementById('hcp-no-data');
+      const canvas = document.getElementById('hcp-chart');
+      const footer = document.getElementById('hcp-footer');
+      const currentVal = document.getElementById('hcp-current-val');
+
+      if (entries.length === 0) {
+        noDataEl.style.display = 'block';
+        canvas.style.display = 'none';
+        footer.style.display = 'none';
+        currentVal.textContent = '—';
+        return;
+      }
+
+      // Update current HCP display
+      const latest = entries[entries.length - 1];
+      currentVal.textContent = parseFloat(latest.hcp).toFixed(1);
+
+      if (entries.length < 2) {
+        noDataEl.style.display = 'block';
+        noDataEl.innerHTML = 'Add one more entry to see your trend chart.<br><span class="hcp-cta">You need at least 2 entries.</span>';
+        canvas.style.display = 'none';
+        footer.style.display = 'none';
+        return;
+      }
+
+      noDataEl.style.display = 'none';
+      canvas.style.display = 'block';
+      footer.style.display = 'flex';
+
+      // Summary stats
+      const vals = entries.map(e => parseFloat(e.hcp));
+      const lowest = Math.min(...vals);
+      const highest = Math.max(...vals);
+      const change = (vals[vals.length - 1] - vals[0]).toFixed(1);
+      const changeStr = change > 0 ? '+' + change : String(change);
+      document.getElementById('hcp-lowest').textContent = lowest.toFixed(1);
+      document.getElementById('hcp-highest').textContent = highest.toFixed(1);
+      document.getElementById('hcp-change').textContent = changeStr;
+      document.getElementById('hcp-count').textContent = entries.length;
+
+      // Labels — format date nicely
+      const labels = entries.map(e => {
+        const [y, m, d] = e.date.split('-');
+        return new Date(y, m - 1, d).toLocaleDateString('en', { day: 'numeric', month: 'short', year: '2-digit' });
+      });
+      const data = vals;
+
+      // Destroy previous chart instance
+      if (hcpChartInstance) { hcpChartInstance.destroy(); hcpChartInstance = null; }
+
+      // Gradient fill under line
+      const ctx = canvas.getContext('2d');
+      const gradFill = ctx.createLinearGradient(0, 0, 0, 200);
+      gradFill.addColorStop(0, 'rgba(249,115,22,0.25)');
+      gradFill.addColorStop(1, 'rgba(249,115,22,0)');
+
+      hcpChartInstance = new Chart(canvas, {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [{
+            label: 'Handicap Index',
+            data,
+            borderColor: '#f97316', // fallback, overridden per-segment below
+            backgroundColor: gradFill,
+            fill: true,
+            tension: 0.4,
+            pointRadius: 5,
+            pointBackgroundColor: (ctx) => {
+              // Colour each point based on change from previous point
+              const i = ctx.dataIndex;
+              if (i === 0) return '#f59e0b';
+              const diff = data[i] - data[i - 1];
+              if (diff < -0.2) return '#10b981';  // improving (green)
+              if (diff > 0.2)  return '#f43f5e';  // worsening (red)
+              return '#f59e0b';                    // stable (orange)
+            },
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2,
+            segment: {
+              borderColor: (ctx) => {
+                try {
+                  const y0 = ctx.p0.parsed.y;
+                  const y1 = ctx.p1.parsed.y;
+                  const diff = y1 - y0;
+                  if (diff < -0.2) return '#10b981';
+                  if (diff > 0.2)  return '#f43f5e';
+                  return '#f97316';
+                } catch(e) { return '#f97316'; }
+              }
+            },
+            borderWidth: 3
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          aspectRatio: 2.5,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: (c) => ' HCP ' + c.parsed.y.toFixed(1)
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: { color: 'rgba(255,255,255,0.05)' },
+              ticks: { color: '#64748b', font: { size: 11 } }
+            },
+            y: {
+              min: 0,
+              max: 30,
+              grid: { color: 'rgba(255,255,255,0.05)' },
+              ticks: {
+                color: '#64748b', font: { size: 11 },
+                callback: (v) => v.toFixed(1)
+              },
+              title: { display: true, text: 'Handicap Index', color: '#64748b', font: { size: 11 } }
+            }
+          }
+        }
+      });
+    }
+
+    // Popout modal
+    function openHcpModal(e) {
+      e.stopPropagation();
+      // Remove any existing modal
+      const existing = document.getElementById('hcp-modal-overlay');
+      if (existing) existing.remove();
+
+      const overlay = document.createElement('div');
+      overlay.className = 'hcp-modal-overlay';
+      overlay.id = 'hcp-modal-overlay';
+
+      overlay.innerHTML = `
+        <div class="hcp-modal" id="hcp-modal-inner">
+          <button class="hcp-modal-close" onclick="closeHcpModal()" aria-label="Close">✕</button>
+          <h3>♟ Log Handicap Index</h3>
+          <div class="form-group">
+            <label style="display:block; margin-bottom:0.4rem; font-weight:600; font-size:0.72rem; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.8px;">Handicap Index</label>
+            <input type="number" id="hcp-input-val" step="0.1" min="0" max="54" placeholder="e.g. 14.2"
+              style="width:100%; padding:0.8rem 1rem; border:1px solid var(--border-glass); border-radius:var(--radius-xs); font-size:0.95rem; font-family:inherit; background:var(--bg-secondary); color:var(--text-primary); outline:none;" />
+          </div>
+          <div class="form-group">
+            <label style="display:block; margin-bottom:0.4rem; font-weight:600; font-size:0.72rem; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.8px;">Date</label>
+            <input type="date" id="hcp-input-date"
+              style="width:100%; padding:0.8rem 1rem; border:1px solid var(--border-glass); border-radius:var(--radius-xs); font-size:0.95rem; font-family:inherit; background:var(--bg-secondary); color:var(--text-primary); outline:none;" />
+          </div>
+          <div id="hcp-modal-error" style="color:var(--accent-red); font-size:0.82rem; min-height:1.2rem; margin-bottom:0.5rem;"></div>
+          <button onclick="saveHcpEntry()"
+            style="width:100%; padding:0.75rem; border:none; border-radius:var(--radius-xs); background:linear-gradient(135deg,#f59e0b,#f97316); color:white; font-weight:700; font-family:inherit; font-size:0.9rem; cursor:pointer;">
+            Save Entry
+          </button>
+          <div class="hcp-history" id="hcp-history-list"></div>
+        </div>
+      `;
+
+      // Set today's date
+      overlay.querySelector('#hcp-input-date').value = new Date().toISOString().split('T')[0];
+
+      // Close on overlay click
+      overlay.addEventListener('click', (ev) => {
+        if (ev.target === overlay) closeHcpModal();
+      });
+
+      document.body.appendChild(overlay);
+      renderHcpHistory();
+      overlay.querySelector('#hcp-input-val').focus();
+    }
+
+    function closeHcpModal() {
+      const overlay = document.getElementById('hcp-modal-overlay');
+      if (overlay) overlay.remove();
+    }
+
+    function saveHcpEntry() {
+      const valInput = document.getElementById('hcp-input-val');
+      const dateInput = document.getElementById('hcp-input-date');
+      const errEl = document.getElementById('hcp-modal-error');
+      const val = parseFloat(valInput.value);
+      const date = dateInput.value;
+      errEl.textContent = '';
+
+      if (isNaN(val) || val < 0 || val > 54) {
+        errEl.textContent = '⚠️ Enter a valid handicap between 0 and 54.';
+        return;
+      }
+      if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+        errEl.textContent = '⚠️ Please select a valid date.';
+        return;
+      }
+
+      const entries = getHcpEntries();
+      entries.push({ hcp: val, date });
+      saveHcpEntries(entries);
+      valInput.value = '';
+      renderHcpHistory();
+      renderHcpChart();
+      showToast('✅ Handicap ' + val.toFixed(1) + ' saved', 'success');
+    }
+
+    function deleteHcpEntry(idx) {
+      const entries = getHcpEntries();
+      entries.splice(idx, 1);
+      saveHcpEntries(entries);
+      renderHcpHistory();
+      renderHcpChart();
+    }
+
+    function clearLastHcpEntry(e) {
+      e.stopPropagation();
+      const entries = getHcpEntries();
+      if (entries.length === 0) {
+        showToast('No handicap entries to clear', 'info');
+        return;
+      }
+      entries.pop();
+      saveHcpEntries(entries);
+      renderHcpChart();
+      if (entries.length === 0) {
+        showToast('🗑️ All handicap data cleared', 'error');
+      } else {
+        showToast('↩️ Last handicap entry removed', 'info');
+      }
+    }
+
+    function renderHcpHistory() {
+      const list = document.getElementById('hcp-history-list');
+      if (!list) return;
+      const entries = getHcpEntries().sort((a, b) => b.date.localeCompare(a.date));
+      if (entries.length === 0) {
+        list.innerHTML = '<div class="hcp-history-title">No entries yet</div>';
+        return;
+      }
+      let html = '<div class="hcp-history-title">History</div>';
+      // Need original indices for deletion — re-sort keeping original index
+      const indexed = getHcpEntries().map((e, i) => ({ ...e, origIdx: i }))
+        .sort((a, b) => b.date.localeCompare(a.date));
+      indexed.forEach(({ hcp, date, origIdx }) => {
+        const [y, m, d] = date.split('-');
+        const fmt = new Date(y, m - 1, d).toLocaleDateString('en', { day: 'numeric', month: 'short', year: 'numeric' });
+        html += `
+          <div class="hcp-history-row">
+            <span class="hcp-history-val">${parseFloat(hcp).toFixed(1)}</span>
+            <span class="hcp-history-date">${fmt}</span>
+            <button class="hcp-history-del" onclick="deleteHcpEntry(${origIdx})" aria-label="Delete entry">🗑</button>
+          </div>`;
+      });
+      list.innerHTML = html;
+    }
+
+    // Initialise on load
+    try { renderHcpChart(); } catch(e) { console.warn('Handicap chart init error:', e); }
 
     // ===== TOAST NOTIFICATIONS =====
     function showToast(message, type = 'success', duration = 3000, undoCallback = null) {
