@@ -1440,6 +1440,257 @@
       min-height: 1.4rem;
       margin-top: 0.4rem;
     }
+
+    /* ===== COURSE PLOT ===== */
+    .cp-search-wrap {
+      position: relative;
+      margin-bottom: 1.2rem;
+    }
+    .cp-search-input {
+      width: 100%;
+      padding: 0.85rem 1rem 0.85rem 2.6rem;
+      border: 1px solid var(--border-glass);
+      border-radius: var(--radius-xs);
+      font-size: 0.95rem;
+      font-family: inherit;
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      outline: none;
+      box-sizing: border-box;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .cp-search-input:focus {
+      border-color: var(--brand-green);
+      box-shadow: 0 0 0 3px var(--accent-green-dim);
+    }
+    .cp-search-input::placeholder { color: var(--text-muted); }
+    .cp-search-icon {
+      position: absolute;
+      left: 0.9rem;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 1.1rem;
+      pointer-events: none;
+    }
+    .cp-search-results {
+      position: absolute;
+      top: 100%;
+      left: 0; right: 0;
+      z-index: 50;
+      background: var(--bg-card);
+      border: 1px solid var(--border-glass);
+      border-radius: var(--radius-xs);
+      margin-top: 4px;
+      max-height: 220px;
+      overflow-y: auto;
+      box-shadow: var(--shadow-xl);
+      display: none;
+    }
+    .cp-search-results.active { display: block; }
+    .cp-search-result {
+      padding: 0.7rem 1rem;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      cursor: pointer;
+      border-bottom: 1px solid var(--border-glass);
+      transition: background 0.15s;
+    }
+    .cp-search-result:last-child { border-bottom: none; }
+    .cp-search-result:hover { background: var(--accent-green-dim); color: var(--text-primary); }
+    .cp-search-result .cp-result-name { font-weight: 700; color: var(--text-primary); }
+    .cp-search-loading {
+      padding: 1rem;
+      text-align: center;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
+    .cp-course-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.8rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+    .cp-course-name {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    .cp-change-course {
+      padding: 0.4rem 0.8rem;
+      border: 1px solid var(--border-glass);
+      border-radius: 6px;
+      background: transparent;
+      color: var(--text-muted);
+      font-family: inherit;
+      font-size: 0.72rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .cp-change-course:hover { border-color: var(--border-accent); color: var(--text-secondary); }
+
+    .cp-hole-indicator {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.8rem;
+      margin-bottom: 1rem;
+    }
+    .cp-hole-num {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--brand-emerald);
+    }
+    .cp-hole-nav-btn {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      border: 1px solid var(--border-glass);
+      background: var(--bg-secondary);
+      color: var(--text-secondary);
+      font-size: 1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+    .cp-hole-nav-btn:hover { border-color: var(--border-accent); color: var(--text-primary); }
+
+    .cp-instruction {
+      text-align: center;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 0.6rem;
+      min-height: 1.2rem;
+    }
+    .cp-instruction .step-highlight {
+      color: var(--brand-emerald);
+      font-weight: 700;
+    }
+
+    .cp-canvas-wrap {
+      position: relative;
+      width: 100%;
+      max-width: 400px;
+      margin: 0 auto 1rem;
+      box-sizing: border-box;
+    }
+    .cp-canvas-wrap canvas {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 1/1;
+      border-radius: var(--radius-sm);
+      cursor: crosshair;
+      display: block;
+      border: 1px solid var(--border-glass);
+      box-sizing: border-box;
+      background: #0a1a0f;
+    }
+    @media (max-width: 600px) {
+      .cp-canvas-wrap { max-width: 100%; }
+    }
+
+    .cp-club-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.4rem;
+      margin-bottom: 1rem;
+      max-width: 400px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .cp-club-btn {
+      padding: 0.7rem 0.3rem;
+      border: 2px solid var(--border-glass);
+      border-radius: var(--radius-xs);
+      background: var(--bg-secondary);
+      color: var(--text-secondary);
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .cp-club-btn:hover { border-color: var(--border-accent); color: var(--text-primary); }
+    .cp-club-btn.active {
+      border-color: var(--brand-green);
+      background: var(--accent-green-dim);
+      color: var(--brand-emerald);
+      box-shadow: 0 0 12px rgba(16,185,129,0.15);
+    }
+
+    .cp-status-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      padding: 0.6rem 1rem;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-glass);
+      border-radius: var(--radius-xs);
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+      margin-top: 0.8rem;
+      flex-wrap: wrap;
+    }
+    .cp-status-bar .cp-shots-count {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      color: var(--brand-emerald);
+    }
+    .cp-skip-btn {
+      padding: 0.35rem 0.7rem;
+      border: 1px solid rgba(245,158,11,0.3);
+      border-radius: 6px;
+      background: rgba(245,158,11,0.08);
+      color: #f59e0b;
+      font-family: inherit;
+      font-size: 0.7rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-transform: uppercase;
+    }
+    .cp-skip-btn:hover { background: rgba(245,158,11,0.15); }
+    .cp-undo-btn {
+      padding: 0.35rem 0.7rem;
+      border: 1px solid rgba(244,63,94,0.3);
+      border-radius: 6px;
+      background: rgba(244,63,94,0.08);
+      color: var(--accent-red);
+      font-family: inherit;
+      font-size: 0.7rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-transform: uppercase;
+    }
+    .cp-undo-btn:hover { background: rgba(244,63,94,0.15); }
+
+    .cp-flash {
+      text-align: center;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--brand-emerald);
+      min-height: 1.4rem;
+      margin-top: 0.4rem;
+    }
+
+    .cp-no-course {
+      text-align: center;
+      padding: 3rem 1.5rem;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+    .cp-no-course .cp-no-course-icon { font-size: 3rem; margin-bottom: 1rem; }
+    .cp-no-course p { margin-top: 0.5rem; font-size: 0.8rem; }
   </style>
 </head>
 
@@ -1497,6 +1748,7 @@
   <!-- NAVIGATION (desktop top tabs) -->
   <nav class="tabs" role="tablist">
     <button class="tab active" data-tab="entry" role="tab">⛳ Log</button>
+    <button class="tab" data-tab="course" role="tab">🗺️ Course Plot</button>
     <button class="tab" data-tab="charts" role="tab">📊 Charts</button>
     <button class="tab" data-tab="kpis" role="tab">📈 KPIs</button>
     <button class="tab" data-tab="advice" role="tab">🎯 Coach's Corner</button>
@@ -1507,6 +1759,10 @@
     <button class="bottom-nav-btn active" data-tab="entry" role="tab" aria-selected="true">
       <span class="nav-icon">⛳</span>
       <span>Log</span>
+    </button>
+    <button class="bottom-nav-btn" data-tab="course" role="tab" aria-selected="false">
+      <span class="nav-icon">🗺️</span>
+      <span>Course</span>
     </button>
     <button class="bottom-nav-btn" data-tab="charts" role="tab" aria-selected="false">
       <span class="nav-icon">📊</span>
@@ -1675,6 +1931,76 @@
         </div>
         <div class="csv-hint">CSV format: <code>Club, Vertical Distance, Horizontal Distance, Date (YYYY-MM-DD)</code></div>
       </form>
+    </div>
+  </section>
+
+  <!-- COURSE PLOT VIEW -->
+  <section id="view-course" class="view" role="tabpanel">
+    <div class="card">
+      <h2>Course Plot <span class="section-badge">On-Course</span></h2>
+
+      <!-- Search / Select Course -->
+      <div id="cp-search-section">
+        <div class="cp-search-wrap">
+          <span class="cp-search-icon">🔍</span>
+          <input type="text" class="cp-search-input" id="cp-search-input" placeholder="Search for your golf course..." autocomplete="off" />
+          <div class="cp-search-results" id="cp-search-results"></div>
+        </div>
+        <div class="cp-no-course" id="cp-no-course">
+          <div class="cp-no-course-icon">🗺️</div>
+          <strong>Find your course to get started</strong>
+          <p>Search above to load real green shapes from OpenStreetMap.<br>Data is cached locally for offline use on future visits.</p>
+        </div>
+      </div>
+
+      <!-- Active Round UI (hidden until course selected) -->
+      <div id="cp-round-section" style="display:none;">
+        <!-- Course header -->
+        <div class="cp-course-header">
+          <span class="cp-course-name" id="cp-course-name"></span>
+          <button class="cp-change-course" onclick="cpChangeCourse()">Change Course</button>
+        </div>
+
+        <!-- Hole indicator -->
+        <div class="cp-hole-indicator">
+          <button class="cp-hole-nav-btn" onclick="cpPrevHole()">‹</button>
+          <span class="cp-hole-num" id="cp-hole-num">Hole 1</span>
+          <button class="cp-hole-nav-btn" onclick="cpNextHole()">›</button>
+        </div>
+
+        <!-- Instruction -->
+        <div class="cp-instruction" id="cp-instruction">
+          <span class="step-highlight">Step 1:</span> Select your club
+        </div>
+
+        <!-- Club grid -->
+        <div class="cp-club-grid" id="cp-club-grid">
+          <button type="button" class="cp-club-btn" data-cp-club="Wedge">W</button>
+          <button type="button" class="cp-club-btn" data-cp-club="9 Iron">9i</button>
+          <button type="button" class="cp-club-btn" data-cp-club="8 Iron">8i</button>
+          <button type="button" class="cp-club-btn" data-cp-club="7 Iron">7i</button>
+          <button type="button" class="cp-club-btn" data-cp-club="6 Iron">6i</button>
+          <button type="button" class="cp-club-btn" data-cp-club="5 Iron">5i</button>
+          <button type="button" class="cp-club-btn" data-cp-club="3 Wood">3W</button>
+          <button type="button" class="cp-club-btn" data-cp-club="Driver">DR</button>
+        </div>
+
+        <!-- Green canvas -->
+        <div class="cp-canvas-wrap">
+          <canvas id="cp-green-canvas"></canvas>
+        </div>
+
+        <!-- Flash feedback -->
+        <div class="cp-flash" id="cp-flash"></div>
+
+        <!-- Status bar -->
+        <div class="cp-status-bar">
+          <span>Shots: <span class="cp-shots-count" id="cp-shots-count">0</span></span>
+          <span>Hole <span id="cp-hole-of">1</span> / <span id="cp-total-holes">18</span></span>
+          <button class="cp-skip-btn" onclick="cpSkipHole()">Skip Hole →</button>
+          <button class="cp-undo-btn" onclick="cpUndoLast()">↩ Undo</button>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -1952,6 +2278,7 @@
       if (tabName === 'charts') renderChart();
       if (tabName === 'kpis') renderKPIs();
       if (tabName === 'advice') renderAdvice();
+      if (tabName === 'course' && cpState.course) cpRenderGreen();
       // Scroll to top on mobile tab switch
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -2502,6 +2829,7 @@
       resizeTimer = setTimeout(() => {
         if (document.getElementById('view-charts').classList.contains('active')) renderChart();
         if (document.getElementById('view-entry').classList.contains('active') && entryMode === 'click') renderEntryGreen();
+        if (document.getElementById('view-course').classList.contains('active') && typeof cpState !== 'undefined' && cpState.course) cpRenderGreen();
       }, 200);
     });
 
@@ -3828,6 +4156,574 @@
           widget.innerHTML = '<span class="weather-loading">📍 Enable location for weather</span>';
         }
       );
+    }
+
+    // ===== COURSE PLOT =====
+    const CP_CACHE_KEY = 'approachiq-course-cache';
+    let cpState = {
+      course: null,         // { name, id, greens: [polygon arrays] }
+      currentHole: 0,       // 0-indexed
+      selectedClub: null,
+      pinCoords: null,      // { x, y } in canvas-local yards
+      ballCoords: null,     // { x, y } in canvas-local yards
+      step: 'club',         // 'club' | 'pin' | 'ball'
+      shotsThisRound: 0
+    };
+
+    // Cache helpers
+    function getCourseCache() {
+      try { return JSON.parse(localStorage.getItem(CP_CACHE_KEY)) || {}; } catch(e) { return {}; }
+    }
+    function saveCourseToCache(courseId, courseData) {
+      const cache = getCourseCache();
+      cache[courseId] = courseData;
+      localStorage.setItem(CP_CACHE_KEY, JSON.stringify(cache));
+    }
+    function getCachedCourse(courseId) {
+      return getCourseCache()[courseId] || null;
+    }
+
+    // Search courses via Overpass API
+    let cpSearchTimeout = null;
+    const cpSearchInput = document.getElementById('cp-search-input');
+    const cpSearchResults = document.getElementById('cp-search-results');
+
+    cpSearchInput.addEventListener('input', () => {
+      clearTimeout(cpSearchTimeout);
+      const query = cpSearchInput.value.trim();
+      if (query.length < 3) { cpSearchResults.classList.remove('active'); return; }
+      cpSearchTimeout = setTimeout(() => cpSearchCourses(query), 500);
+    });
+
+    // Close results on outside click
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.cp-search-wrap')) cpSearchResults.classList.remove('active');
+    });
+
+    async function cpSearchCourses(query) {
+      cpSearchResults.innerHTML = '<div class="cp-search-loading">Searching...</div>';
+      cpSearchResults.classList.add('active');
+
+      try {
+        // Sanitise query for Overpass regex — escape special regex chars
+        const sanitised = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+        // Search for golf courses by name using Overpass
+        const overpassQuery = `[out:json][timeout:15];(way["leisure"="golf_course"]["name"~"${sanitised}",i];relation["leisure"="golf_course"]["name"~"${sanitised}",i];nwr["golf"="course"]["name"~"${sanitised}",i];);out center tags;`;
+        const resp = await fetch('https://overpass-api.de/api/interpreter', {
+          method: 'POST',
+          body: 'data=' + encodeURIComponent(overpassQuery)
+        });
+
+        if (!resp.ok) {
+          cpSearchResults.innerHTML = '<div class="cp-search-loading">Search failed (API error). Try again.</div>';
+          return;
+        }
+
+        const data = await resp.json();
+
+        if (!data.elements || data.elements.length === 0) {
+          cpSearchResults.innerHTML = '<div class="cp-search-loading">No courses found. Try a different name.</div>';
+          return;
+        }
+
+        // Render results
+        cpSearchResults.innerHTML = '';
+        const seen = new Set();
+        data.elements.slice(0, 10).forEach(el => {
+          const name = el.tags && el.tags.name;
+          if (!name || seen.has(name)) return;
+          seen.add(name);
+          const lat = el.center ? el.center.lat : (el.lat || 0);
+          const lon = el.center ? el.center.lon : (el.lon || 0);
+          if (lat === 0 && lon === 0) return; // skip entries without coordinates
+          const div = document.createElement('div');
+          div.className = 'cp-search-result';
+          div.innerHTML = `<span class="cp-result-name">${name}</span>`;
+          div.addEventListener('click', () => cpSelectCourse(name, lat, lon));
+          cpSearchResults.appendChild(div);
+        });
+
+        if (cpSearchResults.children.length === 0) {
+          cpSearchResults.innerHTML = '<div class="cp-search-loading">No courses found.</div>';
+        }
+      } catch(e) {
+        cpSearchResults.innerHTML = '<div class="cp-search-loading">Search failed. Check your connection.</div>';
+        console.error('Course search error:', e);
+      }
+    }
+
+    async function cpSelectCourse(name, lat, lon) {
+      cpSearchResults.classList.remove('active');
+      cpSearchInput.value = '';
+
+      // Check cache first
+      const cacheKey = name.replace(/\s+/g, '_').toLowerCase();
+      const cached = getCachedCourse(cacheKey);
+      if (cached) {
+        cpLoadCourse(cached);
+        showToast('📍 Loaded ' + name + ' from cache', 'success');
+        return;
+      }
+
+      // Fetch greens for this course
+      showToast('🗺️ Fetching green data for ' + name + '...', 'info', 5000);
+      try {
+        const overpassQuery = `
+          [out:json][timeout:25];
+          (
+            way["golf"="green"](around:3000,${lat},${lon});
+          );
+          out geom;
+        `;
+        const resp = await fetch('https://overpass-api.de/api/interpreter', {
+          method: 'POST',
+          body: 'data=' + encodeURIComponent(overpassQuery)
+        });
+        const data = await resp.json();
+
+        if (!data.elements || data.elements.length === 0) {
+          showToast('⚠️ No green data found for this course in OSM', 'error', 5000);
+          return;
+        }
+
+        // Extract polygon data — sort by position (roughly south to north, or by ref tag)
+        const greens = data.elements
+          .filter(el => el.geometry && el.geometry.length > 2)
+          .map(el => ({
+            ref: el.tags && el.tags.ref ? parseInt(el.tags.ref) : null,
+            polygon: el.geometry.map(p => ({ lat: p.lat, lon: p.lon })),
+            centroidLat: el.geometry.reduce((s, p) => s + p.lat, 0) / el.geometry.length,
+            centroidLon: el.geometry.reduce((s, p) => s + p.lon, 0) / el.geometry.length
+          }));
+
+        // Sort: prefer ref tag if available, otherwise sort by latitude (south to north as rough hole order)
+        greens.sort((a, b) => {
+          if (a.ref !== null && b.ref !== null) return a.ref - b.ref;
+          if (a.ref !== null) return -1;
+          if (b.ref !== null) return 1;
+          return a.centroidLat - b.centroidLat;
+        });
+
+        const courseData = { name, greens, lat, lon, fetchedAt: new Date().toISOString() };
+        saveCourseToCache(cacheKey, courseData);
+        cpLoadCourse(courseData);
+        showToast('✅ ' + name + ' loaded — ' + greens.length + ' greens cached', 'success');
+      } catch(e) {
+        showToast('❌ Failed to fetch course data. Try again.', 'error');
+        console.error('Course fetch error:', e);
+      }
+    }
+
+    function cpLoadCourse(courseData) {
+      cpState.course = courseData;
+      cpState.currentHole = 0;
+      cpState.selectedClub = null;
+      cpState.pinCoords = null;
+      cpState.ballCoords = null;
+      cpState.step = 'club';
+      cpState.shotsThisRound = 0;
+
+      // Show round UI, hide search
+      document.getElementById('cp-search-section').style.display = 'none';
+      document.getElementById('cp-round-section').style.display = 'block';
+      document.getElementById('cp-course-name').textContent = courseData.name;
+      document.getElementById('cp-total-holes').textContent = courseData.greens.length;
+      document.getElementById('cp-shots-count').textContent = '0';
+
+      // Reset club buttons
+      document.querySelectorAll('.cp-club-btn').forEach(b => b.classList.remove('active'));
+
+      cpUpdateHoleDisplay();
+      cpRenderGreen();
+    }
+
+    function cpChangeCourse() {
+      document.getElementById('cp-search-section').style.display = 'block';
+      document.getElementById('cp-round-section').style.display = 'none';
+      cpState.course = null;
+    }
+
+    function cpUpdateHoleDisplay() {
+      const holeNum = cpState.currentHole + 1;
+      document.getElementById('cp-hole-num').textContent = 'Hole ' + holeNum;
+      document.getElementById('cp-hole-of').textContent = holeNum;
+      cpUpdateInstruction();
+    }
+
+    function cpUpdateInstruction() {
+      const el = document.getElementById('cp-instruction');
+      if (cpState.step === 'club') {
+        el.innerHTML = '<span class="step-highlight">Step 1:</span> Select your club';
+      } else if (cpState.step === 'pin') {
+        el.innerHTML = '<span class="step-highlight">Step 2:</span> Tap where the pin is on the green';
+      } else if (cpState.step === 'ball') {
+        el.innerHTML = '<span class="step-highlight">Step 3:</span> Tap where your ball landed';
+      }
+    }
+
+    function cpPrevHole() {
+      if (!cpState.course) return;
+      cpState.currentHole = Math.max(0, cpState.currentHole - 1);
+      cpResetHoleState();
+      cpUpdateHoleDisplay();
+      cpRenderGreen();
+    }
+
+    function cpNextHole() {
+      if (!cpState.course) return;
+      cpState.currentHole = Math.min(cpState.course.greens.length - 1, cpState.currentHole + 1);
+      cpResetHoleState();
+      cpUpdateHoleDisplay();
+      cpRenderGreen();
+    }
+
+    function cpSkipHole() {
+      if (!cpState.course) return;
+      if (cpState.currentHole < cpState.course.greens.length - 1) {
+        cpState.currentHole++;
+        cpResetHoleState();
+        cpUpdateHoleDisplay();
+        cpRenderGreen();
+        cpFlash('⏭ Skipped to Hole ' + (cpState.currentHole + 1));
+      } else {
+        cpFlash('🏁 Final hole reached!');
+      }
+    }
+
+    function cpResetHoleState() {
+      cpState.selectedClub = null;
+      cpState.pinCoords = null;
+      cpState.ballCoords = null;
+      cpState.step = 'club';
+      document.querySelectorAll('.cp-club-btn').forEach(b => b.classList.remove('active'));
+    }
+
+    function cpFlash(msg) {
+      const el = document.getElementById('cp-flash');
+      el.textContent = msg;
+      setTimeout(() => { el.textContent = ''; }, 2500);
+    }
+
+    function cpUndoLast() {
+      if (cpState.shotsThisRound <= 0) {
+        showToast('Nothing to undo', 'info');
+        return;
+      }
+      const shots = getShots();
+      if (shots.length === 0) return;
+      shots.pop();
+      saveShots(shots);
+      cpState.shotsThisRound--;
+      document.getElementById('cp-shots-count').textContent = cpState.shotsThisRound;
+      updateStats();
+      showToast('↩️ Last shot undone', 'info');
+    }
+
+    // Club selection
+    document.querySelectorAll('.cp-club-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        document.querySelectorAll('.cp-club-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        cpState.selectedClub = btn.dataset.cpClub;
+        if (cpState.step === 'club') {
+          cpState.step = 'pin';
+          cpUpdateInstruction();
+        }
+      });
+    });
+
+    // ===== GREEN RENDERING =====
+    function cpGetGreenTransform(greenData) {
+      // Convert lat/lon polygon to local x/y coordinates in yards
+      // Uses equirectangular approximation (fine for small areas like a green)
+      const polygon = greenData.polygon;
+      const centLat = polygon.reduce((s, p) => s + p.lat, 0) / polygon.length;
+      const centLon = polygon.reduce((s, p) => s + p.lon, 0) / polygon.length;
+
+      // Meters per degree at this latitude
+      const mPerDegLat = 111320;
+      const mPerDegLon = 111320 * Math.cos(centLat * Math.PI / 180);
+      const ydsPerMeter = 1.09361;
+
+      // Convert to yards relative to centroid
+      const points = polygon.map(p => ({
+        x: (p.lon - centLon) * mPerDegLon * ydsPerMeter,
+        y: (p.lat - centLat) * mPerDegLat * ydsPerMeter
+      }));
+
+      // Find bounding box
+      let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+      points.forEach(p => {
+        if (p.x < minX) minX = p.x;
+        if (p.x > maxX) maxX = p.x;
+        if (p.y < minY) minY = p.y;
+        if (p.y > maxY) maxY = p.y;
+      });
+
+      const width = maxX - minX;
+      const height = maxY - minY;
+
+      return { points, centLat, centLon, minX, maxX, minY, maxY, width, height };
+    }
+
+    function cpRenderGreen() {
+      const canvas = document.getElementById('cp-green-canvas');
+      if (!canvas || !cpState.course) return;
+      const ctx = canvas.getContext('2d');
+
+      const greenData = cpState.course.greens[cpState.currentHole];
+      if (!greenData) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        return;
+      }
+
+      const transform = cpGetGreenTransform(greenData);
+
+      // Canvas sizing
+      const wrap = canvas.parentElement;
+      const size = Math.min(wrap.getBoundingClientRect().width || 360, 400);
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = size * dpr;
+      canvas.height = size * dpr;
+      canvas.style.width = size + 'px';
+      canvas.style.height = size + 'px';
+      ctx.scale(dpr, dpr);
+
+      const W = size, H = size;
+      const padding = 40; // px padding around green
+
+      // Scale to fit green within canvas with padding
+      const scaleX = (W - padding * 2) / (transform.width || 1);
+      const scaleY = (H - padding * 2) / (transform.height || 1);
+      const scale = Math.min(scaleX, scaleY);
+
+      // Centre offset
+      const offsetX = W / 2;
+      const offsetY = H / 2;
+      const greenCentX = (transform.minX + transform.maxX) / 2;
+      const greenCentY = (transform.minY + transform.maxY) / 2;
+
+      // Convert yard coords to pixel coords
+      function toPixel(x, y) {
+        return {
+          px: offsetX + (x - greenCentX) * scale,
+          py: offsetY - (y - greenCentY) * scale  // flip Y for canvas
+        };
+      }
+
+      // Store transform for tap handling
+      canvas._cpTransform = { scale, offsetX, offsetY, greenCentX, greenCentY, toPixel };
+      // Inverse: pixel to yards
+      canvas._cpInverse = function(px, py) {
+        return {
+          x: (px - offsetX) / scale + greenCentX,
+          y: -(py - offsetY) / scale + greenCentY
+        };
+      };
+
+      // ---- Draw ----
+      ctx.clearRect(0, 0, W, H);
+
+      // Background
+      ctx.fillStyle = '#0a1a0f';
+      ctx.fillRect(0, 0, W, H);
+
+      // Fringe (slightly larger than green)
+      ctx.beginPath();
+      transform.points.forEach((p, i) => {
+        const { px, py } = toPixel(p.x, p.y);
+        // Expand outward from centre for fringe
+        const dx = p.x - greenCentX;
+        const dy = p.y - greenCentY;
+        const fringeX = greenCentX + dx * 1.15;
+        const fringeY = greenCentY + dy * 1.15;
+        const fp = toPixel(fringeX, fringeY);
+        if (i === 0) ctx.moveTo(fp.px, fp.py);
+        else ctx.lineTo(fp.px, fp.py);
+      });
+      ctx.closePath();
+      ctx.fillStyle = '#0f4d28';
+      ctx.fill();
+
+      // Green surface
+      ctx.beginPath();
+      transform.points.forEach((p, i) => {
+        const { px, py } = toPixel(p.x, p.y);
+        if (i === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+      });
+      ctx.closePath();
+      ctx.fillStyle = '#1a6b3c';
+      ctx.fill();
+      ctx.strokeStyle = '#2d8f52';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // Scale indicator
+      const scaleBarYds = Math.round(transform.width > 20 ? 10 : 5);
+      const scaleBarPx = scaleBarYds * scale;
+      ctx.beginPath();
+      ctx.moveTo(15, H - 15);
+      ctx.lineTo(15 + scaleBarPx, H - 15);
+      ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      ctx.font = '10px Inter, sans-serif';
+      ctx.fillStyle = 'rgba(255,255,255,0.5)';
+      ctx.textAlign = 'center';
+      ctx.fillText(scaleBarYds + ' yds', 15 + scaleBarPx / 2, H - 4);
+
+      // Draw pin if placed
+      if (cpState.pinCoords) {
+        const pp = toPixel(cpState.pinCoords.x, cpState.pinCoords.y);
+        // Flag pole
+        ctx.beginPath();
+        ctx.moveTo(pp.px, pp.py + 2);
+        ctx.lineTo(pp.px, pp.py - 28);
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        // Flag
+        ctx.beginPath();
+        ctx.moveTo(pp.px, pp.py - 28);
+        ctx.lineTo(pp.px + 12, pp.py - 22);
+        ctx.lineTo(pp.px, pp.py - 16);
+        ctx.closePath();
+        ctx.fillStyle = '#f43f5e';
+        ctx.fill();
+        // Hole
+        ctx.beginPath();
+        ctx.arc(pp.px, pp.py, 3, 0, Math.PI * 2);
+        ctx.fillStyle = '#0a0a0a';
+        ctx.fill();
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
+
+      // Draw ball if placed
+      if (cpState.ballCoords) {
+        const bp = toPixel(cpState.ballCoords.x, cpState.ballCoords.y);
+        // Glow
+        ctx.beginPath();
+        ctx.arc(bp.px, bp.py, 12, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(52,211,153,0.15)';
+        ctx.fill();
+        // Ball
+        ctx.beginPath();
+        ctx.arc(bp.px, bp.py, 7, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(52,211,153,0.95)';
+        ctx.shadowColor = 'rgba(52,211,153,0.6)';
+        ctx.shadowBlur = 8;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+        ctx.strokeStyle = '#10b981';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Line from pin to ball
+        if (cpState.pinCoords) {
+          const pp = toPixel(cpState.pinCoords.x, cpState.pinCoords.y);
+          ctx.beginPath();
+          ctx.moveTo(pp.px, pp.py);
+          ctx.lineTo(bp.px, bp.py);
+          ctx.strokeStyle = 'rgba(52,211,153,0.3)';
+          ctx.lineWidth = 1;
+          ctx.setLineDash([3, 4]);
+          ctx.stroke();
+          ctx.setLineDash([]);
+        }
+      }
+
+      // Hole label
+      ctx.font = 'bold 13px "Space Grotesk", sans-serif';
+      ctx.fillStyle = 'rgba(255,255,255,0.7)';
+      ctx.textAlign = 'center';
+      ctx.fillText('Hole ' + (cpState.currentHole + 1), W / 2, 20);
+    }
+
+    // Canvas tap handler
+    (function wireCpCanvas() {
+      const canvas = document.getElementById('cp-green-canvas');
+      if (!canvas) return;
+
+      function handleTap(e) {
+        e.preventDefault();
+        if (!cpState.course || cpState.step === 'club') return;
+
+        const rect = canvas.getBoundingClientRect();
+        let clientX, clientY;
+        if (e.touches) {
+          clientX = e.touches[0].clientX;
+          clientY = e.touches[0].clientY;
+        } else {
+          clientX = e.clientX;
+          clientY = e.clientY;
+        }
+
+        const dpr = window.devicePixelRatio || 1;
+        const canvasW = canvas.width / dpr;
+        const canvasH = canvas.height / dpr;
+        const px = (clientX - rect.left) * (canvasW / rect.width);
+        const py = (clientY - rect.top) * (canvasH / rect.height);
+
+        if (!canvas._cpInverse) return;
+        const yardCoords = canvas._cpInverse(px, py);
+
+        if (cpState.step === 'pin') {
+          cpState.pinCoords = { x: yardCoords.x, y: yardCoords.y };
+          cpState.step = 'ball';
+          cpUpdateInstruction();
+          cpRenderGreen();
+        } else if (cpState.step === 'ball') {
+          cpState.ballCoords = { x: yardCoords.x, y: yardCoords.y };
+          cpRenderGreen();
+          // Auto-save the shot
+          cpSaveShot();
+        }
+      }
+
+      canvas.addEventListener('click', handleTap);
+      canvas.addEventListener('touchstart', handleTap, { passive: false });
+    })();
+
+    function cpSaveShot() {
+      if (!cpState.selectedClub || !cpState.pinCoords || !cpState.ballCoords) return;
+
+      // Calculate vertical and horizontal distance relative to pin
+      const v = cpState.ballCoords.y - cpState.pinCoords.y;  // positive = long
+      const h = cpState.ballCoords.x - cpState.pinCoords.x;  // positive = right
+
+      // Round to 1 decimal
+      const vRound = Math.round(v * 10) / 10;
+      const hRound = Math.round(h * 10) / 10;
+
+      addShot({
+        club: cpState.selectedClub,
+        verticalDistance: vRound,
+        horizontalDistance: hRound,
+        date: new Date().toISOString().split('T')[0]
+      });
+
+      cpState.shotsThisRound++;
+      document.getElementById('cp-shots-count').textContent = cpState.shotsThisRound;
+
+      const dist = Math.sqrt(vRound * vRound + hRound * hRound).toFixed(1);
+      cpFlash('✓ ' + cpState.selectedClub + ' — ' + dist + ' yds from pin');
+
+      // Auto-advance to next hole after short delay
+      setTimeout(() => {
+        if (cpState.currentHole < cpState.course.greens.length - 1) {
+          cpState.currentHole++;
+          cpResetHoleState();
+          cpUpdateHoleDisplay();
+          cpRenderGreen();
+        } else {
+          cpFlash('🏁 Round complete! ' + cpState.shotsThisRound + ' shots logged.');
+        }
+      }, 1200);
     }
 
     // ===== INIT =====

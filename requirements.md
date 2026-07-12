@@ -32,6 +32,10 @@ ApproachIQ is a standalone single-file HTML web application that allows golfers 
 - **Handicap_Index**: A numerical measure of a golfer's playing ability, updated periodically as rounds are submitted. Lower values indicate better performance.
 - **Handicap_Tracker**: The section of the Tracker that records and charts a user's Handicap_Index entries over time
 - **Practice_Impact**: A Coach's Corner analysis that correlates changes in per-club shot dispersion with Handicap_Index movement over the same time period, identifying which clubs likely contributed to handicap improvement or decline
+- **Course_Plot**: A dedicated tab for on-course shot logging using real green shapes fetched from OpenStreetMap, allowing users to place pin position and ball landing on the actual green outline for each hole
+- **OSM**: OpenStreetMap — a free, open-source, community-built map database. The Tracker queries OSM via the Overpass API to retrieve golf green polygon data tagged with `golf=green`.
+- **Overpass_API**: A read-only query API for OpenStreetMap data, used by the Tracker to search for golf courses and fetch green polygon coordinates
+- **Green_Polygon**: A set of lat/lon coordinates defining the outline shape of a putting green, sourced from OSM and rendered on canvas as the actual green shape
 
 ## Requirements
 
@@ -217,7 +221,7 @@ ApproachIQ is a standalone single-file HTML web application that allows golfers 
 4. THE Tracker SHALL display a live shot counter and active clubs counter in the hero section.
 5. THE Tracker SHALL display sidebar advertisements (3 per side) for golf equipment on screens wider than 1200px, hidden on mobile.
 6. THE Tracker SHALL display a branded footer.
-7. THE Tracker SHALL label the four navigation tabs as: "⛳ Log", "📊 Charts", "📈 KPIs", and "🎯 Coach's Corner".
+7. THE Tracker SHALL label the five navigation tabs as: "⛳ Log", "🗺️ Course Plot", "📊 Charts", "📈 KPIs", and "🎯 Coach's Corner".
 8. ON screens wider than 768px, THE Tracker SHALL display navigation as a pill-style tab bar centred below the hero section.
 9. ON screens 768px wide or narrower, THE Tracker SHALL hide the top tab bar and display a fixed bottom navigation bar pinned to the bottom of the viewport, with each tab showing an icon and a short label. The bottom nav SHALL respect the iOS safe area inset so it does not overlap the iPhone home indicator.
 10. WHEN a tab is switched on mobile, THE Tracker SHALL scroll the page to the top with a smooth animation.
@@ -315,3 +319,30 @@ ApproachIQ is a standalone single-file HTML web application that allows golfers 
 12. WHEN the shot counter reaches 18, THE Tracker SHALL display a popup offering two options: "Save & End Round" (resets the counter to 0 and shows a confirmation toast) or "Keep Going" (dismisses the popup and allows continued logging for consecutive rounds).
 13. THE Tracker SHALL display an "Undo" button next to the shot counter that removes the most recently logged shot, decrements the counter, and shows a confirmation toast.
 14. THE zone green SHALL display a dashed contour ring at 50% radius indicating the boundary between the inner "close" zones and the outer zones, labelled with the approximate distance (~3 yds) to give the user a visual sense of scale.
+
+### Requirement 21: Course Plot (On-Course with Real Green Shapes)
+
+**User Story:** As a golfer playing a round, I want to log my approach shots onto actual green shapes for each hole, so that my data accurately reflects whether I hit the green and how close I finished relative to the real pin position.
+
+#### Acceptance Criteria
+
+1. THE Tracker SHALL provide a "🗺️ Course Plot" tab accessible from both the desktop tab bar and the mobile bottom navigation bar.
+2. THE Course Plot tab SHALL display a search bar allowing the user to search for golf courses by name via the Overpass_API.
+3. WHEN the user types 3 or more characters, THE Tracker SHALL query OSM for golf courses matching the search term (debounced by 500ms) and display up to 10 results in a dropdown.
+4. WHEN the user selects a course from the search results, THE Tracker SHALL fetch all Green_Polygon data (tagged `golf=green`) within a 3 km radius of the course centre via the Overpass_API.
+5. THE Tracker SHALL cache fetched course data (green polygons, course name, coordinates) in localStorage for offline use on future visits.
+6. IF cached data exists for a selected course, THE Tracker SHALL load from cache without making a network request.
+7. WHEN course data is loaded, THE Tracker SHALL display the round UI showing: course name, current hole indicator with prev/next navigation, club selection grid, green canvas, and status bar.
+8. THE green canvas SHALL render the actual Green_Polygon shape for the current hole, with a darker fringe area surrounding it and a scale indicator showing yard distance.
+9. THE round progression SHALL follow a 3-step flow per hole: (1) select club, (2) tap pin position on the green, (3) tap ball landing position (on or off the green area).
+10. AFTER the ball position is tapped, THE Tracker SHALL auto-save the shot (calculating Vertical_Distance and Horizontal_Distance as the difference between ball and pin positions in yards) and auto-advance to the next hole after a brief delay.
+11. THE Tracker SHALL display a flash confirmation after each saved shot showing the club used and distance from pin.
+12. THE Tracker SHALL provide a "Skip Hole" button that advances to the next hole without logging a shot.
+13. THE Tracker SHALL provide an "Undo" button that removes the most recently logged shot from the current round and decrements the shot counter.
+14. THE Tracker SHALL provide a "Change Course" button that returns to the course search view.
+15. THE Tracker SHALL convert Green_Polygon lat/lon coordinates to local yard-based coordinates using equirectangular approximation, centred on each green's centroid.
+16. THE green canvas SHALL render responsively, scaling to fit the container width on all screen sizes including mobile.
+17. THE Tracker SHALL sort fetched greens by their OSM `ref` tag (hole number) when available, falling back to geographic position (south-to-north latitude) when ref tags are absent.
+18. WHEN the final hole is reached and a shot is saved, THE Tracker SHALL display a "Round complete" message with the total shots logged.
+19. THE Tracker SHALL display pin placement as a flag marker (white pole, red flag, hole) and ball placement as a green glowing marker with a dashed line connecting them.
+20. ALL shots logged via Course Plot SHALL be persisted using the same localStorage Shot format as other entry modes, ensuring they appear in Charts, KPIs, and Coach's Corner analysis.
