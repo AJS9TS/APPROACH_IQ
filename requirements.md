@@ -305,7 +305,7 @@ ApproachIQ is a standalone single-file HTML web application that allows golfers 
 3. THE selected club button SHALL be visually highlighted with a green active state until a different club is tapped.
 4. IN Quick Log mode, THE Tracker SHALL display a circular zone-based green with 9 tap zones: centre (pin), long, short, left, right, long-left, long-right, short-left, short-right — plus a "Missed Green" button outside the circle for shots that missed the green entirely.
 5. WHEN the user taps a zone, THE Tracker SHALL immediately auto-save the shot using the selected club, the zone's mapped coordinates, and today's date. No separate submit button is required.
-6. THE Tracker SHALL map zones to approximate yard coordinates: centre (0,0), cardinal directions (±8,0 or 0,±8), diagonals (±6,±6), and missed green (18,0).
+6. THE Tracker SHALL map zones to approximate yard coordinates with randomised scatter: centre (~0,~0 within 3 yd radius, minimum 0.5 yds from pin), cardinal directions (~±8,~0 or ~0,~±8 within 2.5 yd radius), diagonals (~±6,~±6 within 2.5 yd radius), and missed green (~18,~0 within 5 yd radius). Each tap SHALL generate a unique randomised point within the zone's radius to produce realistic dispersion data rather than identical fixed coordinates.
 7. WHEN a zone is tapped without a club selected, THE Tracker SHALL display a warning: "Pick a club first."
 8. AFTER each auto-save, THE Tracker SHALL reset the club selection (deselect the active club button) so the user must pick a club again for the next shot. This prevents accidental logging with the wrong club.
 8. AFTER each auto-save, THE Tracker SHALL display a brief flash confirmation showing the club and zone (e.g. "✓ 7 Iron — long left") that auto-dismisses after 2 seconds.

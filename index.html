@@ -406,6 +406,15 @@
     /* ===== FORM ===== */
     .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; }
     @media (max-width: 600px) { .form-grid { grid-template-columns: 1fr; } }
+    @media (max-width: 600px) {
+      .form-group input[type="date"] {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
+        font-size: 0.9rem;
+      }
+    }
     .form-grid .full-width { grid-column: 1 / -1; }
 
     .form-group label {
@@ -762,8 +771,10 @@
 
     /* Mobile carousel fixes */
     @media (max-width: 768px) {
-      .reviews-section { margin: 1.5rem auto 0; padding: 0 1rem; }
-      .review-card { padding: 1.2rem; }
+      .reviews-section { margin: 1.5rem auto 0; padding: 0 0.75rem; }
+      .carousel-wrapper { overflow: hidden; }
+      .carousel { gap: 0; }
+      .review-card { min-width: 100%; padding: 1.2rem; box-sizing: border-box; }
       .review-text { font-size: 0.85rem; line-height: 1.6; }
       .review-stars { font-size: 1rem; margin-bottom: 0.5rem; }
       .review-author { font-size: 0.8rem; }
@@ -1191,6 +1202,7 @@
       width: 100%;
       max-width: 420px;
       margin: 0 auto 1rem;
+      box-sizing: border-box;
     }
     .click-canvas-wrap canvas {
       width: 100%;
@@ -1200,8 +1212,26 @@
       cursor: crosshair;
       display: block;
       border: 1px solid var(--border-glass);
+      box-sizing: border-box;
+      max-width: 100%;
     }
     .click-canvas-wrap canvas:hover { border-color: var(--border-accent); }
+    @media (max-width: 600px) {
+      .click-canvas-wrap {
+        max-width: 100%;
+        padding: 0;
+      }
+      .click-canvas-wrap canvas {
+        max-width: 100%;
+        touch-action: none;
+      }
+      .coord-readout {
+        flex-wrap: wrap;
+        gap: 0.6rem;
+        padding: 0.6rem 0.8rem;
+        font-size: 0.75rem;
+      }
+    }
 
     /* Coordinate readout */
     .coord-readout {
@@ -1971,17 +2001,37 @@
 
     // ===== QUICK LOG =====
     const ZONE_COORDS = {
-      'centre':      { v: 0,   h: 0   },
-      'long':        { v: 8,   h: 0   },
-      'short':       { v: -8,  h: 0   },
-      'left':        { v: 0,   h: -8  },
-      'right':       { v: 0,   h: 8   },
-      'long-left':   { v: 6,   h: -6  },
-      'long-right':  { v: 6,   h: 6   },
-      'short-left':  { v: -6,  h: -6  },
-      'short-right': { v: -6,  h: 6   },
-      'miss':        { v: 18,  h: 0   }
+      'centre':      { v: 0,   h: 0,   radius: 3   },
+      'long':        { v: 8,   h: 0,   radius: 2.5 },
+      'short':       { v: -8,  h: 0,   radius: 2.5 },
+      'left':        { v: 0,   h: -8,  radius: 2.5 },
+      'right':       { v: 0,   h: 8,   radius: 2.5 },
+      'long-left':   { v: 6,   h: -6,  radius: 2.5 },
+      'long-right':  { v: 6,   h: 6,   radius: 2.5 },
+      'short-left':  { v: -6,  h: -6,  radius: 2.5 },
+      'short-right': { v: -6,  h: 6,   radius: 2.5 },
+      'miss':        { v: 18,  h: 0,   radius: 5   }
     };
+
+    // Generate a random point within a circle of given radius around a centre
+    function randomiseZoneCoords(zone) {
+      const base = ZONE_COORDS[zone];
+      if (!base) return { v: 0, h: 0 };
+      const r = base.radius;
+      // Random point in circle using rejection-free polar method
+      const angle = Math.random() * 2 * Math.PI;
+      const dist = r * Math.sqrt(Math.random());
+      let v = base.v + dist * Math.sin(angle);
+      let h = base.h + dist * Math.cos(angle);
+      // Ensure centre zone never lands exactly at (0,0) — minimum 0.5 yds from pin
+      if (zone === 'centre' && Math.sqrt(v * v + h * h) < 0.5) {
+        const nudgeAngle = Math.random() * 2 * Math.PI;
+        v = 0.5 * Math.sin(nudgeAngle);
+        h = 0.5 * Math.cos(nudgeAngle);
+      }
+      // Round to 1 decimal place for clean data
+      return { v: Math.round(v * 10) / 10, h: Math.round(h * 10) / 10 };
+    }
 
     function initQuickLog() {
       qlSelectedClub = null;
@@ -2069,7 +2119,7 @@
           }
 
           const zone = btn.dataset.qlZone;
-          const coords = ZONE_COORDS[zone];
+          const coords = randomiseZoneCoords(zone);
           if (!coords) return;
 
           // Save the shot immediately
@@ -3272,7 +3322,10 @@
 
       function goTo(idx) {
         current = idx;
-        carousel.style.transform = `translateX(-${current * (100 + 2.5)}%)`;
+        // On mobile (gap: 0), use exactly 100% per slide; on desktop use 100% + gap equivalent
+        const isMobile = window.innerWidth <= 768;
+        const slideWidth = isMobile ? 100 : 102.5;
+        carousel.style.transform = `translateX(-${current * slideWidth}%)`;
         dotsContainer.querySelectorAll('.carousel-dot').forEach((d, i) => {
           d.classList.toggle('active', i === current);
         });
