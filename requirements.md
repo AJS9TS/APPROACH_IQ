@@ -127,13 +127,22 @@ ApproachIQ is a standalone single-file HTML web application that allows golfers 
 3. THE trend chart SHALL only render when a club has data spanning 2 or more months.
 4. THE trend chart SHALL use a smooth line with filled area beneath.
 
-### Requirement 8: Practice Recommendations (Coach's Corner)
+### Requirement 8: Today's Practice & Recommendations (Coach's Corner)
 
-**User Story:** As a golfer, I want to receive personalised coaching-style recommendations on which clubs to prioritise in practice, so that I can make the most efficient use of my range time.
+**User Story:** As a golfer, I want a simple, actionable practice plan when I open the app, so that I know exactly what to work on at the range without overthinking it.
 
 #### Acceptance Criteria
 
-1. THE Tracker SHALL calculate an Improvement Opportunity Score for each qualifying club, weighted 60% on the gap between that club's average proximity and the best performing club, and 40% on dispersion.
+1. THE Tracker SHALL display a "Today's Practice" session plan at the top of the Coach's Corner tab, above the priority recommendations.
+2. THE Tracker SHALL generate up to 3 different session plans based on the user's data, each focusing on different club groupings:
+   - **Session A ("Work on your weaknesses"):** top 2 priority clubs by improvement score.
+   - **Session B ("Sharpen the mid-range"):** the 3rd and 4th priority clubs, or a mix if fewer clubs qualify.
+   - **Session C ("Contrast drill — worst vs best"):** the highest-priority club paired with the user's strongest club.
+3. THE Tracker SHALL display left and right arrow buttons allowing the user to cycle between available session plans. Only the active plan SHALL be visible at a time. The arrows SHALL wrap around (last → first, first → last).
+4. EACH session plan SHALL include: warm up with the user's most consistent club (5 shots), focused work on 2 clubs (10 and 8 shots respectively) with plain-English tips based on miss direction, and a 5-shot finish with free club choice.
+5. EACH session plan SHALL display an estimated ball count and session duration (~20 minutes), and indicate which data period it is based on.
+6. WHEN insufficient data exists (fewer than 3 shots per club in bucket), THE Tracker SHALL display a message prompting the user to log more shots to unlock the plan.
+6. THE Tracker SHALL calculate an Improvement Opportunity Score for each qualifying club, weighted 60% on the gap between that club's average proximity and the best performing club, and 40% on dispersion.
 2. THE Tracker SHALL identify the top 3 worst performing clubs and present them as Priority 1, 2, and 3 recommendations.
 3. EACH recommendation SHALL include a natural-language coaching reason that identifies the dominant miss pattern:
    - IF a club consistently misses long, THE Tracker SHALL advise "take one less club or control swing length."

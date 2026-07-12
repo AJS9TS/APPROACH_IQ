@@ -115,15 +115,15 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-primary: #050a12;
-      --bg-secondary: #0c1222;
-      --bg-card: rgba(12, 18, 34, 0.85);
-      --bg-glass: rgba(255, 255, 255, 0.02);
-      --border-glass: rgba(255, 255, 255, 0.06);
-      --border-accent: rgba(16, 185, 129, 0.2);
-      --text-primary: #f1f5f9;
-      --text-secondary: #94a3b8;
-      --text-muted: #475569;
+      --bg-primary: #030711;
+      --bg-secondary: #111827;
+      --bg-card: rgba(17, 24, 39, 0.95);
+      --bg-glass: rgba(255, 255, 255, 0.04);
+      --border-glass: rgba(255, 255, 255, 0.12);
+      --border-accent: rgba(16, 185, 129, 0.3);
+      --text-primary: #f8fafc;
+      --text-secondary: #cbd5e1;
+      --text-muted: #64748b;
       --brand-green: #10b981;
       --brand-emerald: #34d399;
       --brand-teal: #14b8a6;
@@ -376,7 +376,7 @@
       top: 0; left: 0; right: 0;
       height: 2px;
       background: var(--gradient-brand);
-      opacity: 0.6;
+      opacity: 0.8;
     }
     .card:hover { transform: translateY(-3px); box-shadow: var(--shadow-xl), var(--shadow-glow); }
 
@@ -547,7 +547,7 @@
 
     .advice-details { flex: 1; }
     .advice-club { font-weight: 700; font-size: 1rem; font-family: 'Space Grotesk', sans-serif; }
-    .advice-dispersion { font-size: 0.78rem; color: var(--text-muted); margin-top: 0.25rem; }
+    .advice-dispersion { font-size: 0.78rem; color: var(--text-secondary); margin-top: 0.25rem; }
     .advice-bar { height: 5px; border-radius: 3px; margin-top: 0.6rem; background: rgba(255,255,255,0.04); overflow: hidden; }
     .advice-bar-fill { height: 100%; border-radius: 3px; transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
 
@@ -582,7 +582,7 @@
       display: flex; gap: 1.5rem; margin-top: 0.8rem; padding-top: 0.8rem;
       border-top: 1px solid var(--border-glass); flex-wrap: wrap;
     }
-    .rec-stat { font-size: 0.72rem; color: var(--text-muted); }
+    .rec-stat { font-size: 0.72rem; color: var(--text-secondary); }
     .rec-stat strong { color: var(--text-primary); font-weight: 700; font-family: 'Space Grotesk', sans-serif; }
 
     .full-ranking-title {
@@ -641,7 +641,7 @@
       font-weight: 700; font-size: 0.9rem; color: var(--text-primary);
       min-width: 80px;
     }
-    .impact-club-stats { flex: 1; font-size: 0.75rem; color: var(--text-muted); line-height: 1.5; }
+    .impact-club-stats { flex: 1; font-size: 0.75rem; color: var(--text-secondary); line-height: 1.5; }
     .impact-club-stats strong { color: var(--text-secondary); }
     .impact-club-badge {
       font-size: 0.65rem; font-weight: 700; padding: 0.2rem 0.5rem;
@@ -966,8 +966,8 @@
     .weather-widget {
       position: fixed; top: 1rem; right: 4rem; z-index: 100;
       transform: translateZ(0);
-      background: #334155; backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.15); border-radius: var(--radius-sm);
+      background: #1e293b; backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.2); border-radius: var(--radius-sm);
       padding: 0.6rem 0.9rem; box-shadow: 0 8px 32px rgba(0,0,0,0.5);
       display: flex; align-items: center; gap: 0.6rem;
       font-size: 0.7rem; color: #e2e8f0;
@@ -990,8 +990,8 @@
     .streak-calendar {
       position: fixed; top: 1rem; left: 1rem; z-index: 100;
       transform: translateZ(0);
-      background: #334155; backdrop-filter: blur(20px);
-      border: 2px solid rgba(255, 255, 255, 0.25); border-radius: var(--radius-sm);
+      background: #1e293b; backdrop-filter: blur(20px);
+      border: 2px solid rgba(255, 255, 255, 0.2); border-radius: var(--radius-sm);
       padding: 0.7rem 0.8rem; box-shadow: 0 8px 32px rgba(0,0,0,0.6);
       width: 185px; font-size: 0.6rem;
     }
@@ -1092,7 +1092,7 @@
     }
     .sidebar-ad-icon { font-size: 2.5rem; margin-bottom: 0.7rem; }
     .sidebar-ad-brand { font-family: 'Space Grotesk', sans-serif; font-size: 0.8rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.4rem; }
-    .sidebar-ad-text { font-size: 0.68rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 0.8rem; }
+    .sidebar-ad-text { font-size: 0.68rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 0.8rem; }
     .sidebar-ad-cta {
       font-size: 0.65rem; font-weight: 700; text-transform: uppercase; padding: 0.4rem 0.8rem;
       border-radius: 6px; border: none; cursor: pointer; font-family: inherit;
@@ -1510,13 +1510,8 @@
   <!-- ADVICE VIEW -->
   <section id="view-advice" class="view" role="tabpanel">
     <div class="card">
-      <h2>Practice Recommendations <span class="section-badge">Coach's Corner</span></h2>
-      <p style="color:var(--text-muted); margin-bottom:0.5rem; font-size:0.88rem;">
-        Your personalised practice plan, based on where you'll gain the most strokes.
-      </p>
-      <p style="color:var(--text-muted); margin-bottom:1rem; font-size:0.75rem; font-style:italic;">
-        "Focus on the clubs with the biggest gap to your best. That's where the low-hanging fruit is." — Coach IQ
-      </p>
+      <h2>Today's Practice <span class="section-badge">Coach's Corner</span></h2>
+      <div id="todays-practice" style="margin-bottom:1.5rem;"></div>
       <div class="filter-row" style="margin-bottom:1.5rem;">
         <label for="advice-window">Period:</label>
         <select id="advice-window">
@@ -2598,14 +2593,26 @@
       `;
     }
 
+    function switchPracticePlan(idx) {
+      const container = document.getElementById('practice-plans-container');
+      if (!container) return;
+      const slides = container.querySelectorAll('.practice-plan-slide');
+      slides.forEach((slide, i) => {
+        slide.style.display = i === idx ? '' : 'none';
+      });
+      // Update dots across all visible plans (dots are rendered inside each slide, so rebuild isn't needed — they're static)
+    }
+
     function renderAdvice() {
       const windowVal = adviceWindowSelect.value;
       const shots = filterByDays(getShots(), windowVal);
       const recsContainer = document.getElementById('advice-recommendations');
       const rankingContainer = document.getElementById('advice-full-ranking');
       const noData = document.getElementById('advice-no-data');
+      const todaysPractice = document.getElementById('todays-practice');
       recsContainer.innerHTML = '';
       rankingContainer.innerHTML = '';
+      todaysPractice.innerHTML = '';
 
       // Build performance data for all qualifying clubs
       const clubData = [];
@@ -2637,6 +2644,107 @@
 
       // Sort by improvement score (highest first = needs most work)
       clubData.sort((a, b) => b.improvementScore - a.improvementScore);
+
+      // ===== TODAY'S PRACTICE PLAN =====
+      if (todaysPractice && clubData.length > 0) {
+        const bestClub = clubData[clubData.length - 1]; // strongest club for confidence finish
+
+        // Generate up to 3 different session plans using different club groupings
+        const plans = [];
+        const planLabels = ['Session A', 'Session B', 'Session C'];
+        const planIcons = ['🎯', '🔄', '⚡'];
+
+        // Plan A: top 2 priority clubs (biggest weaknesses)
+        if (clubData.length >= 2) {
+          plans.push({ focus: clubData.slice(0, 2), label: 'Work on your weaknesses', icon: '🎯' });
+        }
+        // Plan B: middle clubs (maintenance work)
+        if (clubData.length >= 4) {
+          plans.push({ focus: clubData.slice(2, 4), label: 'Sharpen the mid-range', icon: '🔄' });
+        } else if (clubData.length >= 3) {
+          plans.push({ focus: [clubData[2], clubData[0]], label: 'Mix it up', icon: '🔄' });
+        }
+        // Plan C: best club + worst club (contrast drill)
+        if (clubData.length >= 3) {
+          plans.push({ focus: [clubData[0], clubData[clubData.length - 1]], label: 'Contrast drill — worst vs best', icon: '⚡' });
+        }
+
+        if (plans.length === 0) {
+          plans.push({ focus: clubData.slice(0, Math.min(2, clubData.length)), label: 'Work on your weaknesses', icon: '🎯' });
+        }
+
+        // Build all plan cards
+        function buildPlanHtml(plan, idx) {
+          let html = '<div class="practice-plan-slide" data-plan-idx="' + idx + '" style="' + (idx === 0 ? '' : 'display:none;') + '">';
+          html += '<div style="padding:1rem 1.2rem; background:var(--bg-secondary); border:1px solid var(--border-glass); border-radius:var(--radius-sm);">';
+          html += '<div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.8rem;">';
+          html += '<div style="display:flex; align-items:center; gap:0.5rem;">';
+          html += '<span style="font-size:1.3rem;">' + plan.icon + '</span>';
+          html += '<div>';
+          html += '<div style="font-family:\'Space Grotesk\',sans-serif; font-weight:700; font-size:0.95rem; color:var(--text-primary);">' + plan.label + '</div>';
+          html += '<div style="font-size:0.7rem; color:var(--text-muted);">Option ' + (idx + 1) + ' of ' + plans.length + '</div>';
+          html += '</div></div>';
+          if (plans.length > 1) {
+            html += '<div style="display:flex; gap:0.4rem; align-items:center;">';
+            html += '<button onclick="switchPracticePlan(' + ((idx - 1 + plans.length) % plans.length) + ')" style="background:transparent; border:1px solid var(--border-glass); border-radius:6px; color:var(--text-secondary); cursor:pointer; padding:0.3rem 0.6rem; font-size:0.85rem; line-height:1; transition:border-color 0.2s;" onmouseover="this.style.borderColor=\'var(--brand-green)\'" onmouseout="this.style.borderColor=\'var(--border-glass)\'">&#8592;</button>';
+            html += '<button onclick="switchPracticePlan(' + ((idx + 1) % plans.length) + ')" style="background:transparent; border:1px solid var(--border-glass); border-radius:6px; color:var(--text-secondary); cursor:pointer; padding:0.3rem 0.6rem; font-size:0.85rem; line-height:1; transition:border-color 0.2s;" onmouseover="this.style.borderColor=\'var(--brand-green)\'" onmouseout="this.style.borderColor=\'var(--border-glass)\'">&#8594;</button>';
+            html += '</div>';
+          }
+          html += '</div>';
+
+          html += '<ol style="margin:0; padding-left:1.2rem; font-size:0.85rem; color:var(--text-secondary); line-height:2;">';
+
+          // Warm up with best club (if not already in focus)
+          const focusClubNames = plan.focus.map(c => c.club);
+          if (bestClub && !focusClubNames.includes(bestClub.club)) {
+            html += '<li><strong>Warm up:</strong> 5 shots with your <strong style="color:var(--brand-emerald);">' + bestClub.club + '</strong> — your most consistent club.</li>';
+          }
+
+          // Focus work
+          plan.focus.forEach((c, i) => {
+            const shotCount = 10 - (i * 2);
+            const bucket = DISTANCE_BUCKETS[c.club];
+            let tip = '';
+            const absV = Math.abs(c.avgV);
+            const absH = Math.abs(c.avgH);
+            if (absV > absH * 1.3) {
+              tip = c.avgV > 0 ? ' Focus on distance control — you tend to go long.' : ' Focus on committing to the swing — you tend to come up short.';
+            } else if (absH > absV * 1.3) {
+              tip = c.avgH > 0 ? ' Pay attention to alignment — your miss is right.' : ' Check your grip and path — your miss is left.';
+            } else {
+              tip = ' Focus on a consistent setup and tempo.';
+            }
+            html += '<li><strong>Focus ' + (i+1) + ':</strong> ' + shotCount + ' shots with your <strong style="color:var(--accent-amber);">' + c.club + '</strong> (target within ' + bucket + ' yds).' + tip + '</li>';
+          });
+
+          html += '<li><strong>Finish:</strong> 5 shots with any club, picking a specific target each time. Commit to the shot.</li>';
+          html += '</ol>';
+
+          const warmUpShots = (bestClub && !focusClubNames.includes(bestClub.club)) ? 5 : 0;
+          const focusShots = plan.focus.reduce((s, _, i) => s + (10 - i * 2), 0);
+          const totalShots = warmUpShots + focusShots + 5;
+          html += '<div style="margin-top:0.8rem; font-size:0.72rem; color:var(--text-muted); display:flex; gap:1rem; flex-wrap:wrap;">';
+          html += '<span>~' + totalShots + ' balls</span>';
+          html += '<span>~20 mins</span>';
+          html += '<span>Based on your last ' + (windowVal ? windowVal + ' days' : 'all-time') + ' data</span>';
+          html += '</div>';
+
+          if (plans.length > 1) {
+            html += '<div style="margin-top:0.6rem; font-size:0.7rem; color:var(--text-muted); font-style:italic;">Not feeling this one? Use the arrows to see other options.</div>';
+          }
+
+          html += '</div></div>';
+          return html;
+        }
+
+        let allPlansHtml = '<div id="practice-plans-container">';
+        plans.forEach((plan, idx) => { allPlansHtml += buildPlanHtml(plan, idx); });
+        allPlansHtml += '</div>';
+
+        todaysPractice.innerHTML = allPlansHtml;
+      } else if (todaysPractice) {
+        todaysPractice.innerHTML = '<div style="padding:1rem; font-size:0.82rem; color:var(--text-muted); border:1px dashed var(--border-glass); border-radius:var(--radius-sm);">Log at least 3 shots per club to unlock your personalised practice plan.</div>';
+      }
 
       // Top 3 priority recommendations
       const priorities = clubData.slice(0, 3);
