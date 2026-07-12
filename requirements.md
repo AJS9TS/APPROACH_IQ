@@ -85,6 +85,7 @@ ApproachIQ is a standalone single-file HTML web application that allows golfers 
 5. THE Tracker SHALL plot each shot as a coloured marker at the correct position relative to the pin.
 6. WHEN a user selects a Club, THE Tracker SHALL display only shots for that club on the green.
 7. THE Tracker SHALL provide a month filter to show only shots from a selected month.
+8. THE Tracker SHALL dynamically populate the month filter dropdown with all months that contain shot data, sorted newest first, plus an "All Time" default option.
 8. THE Tracker SHALL render the canvas responsively, scaling to fit the container width while maintaining a 1:1 aspect ratio at device pixel ratio for crisp rendering.
 9. WHEN the browser window is resized or the device orientation changes, THE Tracker SHALL re-render visible canvas charts to fit the new viewport dimensions.
 
@@ -115,6 +116,9 @@ ApproachIQ is a standalone single-file HTML web application that allows golfers 
 8. THE Tracker SHALL display a status indicator per club: "On track" (≤ good benchmark), "Room to improve" (≤ average benchmark), or "Focus area" (above average).
 9. WHEN a Club has no Shot data within the Distance_Bucket, THE Tracker SHALL display a message indicating insufficient data.
 10. THE Tracker SHALL provide a month filter to show KPIs for a selected month only.
+11. THE Tracker SHALL provide a Standard/Detailed toggle on the KPI page. "Standard" SHALL be the default view.
+12. IN Standard view, THE Tracker SHALL display a simplified card per club showing: performance score (ring), average distance to pin, and target distance (Distance_Bucket threshold).
+13. IN Detailed view, THE Tracker SHALL display the full KPI card with all metrics as specified in ACs 1-9 above.
 
 ### Requirement 7: Trend Line Chart
 

@@ -1501,6 +1501,10 @@
       <div class="filter-row" style="margin-top:1rem;">
         <label for="kpi-month">Month:</label>
         <select id="kpi-month"><option value="">All Time</option></select>
+        <div class="entry-mode-toggle" style="margin-left:auto; margin-bottom:0;">
+          <button type="button" class="entry-mode-btn active" id="kpi-mode-standard" onclick="setKpiMode('standard')">Standard</button>
+          <button type="button" class="entry-mode-btn" id="kpi-mode-detailed" onclick="setKpiMode('detailed')">Detailed</button>
+        </div>
       </div>
     </div>
     <div id="kpi-grid" class="kpi-grid"></div>
@@ -1652,6 +1656,7 @@
       saveShots(shots);
       updateStats();
       renderStreakCalendar();
+      populateMonthSelects();
       return shot;
     }
     function updateStats() {
@@ -2080,6 +2085,31 @@
       return shots.filter(s => s.date && s.date.startsWith(monthValue));
     }
 
+    // Populate month dropdowns from available shot data
+    function populateMonthSelects() {
+      const shots = getShots();
+      const months = new Set();
+      shots.forEach(s => {
+        if (s.date && s.date.length >= 7) months.add(s.date.substring(0, 7));
+      });
+      const sorted = Array.from(months).sort().reverse(); // newest first
+
+      ['chart-month', 'kpi-month'].forEach(id => {
+        const sel = document.getElementById(id);
+        if (!sel) return;
+        const currentVal = sel.value;
+        sel.innerHTML = '<option value="">All Time</option>';
+        sorted.forEach(m => {
+          const [y, mo] = m.split('-');
+          const label = new Date(y, mo - 1).toLocaleDateString('en', { month: 'long', year: 'numeric' });
+          sel.innerHTML += `<option value="${m}">${label}</option>`;
+        });
+        // Restore previous selection if still valid
+        if (currentVal && sorted.includes(currentVal)) sel.value = currentVal;
+      });
+    }
+    populateMonthSelects();
+
     // ===== GOLF GREEN CHART =====
     const chartClubSelect = document.getElementById('chart-club');
     const chartMonthInput = document.getElementById('chart-month');
@@ -2281,6 +2311,15 @@
     kpiMonthInput.addEventListener('change', renderKPIs);
     kpiMonthInput.addEventListener('input', renderKPIs);
 
+    let kpiMode = 'standard'; // 'standard' | 'detailed'
+
+    function setKpiMode(mode) {
+      kpiMode = mode;
+      document.getElementById('kpi-mode-standard').classList.toggle('active', mode === 'standard');
+      document.getElementById('kpi-mode-detailed').classList.toggle('active', mode === 'detailed');
+      renderKPIs();
+    }
+
     function renderKPIs() {
       const monthVal = kpiMonthInput.value;
       const shots = filterByMonth(getShots(), monthVal);
@@ -2326,71 +2365,104 @@
         const card = document.createElement('div');
         card.className = 'kpi-card';
         card.style.animationDelay = (idx * 0.08) + 's';
-        card.innerHTML = `
-          <div class="kpi-header">
-            <h3>${club}</h3>
-            <span class="kpi-target-badge">Target: ≤${bucket} yds</span>
-          </div>
-          <div class="kpi-main-metric">
-            <div class="kpi-ring">
-              <svg viewBox="0 0 80 80">
-                <circle class="kpi-ring-bg" cx="40" cy="40" r="34"/>
-                <circle class="kpi-ring-fill" cx="40" cy="40" r="34"
-                  style="stroke:${ringColor}; stroke-dasharray:${circumference}; stroke-dashoffset:${dashOffset};" />
-              </svg>
-              <div class="kpi-ring-label">${Math.round(ringPct)}%<span class="kpi-ring-sub">Score</span></div>
+
+        if (kpiMode === 'standard') {
+          // ===== STANDARD VIEW: Score, Avg Distance to Pin, Target Distance =====
+          card.innerHTML = `
+            <div class="kpi-header">
+              <h3>${club}</h3>
+              <span class="kpi-target-badge">Target: ≤${bucket} yds</span>
             </div>
-            <div class="kpi-main-details">
-              <div class="kpi-main-value">${avgProx !== null ? avgProx.toFixed(1) : '—'} <small style="font-size:0.7rem; color:var(--text-muted);">yds</small></div>
-              <div class="kpi-main-label">Average distance to pin</div>
-              <div class="kpi-benchmark">Pro: <strong>${bench.pro}</strong> yds • Good: <strong>${bench.good}</strong> yds • Avg: <strong>${bench.avg}</strong> yds</div>
-            </div>
-          </div>
-          <div class="kpi-breakdown">
-            <div class="kpi-mini">
-              <div class="kpi-mini-value">${kpi ? kpi.avgAbsVerticalDistance.toFixed(1) : '—'}</div>
-              <div class="kpi-mini-label">↕ Avg Vertical (yds)</div>
-            </div>
-            <div class="kpi-mini">
-              <div class="kpi-mini-value">${kpi ? kpi.avgAbsHorizontalDistance.toFixed(1) : '—'}</div>
-              <div class="kpi-mini-label">↔ Avg Horizontal (yds)</div>
-            </div>
-            <div class="kpi-mini">
-              <div class="kpi-mini-value">${girPct}%</div>
-              <div class="kpi-mini-label">In-Bucket Rate</div>
-            </div>
-            <div class="kpi-mini">
-              <div class="kpi-mini-value">${inBucket.length}</div>
-              <div class="kpi-mini-label">Qualifying Shots</div>
-            </div>
-          </div>
-          <div class="kpi-bias">
-            <div class="kpi-bias-title">Miss Tendency</div>
-            <div class="kpi-bias-bar">
-              <span class="kpi-bias-label">L / R</span>
-              <div class="kpi-bias-track">
-                <div class="kpi-bias-center"></div>
-                <div class="kpi-bias-marker" style="left:${Math.max(5, Math.min(95, hBiasPct))}%; background:${Math.abs(avgH) > bucket*0.15 ? 'var(--accent-amber)' : 'var(--brand-green)'};"></div>
+            <div class="kpi-main-metric">
+              <div class="kpi-ring">
+                <svg viewBox="0 0 80 80">
+                  <circle class="kpi-ring-bg" cx="40" cy="40" r="34"/>
+                  <circle class="kpi-ring-fill" cx="40" cy="40" r="34"
+                    style="stroke:${ringColor}; stroke-dasharray:${circumference}; stroke-dashoffset:${dashOffset};" />
+                </svg>
+                <div class="kpi-ring-label">${Math.round(ringPct)}%<span class="kpi-ring-sub">Score</span></div>
+              </div>
+              <div class="kpi-main-details">
+                <div class="kpi-main-value">${avgProx !== null ? avgProx.toFixed(1) : '—'} <small style="font-size:0.7rem; color:var(--text-muted);">yds</small></div>
+                <div class="kpi-main-label">Average distance to pin</div>
               </div>
             </div>
-            <div class="kpi-bias-bar">
-              <span class="kpi-bias-label">S / L</span>
-              <div class="kpi-bias-track">
-                <div class="kpi-bias-center"></div>
-                <div class="kpi-bias-marker" style="left:${Math.max(5, Math.min(95, vBiasPct))}%; background:${Math.abs(avgV) > bucket*0.15 ? 'var(--accent-amber)' : 'var(--brand-green)'};"></div>
+            <div class="kpi-footer">
+              <span>${allClubShots.length} total shots</span>
+              <span>${avgProx !== null && avgProx <= bench.good ? '✅ On track' : avgProx !== null && avgProx <= bench.avg ? '⚠️ Room to improve' : '🔴 Focus area'}</span>
+            </div>
+          `;
+        } else {
+          // ===== DETAILED VIEW: Full KPI card =====
+          card.innerHTML = `
+            <div class="kpi-header">
+              <h3>${club}</h3>
+              <span class="kpi-target-badge">Target: ≤${bucket} yds</span>
+            </div>
+            <div class="kpi-main-metric">
+              <div class="kpi-ring">
+                <svg viewBox="0 0 80 80">
+                  <circle class="kpi-ring-bg" cx="40" cy="40" r="34"/>
+                  <circle class="kpi-ring-fill" cx="40" cy="40" r="34"
+                    style="stroke:${ringColor}; stroke-dasharray:${circumference}; stroke-dashoffset:${dashOffset};" />
+                </svg>
+                <div class="kpi-ring-label">${Math.round(ringPct)}%<span class="kpi-ring-sub">Score</span></div>
+              </div>
+              <div class="kpi-main-details">
+                <div class="kpi-main-value">${avgProx !== null ? avgProx.toFixed(1) : '—'} <small style="font-size:0.7rem; color:var(--text-muted);">yds</small></div>
+                <div class="kpi-main-label">Average distance to pin</div>
+                <div class="kpi-benchmark">Pro: <strong>${bench.pro}</strong> yds • Good: <strong>${bench.good}</strong> yds • Avg: <strong>${bench.avg}</strong> yds</div>
               </div>
             </div>
-          </div>
-          <div class="kpi-footer">
-            <span>${allClubShots.length} total shots recorded</span>
-            <span>${avgProx !== null && avgProx <= bench.good ? '✅ On track' : avgProx !== null && avgProx <= bench.avg ? '⚠️ Room to improve' : '🔴 Focus area'}</span>
-          </div>
-          <div class="kpi-trend" id="trend-${club.replace(/\s/g,'-')}"></div>
-        `;
+            <div class="kpi-breakdown">
+              <div class="kpi-mini">
+                <div class="kpi-mini-value">${kpi ? kpi.avgAbsVerticalDistance.toFixed(1) : '—'}</div>
+                <div class="kpi-mini-label">↕ Avg Vertical (yds)</div>
+              </div>
+              <div class="kpi-mini">
+                <div class="kpi-mini-value">${kpi ? kpi.avgAbsHorizontalDistance.toFixed(1) : '—'}</div>
+                <div class="kpi-mini-label">↔ Avg Horizontal (yds)</div>
+              </div>
+              <div class="kpi-mini">
+                <div class="kpi-mini-value">${girPct}%</div>
+                <div class="kpi-mini-label">In-Bucket Rate</div>
+              </div>
+              <div class="kpi-mini">
+                <div class="kpi-mini-value">${inBucket.length}</div>
+                <div class="kpi-mini-label">Qualifying Shots</div>
+              </div>
+            </div>
+            <div class="kpi-bias">
+              <div class="kpi-bias-title">Miss Tendency</div>
+              <div class="kpi-bias-bar">
+                <span class="kpi-bias-label">L / R</span>
+                <div class="kpi-bias-track">
+                  <div class="kpi-bias-center"></div>
+                  <div class="kpi-bias-marker" style="left:${Math.max(5, Math.min(95, hBiasPct))}%; background:${Math.abs(avgH) > bucket*0.15 ? 'var(--accent-amber)' : 'var(--brand-green)'};"></div>
+                </div>
+              </div>
+              <div class="kpi-bias-bar">
+                <span class="kpi-bias-label">S / L</span>
+                <div class="kpi-bias-track">
+                  <div class="kpi-bias-center"></div>
+                  <div class="kpi-bias-marker" style="left:${Math.max(5, Math.min(95, vBiasPct))}%; background:${Math.abs(avgV) > bucket*0.15 ? 'var(--accent-amber)' : 'var(--brand-green)'};"></div>
+                </div>
+              </div>
+            </div>
+            <div class="kpi-footer">
+              <span>${allClubShots.length} total shots recorded</span>
+              <span>${avgProx !== null && avgProx <= bench.good ? '✅ On track' : avgProx !== null && avgProx <= bench.avg ? '⚠️ Room to improve' : '🔴 Focus area'}</span>
+            </div>
+            <div class="kpi-trend" id="trend-${club.replace(/\s/g,'-')}"></div>
+          `;
+        }
+
         grid.appendChild(card);
-        // Render trend line for this club (using ALL shots regardless of month filter for trend)
-        const trendContainer = document.getElementById('trend-' + club.replace(/\s/g,'-'));
-        renderTrendChart(trendContainer, getShots(), club);
+        // Render trend line for this club (using ALL shots regardless of month filter for trend) — only in detailed mode
+        if (kpiMode === 'detailed') {
+          const trendContainer = document.getElementById('trend-' + club.replace(/\s/g,'-'));
+          renderTrendChart(trendContainer, getShots(), club);
+        }
       });
       noData.style.display = hasData ? 'none' : 'block';
     }
