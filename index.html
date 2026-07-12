@@ -2430,6 +2430,160 @@
       return reasons.join(' ');
     }
 
+    function renderPracticeImpact() {
+      const container = document.getElementById('advice-impact');
+      if (!container) return;
+      container.innerHTML = '';
+
+      // Need at least 2 handicap entries to show impact
+      const hcpEntries = getHcpEntries().sort((a, b) => a.date.localeCompare(b.date));
+      if (hcpEntries.length < 2) {
+        container.innerHTML = '<div class="impact-no-data">📊 Log at least 2 handicap entries to see how your practice is impacting your game.</div>';
+        return;
+      }
+
+      // Use the two most recent handicap entries to define the analysis window
+      const latest = hcpEntries[hcpEntries.length - 1];
+      const previous = hcpEntries[hcpEntries.length - 2];
+      const windowStart = previous.date;
+      const windowEnd = latest.date;
+      const hcpDelta = parseFloat(latest.hcp) - parseFloat(previous.hcp);
+
+      // Get all shots within this window
+      const allShots = getShots();
+      const windowShots = allShots.filter(s => s.date && s.date >= windowStart && s.date <= windowEnd);
+
+      // Also get shots BEFORE the window for comparison (previous period of same length)
+      const daysBetween = Math.max(1, Math.round((new Date(windowEnd) - new Date(windowStart)) / (1000 * 60 * 60 * 24)));
+      const priorStart = new Date(new Date(windowStart).getTime() - daysBetween * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+      const priorShots = allShots.filter(s => s.date && s.date >= priorStart && s.date < windowStart);
+
+      if (windowShots.length < 3) {
+        container.innerHTML = '<div class="impact-no-data">📊 Not enough practice data between your last two handicap entries to analyse impact. Keep logging shots!</div>';
+        return;
+      }
+
+      // Calculate dispersion per club for both periods
+      const clubInsights = [];
+      for (const club of CLUBS) {
+        const currentClubShots = windowShots.filter(s => s.club === club);
+        const priorClubShots = priorShots.filter(s => s.club === club);
+
+        if (currentClubShots.length < 3) continue;
+
+        const currentDisp = standardDeviation(currentClubShots.map(calculateHypotenuse));
+        const currentAvgProx = currentClubShots.reduce((s, x) => s + calculateHypotenuse(x), 0) / currentClubShots.length;
+
+        let dispChange = null;
+        let priorDisp = null;
+        if (priorClubShots.length >= 3) {
+          priorDisp = standardDeviation(priorClubShots.map(calculateHypotenuse));
+          dispChange = ((currentDisp - priorDisp) / priorDisp) * 100; // negative = improved
+        }
+
+        clubInsights.push({
+          club,
+          shotCount: currentClubShots.length,
+          currentDisp,
+          priorDisp,
+          dispChange,
+          currentAvgProx
+        });
+      }
+
+      if (clubInsights.length === 0) {
+        container.innerHTML = '<div class="impact-no-data">📊 Need at least 3 shots per club within the handicap window to analyse impact.</div>';
+        return;
+      }
+
+      // Determine overall sentiment
+      const improvingClubs = clubInsights.filter(c => c.dispChange !== null && c.dispChange < -5);
+      const decliningClubs = clubInsights.filter(c => c.dispChange !== null && c.dispChange > 5);
+
+      let sentiment, icon, headerClass, title, subtitle;
+      if (hcpDelta < -0.2 && improvingClubs.length > 0) {
+        sentiment = 'positive';
+        icon = '📉';
+        headerClass = 'positive';
+        title = 'Your practice is paying off';
+        subtitle = `Handicap dropped ${Math.abs(hcpDelta).toFixed(1)} shots — here\'s what likely contributed.`;
+      } else if (hcpDelta > 0.2) {
+        sentiment = 'negative';
+        icon = '📈';
+        headerClass = 'negative';
+        title = 'Handicap trending up';
+        subtitle = decliningClubs.length > 0
+          ? `Up ${hcpDelta.toFixed(1)} shots — some clubs showed wider dispersion in this period.`
+          : `Up ${hcpDelta.toFixed(1)} shots — but your dispersion data looks stable. Could be course/conditions.`;
+      } else {
+        sentiment = 'mixed';
+        icon = '🔄';
+        headerClass = 'mixed';
+        title = improvingClubs.length > 0 ? 'Dispersion improving — handicap holding' : 'Holding steady';
+        subtitle = improvingClubs.length > 0
+          ? 'Your consistency is getting better but it hasn\'t converted to the card yet. Keep going.'
+          : `Handicap moved ${Math.abs(hcpDelta).toFixed(1)} shots — within normal variation.`;
+      }
+
+      // Format date range
+      const fmtDate = (d) => { const [y,m,dd] = d.split('-'); return new Date(y,m-1,dd).toLocaleDateString('en',{day:'numeric',month:'short'}); };
+      const periodLabel = `${fmtDate(windowStart)} — ${fmtDate(windowEnd)} (${daysBetween} days)`;
+
+      // Build club rows HTML
+      let clubRowsHtml = '';
+      // Sort: biggest improvers first
+      clubInsights.sort((a, b) => (a.dispChange || 0) - (b.dispChange || 0));
+      clubInsights.forEach(c => {
+        let badgeClass, badgeText;
+        if (c.dispChange === null) {
+          badgeClass = 'stable'; badgeText = 'New';
+        } else if (c.dispChange < -5) {
+          badgeClass = 'improved'; badgeText = `↓ ${Math.abs(c.dispChange).toFixed(0)}%`;
+        } else if (c.dispChange > 5) {
+          badgeClass = 'declined'; badgeText = `↑ ${Math.abs(c.dispChange).toFixed(0)}%`;
+        } else {
+          badgeClass = 'stable'; badgeText = '≈ Stable';
+        }
+
+        const statsText = c.dispChange !== null
+          ? `${c.shotCount} shots · Disp: ${c.currentDisp.toFixed(1)} yds (was ${c.priorDisp.toFixed(1)}) · Avg to pin: <strong>${c.currentAvgProx.toFixed(1)} yds</strong>`
+          : `${c.shotCount} shots · Disp: ${c.currentDisp.toFixed(1)} yds · Avg to pin: <strong>${c.currentAvgProx.toFixed(1)} yds</strong>`;
+
+        clubRowsHtml += `
+          <div class="impact-club-row">
+            <span class="impact-club-name">${c.club}</span>
+            <span class="impact-club-stats">${statsText}</span>
+            <span class="impact-club-badge ${badgeClass}">${badgeText}</span>
+          </div>`;
+      });
+
+      // Assemble card
+      const deltaClass = hcpDelta < -0.2 ? 'positive' : hcpDelta > 0.2 ? 'negative' : 'neutral';
+      const deltaDisplay = (hcpDelta > 0 ? '+' : '') + hcpDelta.toFixed(1);
+
+      container.innerHTML = `
+        <div class="impact-card">
+          <div class="impact-header ${headerClass}">
+            <span class="impact-icon">${icon}</span>
+            <div>
+              <div class="impact-title">${title}</div>
+              <div class="impact-subtitle">${periodLabel}</div>
+            </div>
+          </div>
+          <div class="impact-body">
+            <div class="impact-hcp-change">
+              <span class="impact-hcp-delta ${deltaClass}">${deltaDisplay}</span>
+              <span class="impact-hcp-label">handicap change this period</span>
+            </div>
+            <div class="impact-clubs">${clubRowsHtml}</div>
+            <div class="impact-disclaimer">
+              Correlation between practice and handicap is indicative, not causal. Many factors affect on-course scoring including conditions, course difficulty, and mental game.
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
     function renderAdvice() {
       const windowVal = adviceWindowSelect.value;
       const shots = filterByDays(getShots(), windowVal);
@@ -2451,8 +2605,11 @@
         clubData.push({ club, avgProx, avgV, avgH, dispersion, shotCount: inBucket.length });
       }
 
-      if (clubData.length === 0) { noData.style.display = 'block'; return; }
+      if (clubData.length === 0) { noData.style.display = 'block'; renderPracticeImpact(); return; }
       noData.style.display = 'none';
+
+      // Render practice impact correlation card
+      renderPracticeImpact();
 
       // Find best performing club (lowest avg proximity)
       const bestProx = Math.min(...clubData.map(c => c.avgProx));

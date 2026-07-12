@@ -31,6 +31,7 @@ ApproachIQ is a standalone single-file HTML web application that allows golfers 
 - **Web_App_Manifest**: A JSON file (`manifest.json`) that defines how the Tracker appears when installed on a device, including name, icons, theme colour, and display mode
 - **Handicap_Index**: A numerical measure of a golfer's playing ability, updated periodically as rounds are submitted. Lower values indicate better performance.
 - **Handicap_Tracker**: The section of the Tracker that records and charts a user's Handicap_Index entries over time
+- **Practice_Impact**: A Coach's Corner analysis that correlates changes in per-club shot dispersion with Handicap_Index movement over the same time period, identifying which clubs likely contributed to handicap improvement or decline
 
 ## Requirements
 
