@@ -86,6 +86,7 @@ ApproachIQ is a standalone single-file HTML web application that allows golfers 
 6. WHEN a user selects a Club, THE Tracker SHALL display only shots for that club on the green.
 7. THE Tracker SHALL provide a month filter to show only shots from a selected month.
 8. THE Tracker SHALL render the canvas responsively, scaling to fit the container width while maintaining a 1:1 aspect ratio at device pixel ratio for crisp rendering.
+9. WHEN the browser window is resized or the device orientation changes, THE Tracker SHALL re-render visible canvas charts to fit the new viewport dimensions.
 
 ### Requirement 5: Chart Export
 

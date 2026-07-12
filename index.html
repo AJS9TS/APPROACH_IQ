@@ -660,7 +660,8 @@
       border: 1px dashed var(--border-glass); margin-bottom: 1.5rem;
     }
 
-    .chart-container { position: relative; width: 100%; max-width: 680px; margin: 1.5rem auto; }
+    .chart-container { position: relative; width: 100%; max-width: 680px; margin: 1.5rem auto; overflow: hidden; }
+    @media (max-width: 768px) { .chart-container { max-width: 100%; } }
     .no-data { text-align: center; color: var(--text-muted); padding: 3rem; font-size: 0.95rem; }
     .filter-row { display: flex; gap: 1rem; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; }
     .filter-row select {
@@ -1484,7 +1485,7 @@
         <button class="btn btn-primary" onclick="exportChart()">📥 Export PNG</button>
       </div>
       <div class="chart-container" style="max-width:600px;">
-        <canvas id="green-canvas" style="width:100%; height:auto; aspect-ratio:1/1;"></canvas>
+        <canvas id="green-canvas"></canvas>
       </div>
       <div id="chart-no-data" class="no-data" style="display:none;">No data for this club yet. Start logging shots!</div>
     </div>
@@ -2091,6 +2092,16 @@
     chartMonthInput.addEventListener('change', renderChart);
     chartMonthInput.addEventListener('input', renderChart);
 
+    // Re-render charts on window resize (phone rotation, browser resize)
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        if (document.getElementById('view-charts').classList.contains('active')) renderChart();
+        if (document.getElementById('view-entry').classList.contains('active') && entryMode === 'click') renderEntryGreen();
+      }, 200);
+    });
+
     function renderChart() {
       const club = chartClubSelect.value;
       const monthVal = chartMonthInput.value;
@@ -2106,9 +2117,12 @@
       // Responsive canvas sizing
       const rect = canvas.parentElement.getBoundingClientRect();
       const size = Math.min(rect.width, 600);
-      canvas.width = size * window.devicePixelRatio;
-      canvas.height = size * window.devicePixelRatio;
-      ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = size * dpr;
+      canvas.height = size * dpr;
+      canvas.style.width = size + 'px';
+      canvas.style.height = size + 'px';
+      ctx.scale(dpr, dpr);
 
       const W = size, H = size;
       const cx = W / 2, cy = H / 2;
