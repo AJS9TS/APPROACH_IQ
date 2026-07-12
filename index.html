@@ -1422,14 +1422,6 @@
             <span class="coord-dist" id="coord-dist" style="opacity:0.4;">— yds to pin</span>
           </div>
           <p class="coord-hint" id="coord-hint">Tap the green to place your ball · Pin is at centre</p>
-
-          <!-- Distance into green still needed in click mode -->
-          <div class="form-grid" style="margin-top:1rem;">
-            <div class="form-group full-width">
-              <label for="distanceIntoGreen-click">Distance of Shot into Green (yds)</label>
-              <input type="number" id="distanceIntoGreen-click" step="0.1" min="0" placeholder="e.g. 120" />
-            </div>
-          </div>
         </div>
 
         <!-- MANUAL ENTRY PANEL -->
@@ -1443,10 +1435,6 @@
               <label for="horizontalDistance">Horizontal to Pin (yds) +right / -left</label>
               <input type="number" id="horizontalDistance" step="0.1" placeholder="e.g. -4 or 5" />
             </div>
-            <div class="form-group full-width">
-              <label for="distanceIntoGreen">Distance of Shot into Green (yds)</label>
-              <input type="number" id="distanceIntoGreen" step="0.1" min="0" placeholder="e.g. 120" />
-            </div>
           </div>
         </div>
 
@@ -1459,7 +1447,7 @@
           <button type="button" class="btn btn-danger" onclick="clearAllData()">Clear All</button>
           <input type="file" id="csv-file-input" accept=".csv" style="display:none;" onchange="handleCSVImport(event)" />
         </div>
-        <div class="csv-hint">CSV format: <code>Club, Vertical Distance, Horizontal Distance, Distance Into Green, Date (YYYY-MM-DD)</code></div>
+        <div class="csv-hint">CSV format: <code>Club, Vertical Distance, Horizontal Distance, Date (YYYY-MM-DD)</code></div>
       </form>
     </div>
   </section>
@@ -1672,14 +1660,14 @@
       if (!data.club || !CLUBS.includes(data.club)) errors.push('club');
       if (data.verticalDistance === '' || data.verticalDistance === undefined || isNaN(Number(data.verticalDistance))) errors.push('verticalDistance');
       if (data.horizontalDistance === '' || data.horizontalDistance === undefined || isNaN(Number(data.horizontalDistance))) errors.push('horizontalDistance');
-      if (data.distanceIntoGreen === '' || data.distanceIntoGreen === undefined || isNaN(Number(data.distanceIntoGreen)) || Number(data.distanceIntoGreen) < 0) errors.push('distanceIntoGreen');
       if (!data.date || !/^\d{4}-\d{2}-\d{2}$/.test(data.date)) errors.push('date');
       return { valid: errors.length === 0, errors };
     }
 
     // ===== KPI CALCULATIONS =====
     function filterShotsByBucket(shots, club) {
-      return shots.filter(s => s.club === club && s.distanceIntoGreen <= DISTANCE_BUCKETS[club]);
+      // Include shots where the result proximity (hypotenuse to pin) is within the bucket threshold
+      return shots.filter(s => s.club === club && calculateHypotenuse(s) <= DISTANCE_BUCKETS[club]);
     }
     function calculateHypotenuse(shot) {
       return Math.sqrt(shot.verticalDistance ** 2 + shot.horizontalDistance ** 2);
@@ -2031,7 +2019,6 @@
           club: document.getElementById('club').value,
           verticalDistance: String(clickedCoords.verticalDistance),
           horizontalDistance: String(clickedCoords.horizontalDistance),
-          distanceIntoGreen: document.getElementById('distanceIntoGreen-click').value,
           date: document.getElementById('shotDate').value
         };
       } else {
@@ -2039,7 +2026,6 @@
           club: document.getElementById('club').value,
           verticalDistance: document.getElementById('verticalDistance').value,
           horizontalDistance: document.getElementById('horizontalDistance').value,
-          distanceIntoGreen: document.getElementById('distanceIntoGreen').value,
           date: document.getElementById('shotDate').value
         };
       }
@@ -2051,7 +2037,6 @@
         club: data.club,
         verticalDistance: Number(data.verticalDistance),
         horizontalDistance: Number(data.horizontalDistance),
-        distanceIntoGreen: Number(data.distanceIntoGreen),
         date: data.date
       });
       succEl.textContent = '✅ Shot saved!';
@@ -2068,12 +2053,10 @@
         resetCoordReadout();
         document.getElementById('coord-readout').classList.remove('has-click');
         document.getElementById('coord-hint').textContent = 'Tap the green to place your ball · Pin is at centre';
-        document.getElementById('distanceIntoGreen-click').value = '';
         renderEntryGreen();
       } else {
         document.getElementById('verticalDistance').value = '';
         document.getElementById('horizontalDistance').value = '';
-        document.getElementById('distanceIntoGreen').value = '';
       }
       setTimeout(() => { succEl.textContent = ''; }, 2500);
     });
@@ -2899,11 +2882,11 @@
         let imported = 0, errors = [];
         for (let i = startIdx; i < lines.length; i++) {
           const cols = lines[i].split(',').map(c => c.trim());
-          if (cols.length < 5) { errors.push(`Row ${i+1}: not enough columns`); continue; }
-          const [club, v, h, d, date] = cols;
-          const val = validateShotInput({ club, verticalDistance: v, horizontalDistance: h, distanceIntoGreen: d, date });
+          if (cols.length < 4) { errors.push(`Row ${i+1}: not enough columns`); continue; }
+          const [club, v, h, date] = cols;
+          const val = validateShotInput({ club, verticalDistance: v, horizontalDistance: h, date });
           if (!val.valid) { errors.push(`Row ${i+1}: ${val.errors.join(', ')}`); continue; }
-          addShot({ club, verticalDistance: Number(v), horizontalDistance: Number(h), distanceIntoGreen: Number(d), date });
+          addShot({ club, verticalDistance: Number(v), horizontalDistance: Number(h), date });
           imported++;
         }
         let msg = `✅ Imported ${imported} shot${imported !== 1 ? 's' : ''}.`;

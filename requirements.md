@@ -19,7 +19,7 @@ ApproachIQ is a standalone single-file HTML web application that allows golfers 
 - **Coordinate_Readout**: A live display beneath the Entry_Green_Canvas showing the current Vertical_Distance, Horizontal_Distance, and Hypotenuse_Distance values corresponding to the cursor position (hover) or placed marker (click)
 - **Entry_Mode**: The active method for inputting shot position data — either Manual Entry (typed numeric inputs) or Click to Place (canvas tap)
 - **Dispersion**: The standard deviation of Hypotenuse_Distance values for a set of shots, representing grouping consistency
-- **Distance_Bucket**: A range threshold specific to each Club used to categorize shots by Distance_Into_Green for KPI calculation
+- **Distance_Bucket**: A proximity threshold specific to each Club representing the maximum acceptable result distance (Hypotenuse_Distance) from the pin. Shots finishing within this threshold are considered "in bucket" and qualify for detailed KPI analysis.
 - **KPI**: Key Performance Indicator — a computed metric summarizing shot accuracy for a Club within a Distance_Bucket
 - **Benchmark**: Reference proximity values for Pro, Good Amateur, and Average Amateur levels per club
 - **Toast**: A non-blocking slide-in notification that auto-dismisses after a set duration
@@ -41,7 +41,7 @@ ApproachIQ is a standalone single-file HTML web application that allows golfers 
 
 #### Acceptance Criteria
 
-1. THE Tracker SHALL provide a form to input a Shot with the following fields: Club, Vertical_Distance (yards), Horizontal_Distance (yards), Distance_Into_Green (yards), and date.
+1. THE Tracker SHALL provide a form to input a Shot with the following fields: Club, Vertical_Distance (yards), Horizontal_Distance (yards), and date.
 2. THE Tracker SHALL support the following Club values: Wedge, 9 Iron, 8 Iron, 7 Iron, 6 Iron, 5 Iron, 3 Wood, and Driver.
 3. WHEN a user submits a valid Shot form, THE Tracker SHALL persist the Shot data to localStorage.
 4. WHEN a user submits a Shot form with missing required fields, THE Tracker SHALL display a validation error message identifying the missing fields.
@@ -66,7 +66,7 @@ ApproachIQ is a standalone single-file HTML web application that allows golfers 
 #### Acceptance Criteria
 
 1. THE Tracker SHALL provide an "Import CSV" button that opens the browser file picker filtered to .csv files.
-2. THE Tracker SHALL parse CSV files with columns in the order: Club, Vertical_Distance, Horizontal_Distance, Distance_Into_Green, Date (YYYY-MM-DD).
+2. THE Tracker SHALL parse CSV files with columns in the order: Club, Vertical_Distance, Horizontal_Distance, Date (YYYY-MM-DD).
 3. THE Tracker SHALL auto-detect and skip a header row if it contains column name keywords (club, vertical, date).
 4. THE Tracker SHALL validate each row individually and import only valid rows.
 5. WHEN rows contain invalid data, THE Tracker SHALL skip those rows and report the count of skipped rows with error details.
@@ -108,10 +108,10 @@ ApproachIQ is a standalone single-file HTML web application that allows golfers 
 
 1. THE Tracker SHALL display a large KPI card for each Club that has recorded Shot data.
 2. THE Tracker SHALL calculate and display: average absolute Vertical_Distance, average absolute Horizontal_Distance, and average Hypotenuse_Distance per Club within the Distance_Bucket.
-3. THE Tracker SHALL apply the following Distance_Bucket thresholds: Wedge 10 yds, 9 Iron 13 yds, 8 Iron 15 yds, 7 Iron 25 yds, 6 Iron 30 yds, 5 Iron 30 yds, 3 Wood 50 yds, Driver 55 yds.
+3. THE Tracker SHALL apply the following Distance_Bucket thresholds based on result proximity (Hypotenuse_Distance to pin): Wedge 10 yds, 9 Iron 13 yds, 8 Iron 15 yds, 7 Iron 25 yds, 6 Iron 30 yds, 5 Iron 30 yds, 3 Wood 50 yds, Driver 55 yds. A shot qualifies for KPI calculation when its Hypotenuse_Distance is within the club's bucket threshold.
 4. THE Tracker SHALL display a performance score ring (0-100%) comparing the user's average proximity to benchmark values (Pro, Good Amateur, Average Amateur).
 5. THE Tracker SHALL display benchmark reference values (Pro, Good, Average) for each club.
-6. THE Tracker SHALL display an In-Bucket Rate percentage (shots within bucket / total shots for that club).
+6. THE Tracker SHALL display an In-Bucket Rate percentage representing the proportion of shots for that club that finished within the Distance_Bucket threshold of the pin (Hypotenuse_Distance ≤ bucket).
 7. THE Tracker SHALL display a Miss Tendency bias indicator showing average directional miss (left/right, short/long) on a visual track.
 8. THE Tracker SHALL display a status indicator per club: "On track" (≤ good benchmark), "Room to improve" (≤ average benchmark), or "Focus area" (above average).
 9. WHEN a Club has no Shot data within the Distance_Bucket, THE Tracker SHALL display a message indicating insufficient data.
