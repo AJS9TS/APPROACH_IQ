@@ -590,6 +590,76 @@
       letter-spacing: 0.5px; color: var(--text-muted); margin: 1.5rem 0 0.8rem;
     }
 
+    /* ===== PRACTICE IMPACT CARD ===== */
+    .impact-card {
+      margin-bottom: 2rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-glass);
+      overflow: hidden;
+      animation: fadeInUp 0.4s ease backwards;
+    }
+    .impact-header {
+      padding: 1rem 1.3rem;
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+    }
+    .impact-header.positive { background: rgba(16,185,129,0.08); border-bottom: 1px solid rgba(16,185,129,0.15); }
+    .impact-header.mixed    { background: rgba(245,158,11,0.08); border-bottom: 1px solid rgba(245,158,11,0.15); }
+    .impact-header.negative { background: rgba(244,63,94,0.08);  border-bottom: 1px solid rgba(244,63,94,0.15); }
+    .impact-icon { font-size: 1.6rem; flex-shrink: 0; }
+    .impact-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1rem; font-weight: 700; color: var(--text-primary);
+    }
+    .impact-subtitle { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.15rem; }
+    .impact-body { padding: 1.2rem 1.3rem; background: var(--bg-card); }
+    .impact-hcp-change {
+      display: flex; align-items: baseline; gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    .impact-hcp-delta {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 2rem; font-weight: 800; line-height: 1;
+    }
+    .impact-hcp-delta.positive { color: var(--brand-emerald); }
+    .impact-hcp-delta.negative { color: var(--accent-red); }
+    .impact-hcp-delta.neutral  { color: var(--accent-amber); }
+    .impact-hcp-label { font-size: 0.78rem; color: var(--text-muted); }
+    .impact-clubs {
+      display: flex; flex-direction: column; gap: 0.6rem; margin-top: 0.8rem;
+    }
+    .impact-club-row {
+      display: flex; align-items: center; gap: 0.8rem;
+      padding: 0.6rem 0.8rem;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border-glass);
+      border-radius: var(--radius-xs);
+    }
+    .impact-club-name {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700; font-size: 0.9rem; color: var(--text-primary);
+      min-width: 80px;
+    }
+    .impact-club-stats { flex: 1; font-size: 0.75rem; color: var(--text-muted); line-height: 1.5; }
+    .impact-club-stats strong { color: var(--text-secondary); }
+    .impact-club-badge {
+      font-size: 0.65rem; font-weight: 700; padding: 0.2rem 0.5rem;
+      border-radius: 5px; text-transform: uppercase; letter-spacing: 0.4px; flex-shrink: 0;
+    }
+    .impact-club-badge.improved { background: rgba(16,185,129,0.12); color: var(--brand-emerald); border: 1px solid rgba(16,185,129,0.2); }
+    .impact-club-badge.declined { background: rgba(244,63,94,0.12); color: var(--accent-red); border: 1px solid rgba(244,63,94,0.2); }
+    .impact-club-badge.stable   { background: rgba(245,158,11,0.12); color: var(--accent-amber); border: 1px solid rgba(245,158,11,0.2); }
+    .impact-disclaimer {
+      margin-top: 1rem; font-size: 0.7rem; color: var(--text-muted);
+      font-style: italic; padding-top: 0.8rem; border-top: 1px solid var(--border-glass);
+    }
+    .impact-no-data {
+      padding: 1rem 1.3rem; font-size: 0.82rem; color: var(--text-muted);
+      background: rgba(255,255,255,0.01); border-radius: var(--radius-sm);
+      border: 1px dashed var(--border-glass); margin-bottom: 1.5rem;
+    }
+
     .chart-container { position: relative; width: 100%; max-width: 680px; margin: 1.5rem auto; }
     .no-data { text-align: center; color: var(--text-muted); padding: 3rem; font-size: 0.95rem; }
     .filter-row { display: flex; gap: 1rem; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; }
@@ -1455,6 +1525,8 @@
           <option value="">All Time</option>
         </select>
       </div>
+      <!-- Practice Impact section — injected here when data is available -->
+      <div id="advice-impact"></div>
       <div id="advice-recommendations"></div>
       <div id="advice-full-ranking"></div>
       <div id="advice-no-data" class="no-data" style="display:none;">
