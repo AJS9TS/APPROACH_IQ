@@ -34,7 +34,8 @@ ApproachIQ is a standalone single-file HTML web application that allows golfers 
 - **Practice_Impact**: A Coach's Corner analysis that correlates changes in per-club shot dispersion with Handicap_Index movement over the same time period, identifying which clubs likely contributed to handicap improvement or decline
 - **Course_Plot**: A dedicated tab for on-course shot logging using real green shapes fetched from OpenStreetMap, allowing users to place pin position and ball landing on the actual green outline for each hole
 - **OSM**: OpenStreetMap — a free, open-source, community-built map database. The Tracker queries OSM via the Overpass API to retrieve golf green polygon data tagged with `golf=green`.
-- **Overpass_API**: A read-only query API for OpenStreetMap data, used by the Tracker to search for golf courses and fetch green polygon coordinates
+- **Overpass_API**: A read-only query API for OpenStreetMap data, used by the Tracker to fetch green polygon coordinates for a selected course
+- **Nominatim**: OpenStreetMap's geocoding API used for fast name-based search of golf courses. Returns coordinates that are then used to query Overpass for green polygon data.
 - **Green_Polygon**: A set of lat/lon coordinates defining the outline shape of a putting green, sourced from OSM and rendered on canvas as the actual green shape
 
 ## Requirements
@@ -327,13 +328,13 @@ ApproachIQ is a standalone single-file HTML web application that allows golfers 
 #### Acceptance Criteria
 
 1. THE Tracker SHALL provide a "🗺️ Course Plot" tab accessible from both the desktop tab bar and the mobile bottom navigation bar.
-2. THE Course Plot tab SHALL display a search bar allowing the user to search for golf courses by name via the Overpass_API.
-3. WHEN the user types 3 or more characters, THE Tracker SHALL query OSM for golf courses matching the search term (debounced by 500ms) and display up to 10 results in a dropdown.
-4. WHEN the user selects a course from the search results, THE Tracker SHALL fetch all Green_Polygon data (tagged `golf=green`) within a 3 km radius of the course centre via the Overpass_API.
+2. THE Course Plot tab SHALL display a search bar allowing the user to search for golf courses by name via the Nominatim geocoding API (appending "golf" to the query for relevance).
+3. WHEN the user types 3 or more characters, THE Tracker SHALL query Nominatim for locations matching the search term (debounced by 500ms) and display up to 10 results in a dropdown, each showing the name and approximate location.
+4. WHEN the user selects a course from the search results, THE Tracker SHALL fetch all Green_Polygon data (tagged `golf=green`) and tee box data (tagged `golf=tee`) within a 1.5 km radius of the course centre via the Overpass_API. IF greens have `ref` tags (hole numbers) in the range 1-18, THE Tracker SHALL filter to only those greens, discarding greens from neighbouring courses.
 5. THE Tracker SHALL cache fetched course data (green polygons, course name, coordinates) in localStorage for offline use on future visits.
 6. IF cached data exists for a selected course, THE Tracker SHALL load from cache without making a network request.
 7. WHEN course data is loaded, THE Tracker SHALL display the round UI showing: course name, current hole indicator with prev/next navigation, club selection grid, green canvas, and status bar.
-8. THE green canvas SHALL render the actual Green_Polygon shape for the current hole, with a darker fringe area surrounding it and a scale indicator showing yard distance.
+8. THE green canvas SHALL render the actual Green_Polygon shape for the current hole, with a darker fringe area surrounding it and a scale indicator showing yard distance. THE Tracker SHALL orient each green so the approach direction (tee-to-green) is from bottom to top. WHEN tee box data is available for a hole, THE Tracker SHALL use the tee-to-green bearing for rotation; otherwise it SHALL fall back to rotating the green's longest axis to vertical.
 9. THE round progression SHALL follow a 3-step flow per hole: (1) select club, (2) tap pin position on the green, (3) tap ball landing position (on or off the green area).
 10. AFTER the ball position is tapped, THE Tracker SHALL auto-save the shot (calculating Vertical_Distance and Horizontal_Distance as the difference between ball and pin positions in yards) and auto-advance to the next hole after a brief delay.
 11. THE Tracker SHALL display a flash confirmation after each saved shot showing the club used and distance from pin.

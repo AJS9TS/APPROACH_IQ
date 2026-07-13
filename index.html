@@ -4205,14 +4205,10 @@
       cpSearchResults.classList.add('active');
 
       try {
-        // Sanitise query for Overpass regex — escape special regex chars
-        const sanitised = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-
-        // Search for golf courses by name using Overpass
-        const overpassQuery = `[out:json][timeout:15];(way["leisure"="golf_course"]["name"~"${sanitised}",i];relation["leisure"="golf_course"]["name"~"${sanitised}",i];nwr["golf"="course"]["name"~"${sanitised}",i];);out center tags;`;
-        const resp = await fetch('https://overpass-api.de/api/interpreter', {
-          method: 'POST',
-          body: 'data=' + encodeURIComponent(overpassQuery)
+        // Use Nominatim (OSM's geocoder) for fast name-based search
+        const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query + ' golf')}&format=json&limit=10&addressdetails=1`;
+        const resp = await fetch(url, {
+          headers: { 'Accept': 'application/json' }
         });
 
         if (!resp.ok) {
@@ -4222,7 +4218,7 @@
 
         const data = await resp.json();
 
-        if (!data.elements || data.elements.length === 0) {
+        if (!data || data.length === 0) {
           cpSearchResults.innerHTML = '<div class="cp-search-loading">No courses found. Try a different name.</div>';
           return;
         }
@@ -4230,22 +4226,23 @@
         // Render results
         cpSearchResults.innerHTML = '';
         const seen = new Set();
-        data.elements.slice(0, 10).forEach(el => {
-          const name = el.tags && el.tags.name;
+        data.forEach(el => {
+          const name = el.display_name ? el.display_name.split(',')[0] : el.name;
           if (!name || seen.has(name)) return;
           seen.add(name);
-          const lat = el.center ? el.center.lat : (el.lat || 0);
-          const lon = el.center ? el.center.lon : (el.lon || 0);
-          if (lat === 0 && lon === 0) return; // skip entries without coordinates
+          const lat = parseFloat(el.lat);
+          const lon = parseFloat(el.lon);
+          if (isNaN(lat) || isNaN(lon)) return;
           const div = document.createElement('div');
           div.className = 'cp-search-result';
-          div.innerHTML = `<span class="cp-result-name">${name}</span>`;
+          const location = el.display_name ? el.display_name.split(',').slice(1, 3).join(',').trim() : '';
+          div.innerHTML = `<span class="cp-result-name">${name}</span>${location ? '<br><small style="color:var(--text-muted);font-size:0.72rem;">' + location + '</small>' : ''}`;
           div.addEventListener('click', () => cpSelectCourse(name, lat, lon));
           cpSearchResults.appendChild(div);
         });
 
         if (cpSearchResults.children.length === 0) {
-          cpSearchResults.innerHTML = '<div class="cp-search-loading">No courses found.</div>';
+          cpSearchResults.innerHTML = '<div class="cp-search-loading">No courses found. Try adding your city/region.</div>';
         }
       } catch(e) {
         cpSearchResults.innerHTML = '<div class="cp-search-loading">Search failed. Check your connection.</div>';
@@ -4269,13 +4266,9 @@
       // Fetch greens for this course
       showToast('🗺️ Fetching green data for ' + name + '...', 'info', 5000);
       try {
-        const overpassQuery = `
-          [out:json][timeout:25];
-          (
-            way["golf"="green"](around:3000,${lat},${lon});
-          );
-          out geom;
-        `;
+        // Use 1.5km radius to capture all holes
+        // Fetch greens and hole ways (lines from tee to green with hole numbers)
+        const overpassQuery = `[out:json][timeout:25];(way["golf"="green"](around:1500,${lat},${lon});way["golf"="hole"](around:1500,${lat},${lon}););out geom tags;`;
         const resp = await fetch('https://overpass-api.de/api/interpreter', {
           method: 'POST',
           body: 'data=' + encodeURIComponent(overpassQuery)
@@ -4287,23 +4280,109 @@
           return;
         }
 
-        // Extract polygon data — sort by position (roughly south to north, or by ref tag)
-        const greens = data.elements
-          .filter(el => el.geometry && el.geometry.length > 2)
-          .map(el => ({
-            ref: el.tags && el.tags.ref ? parseInt(el.tags.ref) : null,
-            polygon: el.geometry.map(p => ({ lat: p.lat, lon: p.lon })),
-            centroidLat: el.geometry.reduce((s, p) => s + p.lat, 0) / el.geometry.length,
-            centroidLon: el.geometry.reduce((s, p) => s + p.lon, 0) / el.geometry.length
-          }));
+        // Separate greens and hole ways (lines from tee to green)
+        const greenElements = data.elements.filter(el => el.tags && el.tags.golf === 'green' && el.geometry && el.geometry.length > 2);
+        const holeWays = data.elements.filter(el => el.tags && el.tags.golf === 'hole' && el.geometry && el.geometry.length >= 2);
 
-        // Sort: prefer ref tag if available, otherwise sort by latitude (south to north as rough hole order)
+        console.log('Raw greens:', greenElements.length, '| Hole ways:', holeWays.length);
+
+        // Build hole data: ref, tee position (first point), green-end position (last point)
+        // Also store approach direction (last segment of hole way = direction into the green)
+        const holeData = [];
+        holeWays.forEach(el => {
+          if (!el.tags || !el.tags.ref) return;
+          const num = parseInt(el.tags.ref.replace(/\D/g, ''));
+          if (isNaN(num) || num < 1 || num > 18) return;
+          const geom = el.geometry;
+          const teePoint = geom[0]; // first point = tee
+          const greenPoint = geom[geom.length - 1]; // last point = at green
+          // Approach direction: second-to-last → last point (the direction arriving at the green)
+          const approachFrom = geom.length >= 2 ? geom[geom.length - 2] : geom[0];
+          holeData.push({
+            ref: num,
+            tee: { lat: teePoint.lat, lon: teePoint.lon },
+            greenEnd: { lat: greenPoint.lat, lon: greenPoint.lon },
+            approachFrom: { lat: approachFrom.lat, lon: approachFrom.lon }
+          });
+        });
+
+        console.log('Hole ways with valid refs:', holeData.length);
+
+        // Match greens to holes by proximity of green centroid to hole way endpoint
+        // Build tee lookup from matched holes (includes approach direction)
+        const teeLookup = {};
+        holeData.forEach(h => { teeLookup[h.ref] = { lat: h.approachFrom.lat, lon: h.approachFrom.lon }; });
+
+        // Extract polygon data
+        let greens = greenElements
+          .map(el => {
+            // Parse ref tag on green itself (rare but possible)
+            let ref = null;
+            if (el.tags && el.tags.ref) {
+              const num = parseInt(el.tags.ref.replace(/\D/g, ''));
+              if (!isNaN(num)) ref = num;
+            }
+            const polygon = el.geometry.map(p => ({ lat: p.lat, lon: p.lon }));
+            const centroidLat = polygon.reduce((s, p) => s + p.lat, 0) / polygon.length;
+            const centroidLon = polygon.reduce((s, p) => s + p.lon, 0) / polygon.length;
+
+            // Match to nearest hole way endpoint if no ref tag
+            if (ref === null && holeData.length > 0) {
+              let minDist = Infinity;
+              holeData.forEach(h => {
+                const dLat = h.greenEnd.lat - centroidLat;
+                const dLon = h.greenEnd.lon - centroidLon;
+                const dist = dLat * dLat + dLon * dLon;
+                if (dist < minDist) {
+                  minDist = dist;
+                  ref = h.ref;
+                }
+              });
+              // Only accept match if within ~80 yards (roughly 0.0007 degrees)
+              if (minDist > 0.0007 * 0.0007) ref = null;
+            }
+
+            return {
+              ref,
+              name: el.tags && el.tags.name ? el.tags.name : null,
+              polygon,
+              centroidLat,
+              centroidLon,
+              tee: ref !== null ? (teeLookup[ref] || null) : null
+            };
+          });
+
+        // Filter: if we have ref-tagged greens, keep only those in range 1-18
+        // Deduplicate: if multiple greens match the same hole, keep the closest to the hole endpoint
+        const refTagged = greens.filter(g => g.ref !== null && g.ref >= 1 && g.ref <= 18);
+        if (refTagged.length >= 9) {
+          // Group by ref and pick the best match per hole
+          const byRef = {};
+          refTagged.forEach(g => {
+            if (!byRef[g.ref]) { byRef[g.ref] = g; return; }
+            // Keep the one closest to the hole way green-end point
+            const holeInfo = holeData.find(h => h.ref === g.ref);
+            if (holeInfo) {
+              const existDist = Math.pow(byRef[g.ref].centroidLat - holeInfo.greenEnd.lat, 2) + Math.pow(byRef[g.ref].centroidLon - holeInfo.greenEnd.lon, 2);
+              const newDist = Math.pow(g.centroidLat - holeInfo.greenEnd.lat, 2) + Math.pow(g.centroidLon - holeInfo.greenEnd.lon, 2);
+              if (newDist < existDist) byRef[g.ref] = g;
+            }
+          });
+          greens = Object.values(byRef);
+        }
+
+        // Sort: prefer ref tag if available, otherwise sort by latitude
         greens.sort((a, b) => {
           if (a.ref !== null && b.ref !== null) return a.ref - b.ref;
           if (a.ref !== null) return -1;
           if (b.ref !== null) return 1;
           return a.centroidLat - b.centroidLat;
         });
+
+        console.log('Course Plot: fetched', greens.length, 'greens for', name);
+        console.log('Greens with ref tags:', greens.filter(g => g.ref !== null).length);
+        console.log('Tees found:', Object.keys(teeLookup).length);
+        greens.forEach((g, i) => console.log('  Green', i+1, '→ ref:', g.ref, '| tee:', g.tee ? 'yes' : 'no', '| points:', g.polygon.length));
 
         const courseData = { name, greens, lat, lon, fetchedAt: new Date().toISOString() };
         saveCourseToCache(cacheKey, courseData);
@@ -4448,12 +4527,50 @@
       const ydsPerMeter = 1.09361;
 
       // Convert to yards relative to centroid
-      const points = polygon.map(p => ({
+      let points = polygon.map(p => ({
         x: (p.lon - centLon) * mPerDegLon * ydsPerMeter,
         y: (p.lat - centLat) * mPerDegLat * ydsPerMeter
       }));
 
-      // Find bounding box
+      // Determine rotation angle
+      let rotateBy = 0;
+
+      if (greenData.tee) {
+        // greenData.tee is the "approach from" point (second-to-last point of hole way)
+        // Vector from that point to green centroid = approach direction
+        const approachX = (greenData.tee.lon - centLon) * mPerDegLon * ydsPerMeter;
+        const approachY = (greenData.tee.lat - centLat) * mPerDegLat * ydsPerMeter;
+        // approachX, approachY points FROM the green centroid TO the approach-from point
+        // The approach direction INTO the green is the opposite: (-approachX, -approachY)
+        // We want this "into the green" direction to point UP (+Y in our system)
+        const approachAngle = Math.atan2(-approachY, -approachX); // angle of approach direction
+        // Rotate so approach direction aligns with +Y (up) = PI/2
+        rotateBy = (Math.PI / 2) - approachAngle;
+      } else {
+        // Fallback: rotate so longest axis is vertical
+        let maxDist = 0;
+        let angle = 0;
+        for (let i = 0; i < points.length; i++) {
+          for (let j = i + 1; j < points.length; j++) {
+            const dx = points[j].x - points[i].x;
+            const dy = points[j].y - points[i].y;
+            const dist = dx * dx + dy * dy;
+            if (dist > maxDist) {
+              maxDist = dist;
+              angle = Math.atan2(dy, dx);
+            }
+          }
+        }
+        rotateBy = (Math.PI / 2) - angle;
+      }
+
+      // Apply rotation
+      points = points.map(p => ({
+        x: p.x * Math.cos(rotateBy) - p.y * Math.sin(rotateBy),
+        y: p.x * Math.sin(rotateBy) + p.y * Math.cos(rotateBy)
+      }));
+
+      // Find bounding box after rotation
       let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
       points.forEach(p => {
         if (p.x < minX) minX = p.x;
@@ -4465,7 +4582,7 @@
       const width = maxX - minX;
       const height = maxY - minY;
 
-      return { points, centLat, centLon, minX, maxX, minY, maxY, width, height };
+      return { points, centLat, centLon, minX, maxX, minY, maxY, width, height, rotateBy };
     }
 
     function cpRenderGreen() {
