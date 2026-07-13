@@ -1546,6 +1546,25 @@
       font-weight: 800;
       color: var(--brand-emerald);
     }
+    .cp-hole-meta {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin-bottom: 0.8rem;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+    }
+    .cp-meta-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.2rem 0.6rem;
+      background: var(--bg-secondary);
+      border-radius: 10px;
+      border: 1px solid var(--border-glass);
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 600;
+    }
     .cp-hole-nav-btn {
       width: 32px; height: 32px;
       border-radius: 50%;
@@ -1966,6 +1985,13 @@
           <button class="cp-hole-nav-btn" onclick="cpPrevHole()">‹</button>
           <span class="cp-hole-num" id="cp-hole-num">Hole 1</span>
           <button class="cp-hole-nav-btn" onclick="cpNextHole()">›</button>
+        </div>
+
+        <!-- Hole metadata (par, SI, distance) -->
+        <div class="cp-hole-meta" id="cp-hole-meta" style="display:none;">
+          <span class="cp-meta-item" id="cp-meta-par"></span>
+          <span class="cp-meta-item" id="cp-meta-si"></span>
+          <span class="cp-meta-item" id="cp-meta-dist"></span>
         </div>
 
         <!-- Instruction -->
@@ -4288,6 +4314,7 @@
 
         // Build hole data: ref, tee position (first point), green-end position (last point)
         // Also store approach direction (last segment of hole way = direction into the green)
+        // Plus par, handicap (stroke index), and full geometry for distance calculation
         const holeData = [];
         holeWays.forEach(el => {
           if (!el.tags || !el.tags.ref) return;
@@ -4298,8 +4325,22 @@
           const greenPoint = geom[geom.length - 1]; // last point = at green
           // Approach direction: second-to-last → last point (the direction arriving at the green)
           const approachFrom = geom.length >= 2 ? geom[geom.length - 2] : geom[0];
+          // Calculate total hole distance (sum of segments in yards)
+          let distanceYards = 0;
+          for (let i = 1; i < geom.length; i++) {
+            const lat1 = geom[i-1].lat, lon1 = geom[i-1].lon;
+            const lat2 = geom[i].lat, lon2 = geom[i].lon;
+            const midLat = (lat1 + lat2) / 2 * Math.PI / 180;
+            const dx = (lon2 - lon1) * Math.cos(midLat);
+            const dy = lat2 - lat1;
+            const segMetres = Math.sqrt(dx * dx + dy * dy) * 111320;
+            distanceYards += segMetres * 1.09361;
+          }
           holeData.push({
             ref: num,
+            par: el.tags.par ? parseInt(el.tags.par) : null,
+            handicap: el.tags.handicap ? parseInt(el.tags.handicap) : null,
+            distanceYards: Math.round(distanceYards),
             tee: { lat: teePoint.lat, lon: teePoint.lon },
             greenEnd: { lat: greenPoint.lat, lon: greenPoint.lon },
             approachFrom: { lat: approachFrom.lat, lon: approachFrom.lon }
@@ -4309,9 +4350,13 @@
         console.log('Hole ways with valid refs:', holeData.length);
 
         // Match greens to holes by proximity of green centroid to hole way endpoint
-        // Build tee lookup from matched holes (includes approach direction)
+        // Build tee lookup from matched holes (includes approach direction and metadata)
         const teeLookup = {};
-        holeData.forEach(h => { teeLookup[h.ref] = { lat: h.approachFrom.lat, lon: h.approachFrom.lon }; });
+        const holeMeta = {};
+        holeData.forEach(h => {
+          teeLookup[h.ref] = { lat: h.approachFrom.lat, lon: h.approachFrom.lon };
+          holeMeta[h.ref] = { par: h.par, handicap: h.handicap, distanceYards: h.distanceYards };
+        });
 
         // Extract polygon data
         let greens = greenElements
@@ -4348,7 +4393,10 @@
               polygon,
               centroidLat,
               centroidLon,
-              tee: ref !== null ? (teeLookup[ref] || null) : null
+              tee: ref !== null ? (teeLookup[ref] || null) : null,
+              par: ref !== null && holeMeta[ref] ? holeMeta[ref].par : null,
+              handicap: ref !== null && holeMeta[ref] ? holeMeta[ref].handicap : null,
+              distanceYards: ref !== null && holeMeta[ref] ? holeMeta[ref].distanceYards : null
             };
           });
 
@@ -4427,6 +4475,23 @@
       const holeNum = cpState.currentHole + 1;
       document.getElementById('cp-hole-num').textContent = 'Hole ' + holeNum;
       document.getElementById('cp-hole-of').textContent = holeNum;
+
+      // Update hole metadata (par, SI, distance)
+      const greenData = cpState.course ? cpState.course.greens[cpState.currentHole] : null;
+      const metaEl = document.getElementById('cp-hole-meta');
+      if (greenData && (greenData.par || greenData.handicap || greenData.distanceYards)) {
+        metaEl.style.display = 'flex';
+        document.getElementById('cp-meta-par').textContent = greenData.par ? 'Par ' + greenData.par : '';
+        document.getElementById('cp-meta-si').textContent = greenData.handicap ? 'SI ' + greenData.handicap : '';
+        document.getElementById('cp-meta-dist').textContent = greenData.distanceYards ? greenData.distanceYards + ' yds' : '';
+        // Hide empty items
+        document.getElementById('cp-meta-par').style.display = greenData.par ? 'inline-flex' : 'none';
+        document.getElementById('cp-meta-si').style.display = greenData.handicap ? 'inline-flex' : 'none';
+        document.getElementById('cp-meta-dist').style.display = greenData.distanceYards ? 'inline-flex' : 'none';
+      } else {
+        metaEl.style.display = 'none';
+      }
+
       cpUpdateInstruction();
     }
 
@@ -4691,6 +4756,36 @@
       ctx.fillStyle = 'rgba(255,255,255,0.5)';
       ctx.textAlign = 'center';
       ctx.fillText(scaleBarYds + ' yds', 15 + scaleBarPx / 2, H - 4);
+
+      // Approach direction indicator (arrow at bottom centre)
+      if (greenData.tee) {
+        const arrowCx = W / 2;
+        const arrowCy = H - 25;
+        const arrowSize = 8;
+        // Draw upward-pointing chevron
+        ctx.beginPath();
+        ctx.moveTo(arrowCx - arrowSize, arrowCy + arrowSize * 0.5);
+        ctx.lineTo(arrowCx, arrowCy - arrowSize * 0.5);
+        ctx.lineTo(arrowCx + arrowSize, arrowCy + arrowSize * 0.5);
+        ctx.strokeStyle = 'rgba(16,185,129,0.7)';
+        ctx.lineWidth = 2.5;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.stroke();
+        // Second chevron for emphasis
+        ctx.beginPath();
+        ctx.moveTo(arrowCx - arrowSize, arrowCy + arrowSize * 1.3);
+        ctx.lineTo(arrowCx, arrowCy + arrowSize * 0.3);
+        ctx.lineTo(arrowCx + arrowSize, arrowCy + arrowSize * 1.3);
+        ctx.strokeStyle = 'rgba(16,185,129,0.4)';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        // Label
+        ctx.font = '9px Inter, sans-serif';
+        ctx.fillStyle = 'rgba(16,185,129,0.6)';
+        ctx.textAlign = 'center';
+        ctx.fillText('approach', arrowCx, arrowCy + arrowSize * 2.2);
+      }
 
       // Draw pin if placed
       if (cpState.pinCoords) {
