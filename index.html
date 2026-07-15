@@ -4295,11 +4295,40 @@
         // Use 1.5km radius to capture all holes
         // Fetch greens and hole ways (lines from tee to green with hole numbers)
         const overpassQuery = `[out:json][timeout:25];(way["golf"="green"](around:1500,${lat},${lon});way["golf"="hole"](around:1500,${lat},${lon}););out geom tags;`;
-        const resp = await fetch('https://overpass-api.de/api/interpreter', {
-          method: 'POST',
-          body: 'data=' + encodeURIComponent(overpassQuery)
-        });
-        const data = await resp.json();
+        
+        // Try primary endpoint, fall back to secondary if it fails
+        const overpassEndpoints = [
+          'https://overpass-api.de/api/interpreter',
+          'https://overpass.kumi.systems/api/interpreter'
+        ];
+        let data = null;
+        for (const endpoint of overpassEndpoints) {
+          try {
+            const resp = await fetch(endpoint, {
+              method: 'POST',
+              body: 'data=' + encodeURIComponent(overpassQuery)
+            });
+            if (!resp.ok) {
+              console.warn('Overpass endpoint ' + endpoint + ' returned ' + resp.status + ', trying next...');
+              continue;
+            }
+            const text = await resp.text();
+            if (text.startsWith('<?xml') || text.startsWith('<')) {
+              console.warn('Overpass endpoint ' + endpoint + ' returned XML (rate limited?), trying next...');
+              continue;
+            }
+            data = JSON.parse(text);
+            break;
+          } catch (e) {
+            console.warn('Overpass endpoint ' + endpoint + ' failed:', e.message);
+            continue;
+          }
+        }
+
+        if (!data) {
+          showToast('⚠️ Overpass API unavailable — try again in 30 seconds', 'error', 5000);
+          return;
+        }
 
         if (!data.elements || data.elements.length === 0) {
           showToast('⚠️ No green data found for this course in OSM', 'error', 5000);
@@ -4315,7 +4344,9 @@
         // Build hole data: ref, tee position (first point), green-end position (last point)
         // Also store approach direction (last segment of hole way = direction into the green)
         // Plus par, handicap (stroke index), and full geometry for distance calculation
-        const holeData = [];
+        // NOTE: Multiple hole ways may share the same ref (different tee positions).
+        // We group by ref and will pick the best match per green later.
+        const holeDataByRef = {};
         holeWays.forEach(el => {
           if (!el.tags || !el.tags.ref) return;
           const num = parseInt(el.tags.ref.replace(/\D/g, ''));
@@ -4336,18 +4367,37 @@
             const segMetres = Math.sqrt(dx * dx + dy * dy) * 111320;
             distanceYards += segMetres * 1.09361;
           }
-          holeData.push({
+          const entry = {
             ref: num,
             par: el.tags.par ? parseInt(el.tags.par) : null,
             handicap: el.tags.handicap ? parseInt(el.tags.handicap) : null,
             distanceYards: Math.round(distanceYards),
             tee: { lat: teePoint.lat, lon: teePoint.lon },
             greenEnd: { lat: greenPoint.lat, lon: greenPoint.lon },
-            approachFrom: { lat: approachFrom.lat, lon: approachFrom.lon }
-          });
+            approachFrom: { lat: approachFrom.lat, lon: approachFrom.lon },
+            nodeCount: geom.length
+          };
+          if (!holeDataByRef[num]) holeDataByRef[num] = [];
+          holeDataByRef[num].push(entry);
         });
 
-        console.log('Hole ways with valid refs:', holeData.length);
+        // For each ref, pick the hole way with the most nodes (more nodes = more detailed path = better approach direction)
+        // If tied, pick the longest distance (likely the back tees, most representative)
+        const holeData = [];
+        Object.keys(holeDataByRef).forEach(ref => {
+          const candidates = holeDataByRef[ref];
+          candidates.sort((a, b) => {
+            if (b.nodeCount !== a.nodeCount) return b.nodeCount - a.nodeCount;
+            return b.distanceYards - a.distanceYards;
+          });
+          holeData.push(candidates[0]);
+        });
+
+        console.log('Hole ways with valid refs:', Object.keys(holeDataByRef).length, '(from', holeWays.filter(el => el.tags && el.tags.ref).length, 'total ways)');
+        holeData.forEach(h => {
+          const altCount = holeDataByRef[h.ref] ? holeDataByRef[h.ref].length : 0;
+          console.log('  Hole ' + h.ref + ' | par=' + h.par + ' | dist=' + h.distanceYards + 'yds | nodes=' + h.nodeCount + ' (of ' + altCount + ' ways) | approachFrom=(' + h.approachFrom.lat.toFixed(5) + ',' + h.approachFrom.lon.toFixed(5) + ') | greenEnd=(' + h.greenEnd.lat.toFixed(5) + ',' + h.greenEnd.lon.toFixed(5) + ')');
+        });
 
         // Match greens to holes by proximity of green centroid to hole way endpoint
         // Build tee lookup from matched holes (includes approach direction and metadata)
@@ -4394,6 +4444,7 @@
               centroidLat,
               centroidLon,
               tee: ref !== null ? (teeLookup[ref] || null) : null,
+              greenEnd: ref !== null && holeData.find(h => h.ref === ref) ? { lat: holeData.find(h => h.ref === ref).greenEnd.lat, lon: holeData.find(h => h.ref === ref).greenEnd.lon } : null,
               par: ref !== null && holeMeta[ref] ? holeMeta[ref].par : null,
               handicap: ref !== null && holeMeta[ref] ? holeMeta[ref].handicap : null,
               distanceYards: ref !== null && holeMeta[ref] ? holeMeta[ref].distanceYards : null
@@ -4603,22 +4654,31 @@
 
       if (greenData.tee) {
         // greenData.tee is the "approach from" point (second-to-last point of hole way)
-        // Vector FROM green centroid TO approach-from point
-        const approachX = (greenData.tee.lon - centLon) * mPerDegLon * ydsPerMeter;
-        const approachY = (greenData.tee.lat - centLat) * mPerDegLat * ydsPerMeter;
+        // greenData.greenEnd is the final node of the hole way (at the green)
+        // The TRUE approach direction is from approachFrom → greenEnd, independent of polygon centroid
+        const mPerDegLat2 = 111320;
+        const mPerDegLonLocal = 111320 * Math.cos(centLat * Math.PI / 180);
+        const ydsPerM = 1.09361;
         
-        // Check the vector has meaningful length (at least 5 yards)
-        const vecLen = Math.sqrt(approachX * approachX + approachY * approachY);
+        // Vector from approachFrom to greenEnd = actual approach direction from OSM data
+        let intoGreenX, intoGreenY;
+        if (greenData.greenEnd) {
+          intoGreenX = (greenData.greenEnd.lon - greenData.tee.lon) * mPerDegLonLocal * ydsPerM;
+          intoGreenY = (greenData.greenEnd.lat - greenData.tee.lat) * mPerDegLat2 * ydsPerM;
+        } else {
+          // Fallback to polygon centroid if greenEnd not available
+          intoGreenX = (centLon - greenData.tee.lon) * mPerDegLonLocal * ydsPerM;
+          intoGreenY = (centLat - greenData.tee.lat) * mPerDegLat2 * ydsPerM;
+        }
+        const vecLen = Math.sqrt(intoGreenX * intoGreenX + intoGreenY * intoGreenY);
+        
         if (vecLen >= 5) {
-          // Direction INTO the green = opposite of the vector to the approach point
-          // atan2(y, x) gives angle from +X axis
-          const intoGreenX = -approachX;
-          const intoGreenY = -approachY;
-          const approachAngle = Math.atan2(intoGreenY, intoGreenX);
-          // Rotate so this direction aligns with +Y (up on screen) = PI/2
-          rotateBy = (Math.PI / 2) - approachAngle;
+          // Angle of the into-green vector measured from +Y axis (north), clockwise
+          const angleFromUp = Math.atan2(intoGreenX, intoGreenY);
+          // Rotate all points by -angleFromUp so approach direction aligns with +Y (up on canvas)
+          rotateBy = -angleFromUp;
           orientationSource = 'holeLine';
-          console.log('  Green orientation: holeLine | vec=(' + approachX.toFixed(1) + ',' + approachY.toFixed(1) + ') len=' + vecLen.toFixed(1) + 'yds angle=' + (approachAngle * 180 / Math.PI).toFixed(1) + '° rotate=' + (rotateBy * 180 / Math.PI).toFixed(1) + '°');
+          console.log('  Green orientation: holeLine | intoGreen=(' + intoGreenX.toFixed(1) + ',' + intoGreenY.toFixed(1) + ') len=' + vecLen.toFixed(1) + 'yds angleFromUp=' + (angleFromUp * 180 / Math.PI).toFixed(1) + '° rotateBy=' + (rotateBy * 180 / Math.PI).toFixed(1) + '°');
         } else {
           console.log('  Green orientation: holeLine vector too short (' + vecLen.toFixed(1) + ' yds), using fallback');
           greenData.tee = null; // Force fallback
