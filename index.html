@@ -4341,22 +4341,27 @@
 
         console.log('Raw greens:', greenElements.length, '| Hole ways:', holeWays.length);
 
-        // Build hole data: ref, tee position (first point), green-end position (last point)
-        // Also store approach direction (last segment of hole way = direction into the green)
-        // Plus par, handicap (stroke index), and full geometry for distance calculation
-        // NOTE: Multiple hole ways may share the same ref (different tee positions).
-        // We group by ref and will pick the best match per green later.
+        // STEP 1: Identify which greens belong to this course by clustering near search centre
+        // Only keep greens within 800m of the course centre (filters out neighbouring courses)
+        const courseRadiusDeg = 0.008; // ~800m at London latitudes
+        const nearbyGreens = greenElements.filter(el => {
+          const gLat = el.geometry.reduce((s, p) => s + p.lat, 0) / el.geometry.length;
+          const gLon = el.geometry.reduce((s, p) => s + p.lon, 0) / el.geometry.length;
+          return Math.abs(gLat - lat) < courseRadiusDeg && Math.abs(gLon - lon) < courseRadiusDeg;
+        });
+        
+        console.log('Greens within 800m of course centre:', nearbyGreens.length, '(of', greenElements.length, 'total)');
+
+        // STEP 2: Build hole data - pick the hole way whose greenEnd is closest to a NEARBY green
         const holeDataByRef = {};
         holeWays.forEach(el => {
           if (!el.tags || !el.tags.ref) return;
           const num = parseInt(el.tags.ref.replace(/\D/g, ''));
           if (isNaN(num) || num < 1 || num > 18) return;
           const geom = el.geometry;
-          const teePoint = geom[0]; // first point = tee
-          const greenPoint = geom[geom.length - 1]; // last point = at green
-          // Approach direction: second-to-last → last point (the direction arriving at the green)
+          const teePoint = geom[0];
+          const greenPoint = geom[geom.length - 1];
           const approachFrom = geom.length >= 2 ? geom[geom.length - 2] : geom[0];
-          // Calculate total hole distance (sum of segments in yards)
           let distanceYards = 0;
           for (let i = 1; i < geom.length; i++) {
             const lat1 = geom[i-1].lat, lon1 = geom[i-1].lon;
@@ -4381,32 +4386,26 @@
           holeDataByRef[num].push(entry);
         });
 
-        // For each ref, pick the hole way whose greenEnd is closest to a green polygon centroid
-        // This ensures we pick the correct course's hole way when multiple courses share the area
+        // STEP 3: For each ref, pick the hole way whose greenEnd is closest to a nearby green
         const holeData = [];
         Object.keys(holeDataByRef).forEach(ref => {
           const candidates = holeDataByRef[ref];
           if (candidates.length === 1) {
             holeData.push(candidates[0]);
           } else {
-            // Find the green centroid for this ref (if available from greenElements)
-            const matchingGreen = greenElements.find(el => el.tags && el.tags.ref && parseInt(el.tags.ref.replace(/\D/g, '')) === parseInt(ref));
-            if (matchingGreen && matchingGreen.geometry) {
-              const gCentLat = matchingGreen.geometry.reduce((s, p) => s + p.lat, 0) / matchingGreen.geometry.length;
-              const gCentLon = matchingGreen.geometry.reduce((s, p) => s + p.lon, 0) / matchingGreen.geometry.length;
-              // Pick the candidate whose greenEnd is closest to this green's centroid
-              candidates.sort((a, b) => {
-                const distA = Math.pow(a.greenEnd.lat - gCentLat, 2) + Math.pow(a.greenEnd.lon - gCentLon, 2);
-                const distB = Math.pow(b.greenEnd.lat - gCentLat, 2) + Math.pow(b.greenEnd.lon - gCentLon, 2);
-                return distA - distB;
-              });
-            } else {
-              // No green to match against — pick most nodes, then longest
-              candidates.sort((a, b) => {
-                if (b.nodeCount !== a.nodeCount) return b.nodeCount - a.nodeCount;
-                return b.distanceYards - a.distanceYards;
-              });
+            // Find any nearby green with this ref, or nearest nearby green
+            let bestGreenLat = lat, bestGreenLon = lon; // default to course centre
+            const matchingNearbyGreen = nearbyGreens.find(el => el.tags && el.tags.ref && parseInt(el.tags.ref.replace(/\D/g, '')) === parseInt(ref));
+            if (matchingNearbyGreen && matchingNearbyGreen.geometry) {
+              bestGreenLat = matchingNearbyGreen.geometry.reduce((s, p) => s + p.lat, 0) / matchingNearbyGreen.geometry.length;
+              bestGreenLon = matchingNearbyGreen.geometry.reduce((s, p) => s + p.lon, 0) / matchingNearbyGreen.geometry.length;
             }
+            // Pick candidate whose greenEnd is closest to the target green/centre
+            candidates.sort((a, b) => {
+              const distA = Math.pow(a.greenEnd.lat - bestGreenLat, 2) + Math.pow(a.greenEnd.lon - bestGreenLon, 2);
+              const distB = Math.pow(b.greenEnd.lat - bestGreenLat, 2) + Math.pow(b.greenEnd.lon - bestGreenLon, 2);
+              return distA - distB;
+            });
             holeData.push(candidates[0]);
           }
         });
@@ -4426,8 +4425,8 @@
           holeMeta[h.ref] = { par: h.par, handicap: h.handicap, distanceYards: h.distanceYards };
         });
 
-        // Extract polygon data
-        let greens = greenElements
+        // STEP 4: Extract polygon data from nearby greens only
+        let greens = nearbyGreens
           .map(el => {
             // Parse ref tag on green itself (rare but possible)
             let ref = null;
