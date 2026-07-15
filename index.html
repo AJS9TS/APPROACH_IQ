@@ -4599,20 +4599,35 @@
 
       // Determine rotation angle
       let rotateBy = 0;
+      let orientationSource = 'none';
 
       if (greenData.tee) {
         // greenData.tee is the "approach from" point (second-to-last point of hole way)
-        // Vector from that point to green centroid = approach direction
+        // Vector FROM green centroid TO approach-from point
         const approachX = (greenData.tee.lon - centLon) * mPerDegLon * ydsPerMeter;
         const approachY = (greenData.tee.lat - centLat) * mPerDegLat * ydsPerMeter;
-        // approachX, approachY points FROM the green centroid TO the approach-from point
-        // The approach direction INTO the green is the opposite: (-approachX, -approachY)
-        // We want this "into the green" direction to point UP (+Y in our system)
-        const approachAngle = Math.atan2(-approachY, -approachX); // angle of approach direction
-        // Rotate so approach direction aligns with +Y (up) = PI/2
-        rotateBy = (Math.PI / 2) - approachAngle;
-      } else {
+        
+        // Check the vector has meaningful length (at least 5 yards)
+        const vecLen = Math.sqrt(approachX * approachX + approachY * approachY);
+        if (vecLen >= 5) {
+          // Direction INTO the green = opposite of the vector to the approach point
+          // atan2(y, x) gives angle from +X axis
+          const intoGreenX = -approachX;
+          const intoGreenY = -approachY;
+          const approachAngle = Math.atan2(intoGreenY, intoGreenX);
+          // Rotate so this direction aligns with +Y (up on screen) = PI/2
+          rotateBy = (Math.PI / 2) - approachAngle;
+          orientationSource = 'holeLine';
+          console.log('  Green orientation: holeLine | vec=(' + approachX.toFixed(1) + ',' + approachY.toFixed(1) + ') len=' + vecLen.toFixed(1) + 'yds angle=' + (approachAngle * 180 / Math.PI).toFixed(1) + '° rotate=' + (rotateBy * 180 / Math.PI).toFixed(1) + '°');
+        } else {
+          console.log('  Green orientation: holeLine vector too short (' + vecLen.toFixed(1) + ' yds), using fallback');
+          greenData.tee = null; // Force fallback
+        }
+      }
+      
+      if (!greenData.tee) {
         // Fallback: rotate so longest axis is vertical
+        orientationSource = 'longestAxis';
         let maxDist = 0;
         let angle = 0;
         for (let i = 0; i < points.length; i++) {
@@ -4627,6 +4642,7 @@
           }
         }
         rotateBy = (Math.PI / 2) - angle;
+        console.log('  Green orientation: longestAxis | angle=' + (angle * 180 / Math.PI).toFixed(1) + '° rotate=' + (rotateBy * 180 / Math.PI).toFixed(1) + '°');
       }
 
       // Apply rotation
@@ -4660,6 +4676,7 @@
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         return;
       }
+      console.log('Rendering Hole ' + (cpState.currentHole + 1) + ' | ref=' + greenData.ref + ' | hasTee=' + !!greenData.tee + ' | tee=' + JSON.stringify(greenData.tee));
 
       const transform = cpGetGreenTransform(greenData);
 
