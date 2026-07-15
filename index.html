@@ -4381,16 +4381,34 @@
           holeDataByRef[num].push(entry);
         });
 
-        // For each ref, pick the hole way with the most nodes (more nodes = more detailed path = better approach direction)
-        // If tied, pick the longest distance (likely the back tees, most representative)
+        // For each ref, pick the hole way whose greenEnd is closest to a green polygon centroid
+        // This ensures we pick the correct course's hole way when multiple courses share the area
         const holeData = [];
         Object.keys(holeDataByRef).forEach(ref => {
           const candidates = holeDataByRef[ref];
-          candidates.sort((a, b) => {
-            if (b.nodeCount !== a.nodeCount) return b.nodeCount - a.nodeCount;
-            return b.distanceYards - a.distanceYards;
-          });
-          holeData.push(candidates[0]);
+          if (candidates.length === 1) {
+            holeData.push(candidates[0]);
+          } else {
+            // Find the green centroid for this ref (if available from greenElements)
+            const matchingGreen = greenElements.find(el => el.tags && el.tags.ref && parseInt(el.tags.ref.replace(/\D/g, '')) === parseInt(ref));
+            if (matchingGreen && matchingGreen.geometry) {
+              const gCentLat = matchingGreen.geometry.reduce((s, p) => s + p.lat, 0) / matchingGreen.geometry.length;
+              const gCentLon = matchingGreen.geometry.reduce((s, p) => s + p.lon, 0) / matchingGreen.geometry.length;
+              // Pick the candidate whose greenEnd is closest to this green's centroid
+              candidates.sort((a, b) => {
+                const distA = Math.pow(a.greenEnd.lat - gCentLat, 2) + Math.pow(a.greenEnd.lon - gCentLon, 2);
+                const distB = Math.pow(b.greenEnd.lat - gCentLat, 2) + Math.pow(b.greenEnd.lon - gCentLon, 2);
+                return distA - distB;
+              });
+            } else {
+              // No green to match against — pick most nodes, then longest
+              candidates.sort((a, b) => {
+                if (b.nodeCount !== a.nodeCount) return b.nodeCount - a.nodeCount;
+                return b.distanceYards - a.distanceYards;
+              });
+            }
+            holeData.push(candidates[0]);
+          }
         });
 
         console.log('Hole ways with valid refs:', Object.keys(holeDataByRef).length, '(from', holeWays.filter(el => el.tags && el.tags.ref).length, 'total ways)');
