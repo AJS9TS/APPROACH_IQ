@@ -116,6 +116,49 @@ const BENCHMARKS = {
 | `golf-practice-tracker-shots` | `Shot[]` (JSON) | All shot data |
 | `approachiq-handicap-history` | `HcpEntry[]` (JSON) | Handicap index entries |
 | `approachiq-theme` | `'light'` or `'dark'` | Theme preference |
+| `approachiq-course-{id}` | `CourseData` (JSON) | Cached course data per course (greens, hole lines, metadata) |
+
+### Course Data Model (Cached per Course)
+
+```javascript
+{
+  name: string,                  // Course name from Nominatim
+  centre: { lat, lon },          // Course centre coordinates
+  fetchedAt: string,             // ISO date of last fetch
+  greens: [{
+    id: string,                  // OSM way ID
+    ref: number|null,            // Hole number (from ref tag)
+    polygon: [[lat, lon], ...],  // Green outline coordinates
+  }],
+  holeLines: [{
+    id: string,                  // OSM way ID
+    ref: number|null,            // Hole number (from ref tag)
+    par: number|null,            // Par value (from par tag)
+    handicap: number|null,       // Stroke index (from handicap tag)
+    nodes: [[lat, lon], ...],    // Ordered nodes from tee to green
+  }],
+  tees: [{
+    id: string,                  // OSM way ID
+    ref: number|null,            // Hole number
+    centroid: { lat, lon },      // Tee box centre
+  }]
+}
+```
+
+### Hole Metadata (Derived at Runtime)
+
+```javascript
+{
+  holeNumber: number,
+  par: number|null,
+  strokeIndex: number|null,
+  distanceYards: number|null,    // Sum of hole line segment lengths
+  approachBearing: number|null,  // Degrees from north (penultimate → final node)
+  green: { polygon, centroid },
+  holeLine: { nodes }|null,
+  tee: { centroid }|null
+}
+```
 
 ---
 
@@ -209,6 +252,66 @@ The app uses two custom canvas-drawn greens (no Chart.js for these):
 - CSS-based circular layout with positioned zone buttons
 - Dashed 50% contour ring indicating close zone boundary
 - Pin emoji at centre
+
+### Course Plot Green (Real Green Shapes)
+- Renders actual Green_Polygon shape from OSM data (not a circle)
+- Darker fringe area surrounding the green outline
+- Scale indicator showing yard distance
+- Approach direction indicator (arrow/chevron) at bottom edge of canvas
+- Pin marker (flag) placed by user tap, ball marker placed by second tap
+- Dashed line from pin to ball after both are placed
+- Responsive: scales to container width on all screen sizes
+
+#### Green Orientation Algorithm
+
+The green is rotated so the approach direction always points bottom-to-top on screen. Priority chain:
+
+1. **Approach_Bearing from Hole_Line** (best): Calculate bearing from penultimate node to final node of the `golf=hole` way. This captures the actual approach angle even on doglegs.
+2. **Tee-to-Green bearing** (fallback): Calculate bearing from tee box centroid to green centroid. Correct for straight holes, approximate for doglegs.
+3. **Longest axis rotation** (last resort): Rotate the green polygon so its longest axis is vertical. Pure geometry with no directional intent.
+
+Bearing calculation (penultimate → final node):
+```
+dLon = lon2 - lon1 (in radians)
+x = sin(dLon) × cos(lat2)
+y = cos(lat1) × sin(lat2) - sin(lat1) × cos(lat2) × cos(dLon)
+bearing = atan2(x, y) → normalised to 0-360°
+```
+
+Rotation applied: All green polygon coordinates are rotated by `-bearing` around the green centroid before rendering, so that the approach vector points straight up (north on canvas = top of screen).
+
+#### Hole-to-Green Matching
+
+When Hole_Line data is available, greens are matched to holes by spatial containment: the final node of each Hole_Line should fall within (or nearest to) a green polygon. This provides definitive matching even when greens lack `ref` tags.
+
+#### Hole Distance Calculation
+
+Total hole distance = sum of equirectangular distances between consecutive Hole_Line nodes, converted to yards:
+```
+dx = (lon2 - lon1) × cos(midLat)  // in degrees
+dy = lat2 - lat1                    // in degrees
+segmentMetres = sqrt(dx² + dy²) × 111,320
+segmentYards = segmentMetres × 1.09361
+totalYards = sum of all segments
+```
+
+---
+
+## Course Plot — Overpass Query
+
+```
+[out:json][timeout:25];
+(
+  way["golf"="green"](around:1500,{lat},{lon});
+  way["golf"="tee"](around:1500,{lat},{lon});
+  way["golf"="hole"](around:1500,{lat},{lon});
+);
+out body;
+>;
+out skel qt;
+```
+
+Fetches greens (polygons), tee boxes (polygons), and hole lines (ways) within 1.5 km of the course centre. The `out body` returns tags; `>; out skel qt;` resolves node coordinates.
 
 ---
 

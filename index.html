@@ -1592,6 +1592,25 @@
       font-weight: 800;
       color: var(--brand-emerald);
     }
+    .cp-hole-meta {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin-bottom: 0.8rem;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+    }
+    .cp-meta-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.2rem 0.6rem;
+      background: var(--bg-secondary);
+      border-radius: 10px;
+      border: 1px solid var(--border-glass);
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 600;
+    }
     .cp-hole-nav-btn {
       width: 32px; height: 32px;
       border-radius: 50%;
@@ -2043,6 +2062,86 @@
     </div>
   </section>
 
+<<<<<<< HEAD
+=======
+  <!-- COURSE PLOT VIEW -->
+  <section id="view-course" class="view" role="tabpanel">
+    <div class="card">
+      <h2>Course Plot <span class="section-badge">On-Course</span></h2>
+
+      <!-- Search / Select Course -->
+      <div id="cp-search-section">
+        <div class="cp-search-wrap">
+          <span class="cp-search-icon">🔍</span>
+          <input type="text" class="cp-search-input" id="cp-search-input" placeholder="Search for your golf course..." autocomplete="off" />
+          <div class="cp-search-results" id="cp-search-results"></div>
+        </div>
+        <div class="cp-no-course" id="cp-no-course">
+          <div class="cp-no-course-icon">🗺️</div>
+          <strong>Find your course to get started</strong>
+          <p>Search above to load real green shapes from OpenStreetMap.<br>Data is cached locally for offline use on future visits.</p>
+        </div>
+      </div>
+
+      <!-- Active Round UI (hidden until course selected) -->
+      <div id="cp-round-section" style="display:none;">
+        <!-- Course header -->
+        <div class="cp-course-header">
+          <span class="cp-course-name" id="cp-course-name"></span>
+          <button class="cp-change-course" onclick="cpChangeCourse()">Change Course</button>
+        </div>
+
+        <!-- Hole indicator -->
+        <div class="cp-hole-indicator">
+          <button class="cp-hole-nav-btn" onclick="cpPrevHole()">‹</button>
+          <span class="cp-hole-num" id="cp-hole-num">Hole 1</span>
+          <button class="cp-hole-nav-btn" onclick="cpNextHole()">›</button>
+        </div>
+
+        <!-- Hole metadata (par, SI, distance) -->
+        <div class="cp-hole-meta" id="cp-hole-meta" style="display:none;">
+          <span class="cp-meta-item" id="cp-meta-par"></span>
+          <span class="cp-meta-item" id="cp-meta-si"></span>
+          <span class="cp-meta-item" id="cp-meta-dist"></span>
+        </div>
+
+        <!-- Instruction -->
+        <div class="cp-instruction" id="cp-instruction">
+          <span class="step-highlight">Step 1:</span> Select your club
+        </div>
+
+        <!-- Club grid -->
+        <div class="cp-club-grid" id="cp-club-grid">
+          <button type="button" class="cp-club-btn" data-cp-club="Wedge">W</button>
+          <button type="button" class="cp-club-btn" data-cp-club="9 Iron">9i</button>
+          <button type="button" class="cp-club-btn" data-cp-club="8 Iron">8i</button>
+          <button type="button" class="cp-club-btn" data-cp-club="7 Iron">7i</button>
+          <button type="button" class="cp-club-btn" data-cp-club="6 Iron">6i</button>
+          <button type="button" class="cp-club-btn" data-cp-club="5 Iron">5i</button>
+          <button type="button" class="cp-club-btn" data-cp-club="3 Wood">3W</button>
+          <button type="button" class="cp-club-btn" data-cp-club="Driver">DR</button>
+        </div>
+
+        <!-- Green canvas -->
+        <div class="cp-canvas-wrap">
+          <canvas id="cp-green-canvas"></canvas>
+        </div>
+
+        <!-- Flash feedback -->
+        <div class="cp-flash" id="cp-flash"></div>
+
+        <!-- Status bar -->
+        <div class="cp-status-bar">
+          <span>Shots: <span class="cp-shots-count" id="cp-shots-count">0</span></span>
+          <span>Hole <span id="cp-hole-of">1</span> / <span id="cp-total-holes">18</span></span>
+          <button class="cp-skip-btn" onclick="cpSkipHole()">Skip Hole →</button>
+          <button class="cp-undo-btn" onclick="cpUndoLast()">↩ Undo</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+>>>>>>> f69c22d3f4c397366d6fdea4b88900e1d3d66602
   <!-- CHARTS VIEW -->
   <section id="view-charts" class="view" role="tabpanel">
     <div class="card">
@@ -4314,11 +4413,40 @@
         // Use 1.5km radius to capture all holes
         // Fetch greens and hole ways (lines from tee to green with hole numbers)
         const overpassQuery = `[out:json][timeout:25];(way["golf"="green"](around:1500,${lat},${lon});way["golf"="hole"](around:1500,${lat},${lon}););out geom tags;`;
-        const resp = await fetch('https://overpass-api.de/api/interpreter', {
-          method: 'POST',
-          body: 'data=' + encodeURIComponent(overpassQuery)
-        });
-        const data = await resp.json();
+        
+        // Try primary endpoint, fall back to secondary if it fails
+        const overpassEndpoints = [
+          'https://overpass-api.de/api/interpreter',
+          'https://overpass.kumi.systems/api/interpreter'
+        ];
+        let data = null;
+        for (const endpoint of overpassEndpoints) {
+          try {
+            const resp = await fetch(endpoint, {
+              method: 'POST',
+              body: 'data=' + encodeURIComponent(overpassQuery)
+            });
+            if (!resp.ok) {
+              console.warn('Overpass endpoint ' + endpoint + ' returned ' + resp.status + ', trying next...');
+              continue;
+            }
+            const text = await resp.text();
+            if (text.startsWith('<?xml') || text.startsWith('<')) {
+              console.warn('Overpass endpoint ' + endpoint + ' returned XML (rate limited?), trying next...');
+              continue;
+            }
+            data = JSON.parse(text);
+            break;
+          } catch (e) {
+            console.warn('Overpass endpoint ' + endpoint + ' failed:', e.message);
+            continue;
+          }
+        }
+
+        if (!data) {
+          showToast('⚠️ Overpass API unavailable — try again in 30 seconds', 'error', 5000);
+          return;
+        }
 
         if (!data.elements || data.elements.length === 0) {
           showToast('⚠️ No green data found for this course in OSM', 'error', 5000);
@@ -4331,35 +4459,92 @@
 
         console.log('Raw greens:', greenElements.length, '| Hole ways:', holeWays.length);
 
-        // Build hole data: ref, tee position (first point), green-end position (last point)
-        // Also store approach direction (last segment of hole way = direction into the green)
-        const holeData = [];
+        // STEP 1: Identify which greens belong to this course by clustering near search centre
+        // Only keep greens within 800m of the course centre (filters out neighbouring courses)
+        const courseRadiusDeg = 0.008; // ~800m at London latitudes
+        const nearbyGreens = greenElements.filter(el => {
+          const gLat = el.geometry.reduce((s, p) => s + p.lat, 0) / el.geometry.length;
+          const gLon = el.geometry.reduce((s, p) => s + p.lon, 0) / el.geometry.length;
+          return Math.abs(gLat - lat) < courseRadiusDeg && Math.abs(gLon - lon) < courseRadiusDeg;
+        });
+        
+        console.log('Greens within 800m of course centre:', nearbyGreens.length, '(of', greenElements.length, 'total)');
+
+        // STEP 2: Build hole data - pick the hole way whose greenEnd is closest to a NEARBY green
+        const holeDataByRef = {};
         holeWays.forEach(el => {
           if (!el.tags || !el.tags.ref) return;
           const num = parseInt(el.tags.ref.replace(/\D/g, ''));
           if (isNaN(num) || num < 1 || num > 18) return;
           const geom = el.geometry;
-          const teePoint = geom[0]; // first point = tee
-          const greenPoint = geom[geom.length - 1]; // last point = at green
-          // Approach direction: second-to-last → last point (the direction arriving at the green)
+          const teePoint = geom[0];
+          const greenPoint = geom[geom.length - 1];
           const approachFrom = geom.length >= 2 ? geom[geom.length - 2] : geom[0];
-          holeData.push({
+          let distanceYards = 0;
+          for (let i = 1; i < geom.length; i++) {
+            const lat1 = geom[i-1].lat, lon1 = geom[i-1].lon;
+            const lat2 = geom[i].lat, lon2 = geom[i].lon;
+            const midLat = (lat1 + lat2) / 2 * Math.PI / 180;
+            const dx = (lon2 - lon1) * Math.cos(midLat);
+            const dy = lat2 - lat1;
+            const segMetres = Math.sqrt(dx * dx + dy * dy) * 111320;
+            distanceYards += segMetres * 1.09361;
+          }
+          const entry = {
             ref: num,
+            par: el.tags.par ? parseInt(el.tags.par) : null,
+            handicap: el.tags.handicap ? parseInt(el.tags.handicap) : null,
+            distanceYards: Math.round(distanceYards),
             tee: { lat: teePoint.lat, lon: teePoint.lon },
             greenEnd: { lat: greenPoint.lat, lon: greenPoint.lon },
-            approachFrom: { lat: approachFrom.lat, lon: approachFrom.lon }
-          });
+            approachFrom: { lat: approachFrom.lat, lon: approachFrom.lon },
+            nodeCount: geom.length
+          };
+          if (!holeDataByRef[num]) holeDataByRef[num] = [];
+          holeDataByRef[num].push(entry);
         });
 
-        console.log('Hole ways with valid refs:', holeData.length);
+        // STEP 3: For each ref, pick the hole way whose greenEnd is closest to a nearby green
+        const holeData = [];
+        Object.keys(holeDataByRef).forEach(ref => {
+          const candidates = holeDataByRef[ref];
+          if (candidates.length === 1) {
+            holeData.push(candidates[0]);
+          } else {
+            // Find any nearby green with this ref, or nearest nearby green
+            let bestGreenLat = lat, bestGreenLon = lon; // default to course centre
+            const matchingNearbyGreen = nearbyGreens.find(el => el.tags && el.tags.ref && parseInt(el.tags.ref.replace(/\D/g, '')) === parseInt(ref));
+            if (matchingNearbyGreen && matchingNearbyGreen.geometry) {
+              bestGreenLat = matchingNearbyGreen.geometry.reduce((s, p) => s + p.lat, 0) / matchingNearbyGreen.geometry.length;
+              bestGreenLon = matchingNearbyGreen.geometry.reduce((s, p) => s + p.lon, 0) / matchingNearbyGreen.geometry.length;
+            }
+            // Pick candidate whose greenEnd is closest to the target green/centre
+            candidates.sort((a, b) => {
+              const distA = Math.pow(a.greenEnd.lat - bestGreenLat, 2) + Math.pow(a.greenEnd.lon - bestGreenLon, 2);
+              const distB = Math.pow(b.greenEnd.lat - bestGreenLat, 2) + Math.pow(b.greenEnd.lon - bestGreenLon, 2);
+              return distA - distB;
+            });
+            holeData.push(candidates[0]);
+          }
+        });
+
+        console.log('Hole ways with valid refs:', Object.keys(holeDataByRef).length, '(from', holeWays.filter(el => el.tags && el.tags.ref).length, 'total ways)');
+        holeData.forEach(h => {
+          const altCount = holeDataByRef[h.ref] ? holeDataByRef[h.ref].length : 0;
+          console.log('  Hole ' + h.ref + ' | par=' + h.par + ' | dist=' + h.distanceYards + 'yds | nodes=' + h.nodeCount + ' (of ' + altCount + ' ways) | approachFrom=(' + h.approachFrom.lat.toFixed(5) + ',' + h.approachFrom.lon.toFixed(5) + ') | greenEnd=(' + h.greenEnd.lat.toFixed(5) + ',' + h.greenEnd.lon.toFixed(5) + ')');
+        });
 
         // Match greens to holes by proximity of green centroid to hole way endpoint
-        // Build tee lookup from matched holes (includes approach direction)
+        // Build tee lookup from matched holes (includes approach direction and metadata)
         const teeLookup = {};
-        holeData.forEach(h => { teeLookup[h.ref] = { lat: h.approachFrom.lat, lon: h.approachFrom.lon }; });
+        const holeMeta = {};
+        holeData.forEach(h => {
+          teeLookup[h.ref] = { lat: h.approachFrom.lat, lon: h.approachFrom.lon };
+          holeMeta[h.ref] = { par: h.par, handicap: h.handicap, distanceYards: h.distanceYards };
+        });
 
-        // Extract polygon data
-        let greens = greenElements
+        // STEP 4: Extract polygon data from nearby greens only
+        let greens = nearbyGreens
           .map(el => {
             // Parse ref tag on green itself (rare but possible)
             let ref = null;
@@ -4393,7 +4578,11 @@
               polygon,
               centroidLat,
               centroidLon,
-              tee: ref !== null ? (teeLookup[ref] || null) : null
+              tee: ref !== null ? (teeLookup[ref] || null) : null,
+              greenEnd: ref !== null && holeData.find(h => h.ref === ref) ? { lat: holeData.find(h => h.ref === ref).greenEnd.lat, lon: holeData.find(h => h.ref === ref).greenEnd.lon } : null,
+              par: ref !== null && holeMeta[ref] ? holeMeta[ref].par : null,
+              handicap: ref !== null && holeMeta[ref] ? holeMeta[ref].handicap : null,
+              distanceYards: ref !== null && holeMeta[ref] ? holeMeta[ref].distanceYards : null
             };
           });
 
@@ -4472,6 +4661,23 @@
       const holeNum = cpState.currentHole + 1;
       document.getElementById('cp-hole-num').textContent = 'Hole ' + holeNum;
       document.getElementById('cp-hole-of').textContent = holeNum;
+
+      // Update hole metadata (par, SI, distance)
+      const greenData = cpState.course ? cpState.course.greens[cpState.currentHole] : null;
+      const metaEl = document.getElementById('cp-hole-meta');
+      if (greenData && (greenData.par || greenData.handicap || greenData.distanceYards)) {
+        metaEl.style.display = 'flex';
+        document.getElementById('cp-meta-par').textContent = greenData.par ? 'Par ' + greenData.par : '';
+        document.getElementById('cp-meta-si').textContent = greenData.handicap ? 'SI ' + greenData.handicap : '';
+        document.getElementById('cp-meta-dist').textContent = greenData.distanceYards ? greenData.distanceYards + ' yds' : '';
+        // Hide empty items
+        document.getElementById('cp-meta-par').style.display = greenData.par ? 'inline-flex' : 'none';
+        document.getElementById('cp-meta-si').style.display = greenData.handicap ? 'inline-flex' : 'none';
+        document.getElementById('cp-meta-dist').style.display = greenData.distanceYards ? 'inline-flex' : 'none';
+      } else {
+        metaEl.style.display = 'none';
+      }
+
       cpUpdateInstruction();
     }
 
@@ -4579,20 +4785,44 @@
 
       // Determine rotation angle
       let rotateBy = 0;
+      let orientationSource = 'none';
 
       if (greenData.tee) {
         // greenData.tee is the "approach from" point (second-to-last point of hole way)
-        // Vector from that point to green centroid = approach direction
-        const approachX = (greenData.tee.lon - centLon) * mPerDegLon * ydsPerMeter;
-        const approachY = (greenData.tee.lat - centLat) * mPerDegLat * ydsPerMeter;
-        // approachX, approachY points FROM the green centroid TO the approach-from point
-        // The approach direction INTO the green is the opposite: (-approachX, -approachY)
-        // We want this "into the green" direction to point UP (+Y in our system)
-        const approachAngle = Math.atan2(-approachY, -approachX); // angle of approach direction
-        // Rotate so approach direction aligns with +Y (up) = PI/2
-        rotateBy = (Math.PI / 2) - approachAngle;
-      } else {
+        // greenData.greenEnd is the final node of the hole way (at the green)
+        // The TRUE approach direction is from approachFrom → greenEnd, independent of polygon centroid
+        const mPerDegLat2 = 111320;
+        const mPerDegLonLocal = 111320 * Math.cos(centLat * Math.PI / 180);
+        const ydsPerM = 1.09361;
+        
+        // Vector from approachFrom to greenEnd = actual approach direction from OSM data
+        let intoGreenX, intoGreenY;
+        if (greenData.greenEnd) {
+          intoGreenX = (greenData.greenEnd.lon - greenData.tee.lon) * mPerDegLonLocal * ydsPerM;
+          intoGreenY = (greenData.greenEnd.lat - greenData.tee.lat) * mPerDegLat2 * ydsPerM;
+        } else {
+          // Fallback to polygon centroid if greenEnd not available
+          intoGreenX = (centLon - greenData.tee.lon) * mPerDegLonLocal * ydsPerM;
+          intoGreenY = (centLat - greenData.tee.lat) * mPerDegLat2 * ydsPerM;
+        }
+        const vecLen = Math.sqrt(intoGreenX * intoGreenX + intoGreenY * intoGreenY);
+        
+        if (vecLen >= 5) {
+          // Angle of the into-green vector measured from +Y axis (north), clockwise
+          const angleFromUp = Math.atan2(intoGreenX, intoGreenY);
+          // Rotate all points by -angleFromUp so approach direction aligns with +Y (up on canvas)
+          rotateBy = -angleFromUp;
+          orientationSource = 'holeLine';
+          console.log('  Green orientation: holeLine | intoGreen=(' + intoGreenX.toFixed(1) + ',' + intoGreenY.toFixed(1) + ') len=' + vecLen.toFixed(1) + 'yds angleFromUp=' + (angleFromUp * 180 / Math.PI).toFixed(1) + '° rotateBy=' + (rotateBy * 180 / Math.PI).toFixed(1) + '°');
+        } else {
+          console.log('  Green orientation: holeLine vector too short (' + vecLen.toFixed(1) + ' yds), using fallback');
+          greenData.tee = null; // Force fallback
+        }
+      }
+      
+      if (!greenData.tee) {
         // Fallback: rotate so longest axis is vertical
+        orientationSource = 'longestAxis';
         let maxDist = 0;
         let angle = 0;
         for (let i = 0; i < points.length; i++) {
@@ -4607,6 +4837,7 @@
           }
         }
         rotateBy = (Math.PI / 2) - angle;
+        console.log('  Green orientation: longestAxis | angle=' + (angle * 180 / Math.PI).toFixed(1) + '° rotate=' + (rotateBy * 180 / Math.PI).toFixed(1) + '°');
       }
 
       // Apply rotation
@@ -4640,6 +4871,7 @@
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         return;
       }
+      console.log('Rendering Hole ' + (cpState.currentHole + 1) + ' | ref=' + greenData.ref + ' | hasTee=' + !!greenData.tee + ' | tee=' + JSON.stringify(greenData.tee));
 
       const transform = cpGetGreenTransform(greenData);
 
@@ -4736,6 +4968,36 @@
       ctx.fillStyle = 'rgba(255,255,255,0.5)';
       ctx.textAlign = 'center';
       ctx.fillText(scaleBarYds + ' yds', 15 + scaleBarPx / 2, H - 4);
+
+      // Approach direction indicator (arrow at bottom centre)
+      if (greenData.tee) {
+        const arrowCx = W / 2;
+        const arrowCy = H - 25;
+        const arrowSize = 8;
+        // Draw upward-pointing chevron
+        ctx.beginPath();
+        ctx.moveTo(arrowCx - arrowSize, arrowCy + arrowSize * 0.5);
+        ctx.lineTo(arrowCx, arrowCy - arrowSize * 0.5);
+        ctx.lineTo(arrowCx + arrowSize, arrowCy + arrowSize * 0.5);
+        ctx.strokeStyle = 'rgba(16,185,129,0.7)';
+        ctx.lineWidth = 2.5;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.stroke();
+        // Second chevron for emphasis
+        ctx.beginPath();
+        ctx.moveTo(arrowCx - arrowSize, arrowCy + arrowSize * 1.3);
+        ctx.lineTo(arrowCx, arrowCy + arrowSize * 0.3);
+        ctx.lineTo(arrowCx + arrowSize, arrowCy + arrowSize * 1.3);
+        ctx.strokeStyle = 'rgba(16,185,129,0.4)';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        // Label
+        ctx.font = '9px Inter, sans-serif';
+        ctx.fillStyle = 'rgba(16,185,129,0.6)';
+        ctx.textAlign = 'center';
+        ctx.fillText('approach', arrowCx, arrowCy + arrowSize * 2.2);
+      }
 
       // Draw pin if placed
       if (cpState.pinCoords) {

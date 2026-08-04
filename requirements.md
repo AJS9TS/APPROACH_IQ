@@ -37,6 +37,8 @@ ApproachIQ is a standalone single-file HTML web application that allows golfers 
 - **Overpass_API**: A read-only query API for OpenStreetMap data, used by the Tracker to fetch green polygon coordinates for a selected course
 - **Nominatim**: OpenStreetMap's geocoding API used for fast name-based search of golf courses. Returns coordinates that are then used to query Overpass for green polygon data.
 - **Green_Polygon**: A set of lat/lon coordinates defining the outline shape of a putting green, sourced from OSM and rendered on canvas as the actual green shape
+- **Hole_Line**: An OSM way tagged `golf=hole`, representing the centre-line path of a hole from tee to green. The first node is at the tee, the last node is at the centre of the green, and intermediate nodes represent approximate shot positions along the fairway (number of segments = par minus 1).
+- **Approach_Bearing**: The compass bearing (degrees from north, clockwise) calculated from the penultimate node to the final node of a Hole_Line. This represents the direction the approach shot travels into the green and is used to orient the green canvas so the player's perspective is bottom-to-top.
 
 ## Requirements
 
@@ -330,11 +332,12 @@ ApproachIQ is a standalone single-file HTML web application that allows golfers 
 1. THE Tracker SHALL provide a "🗺️ Course Plot" tab accessible from both the desktop tab bar and the mobile bottom navigation bar.
 2. THE Course Plot tab SHALL display a search bar allowing the user to search for golf courses by name via the Nominatim geocoding API (appending "golf" to the query for relevance).
 3. WHEN the user types 3 or more characters, THE Tracker SHALL query Nominatim for locations matching the search term (debounced by 500ms) and display up to 10 results in a dropdown, each showing the name and approximate location.
-4. WHEN the user selects a course from the search results, THE Tracker SHALL fetch all Green_Polygon data (tagged `golf=green`) and tee box data (tagged `golf=tee`) within a 1.5 km radius of the course centre via the Overpass_API. IF greens have `ref` tags (hole numbers) in the range 1-18, THE Tracker SHALL filter to only those greens, discarding greens from neighbouring courses.
-5. THE Tracker SHALL cache fetched course data (green polygons, course name, coordinates) in localStorage for offline use on future visits.
+4. WHEN the user selects a course from the search results, THE Tracker SHALL fetch all Green_Polygon data (tagged `golf=green`), tee box data (tagged `golf=tee`), and Hole_Line data (tagged `golf=hole`) within a 1.5 km radius of the course centre via the Overpass_API. IF greens have `ref` tags (hole numbers) in the range 1-18, THE Tracker SHALL filter to only those greens, discarding greens from neighbouring courses.
+5. THE Tracker SHALL cache fetched course data (green polygons, hole lines, course name, coordinates) in localStorage for offline use on future visits.
 6. IF cached data exists for a selected course, THE Tracker SHALL load from cache without making a network request.
-7. WHEN course data is loaded, THE Tracker SHALL display the round UI showing: course name, current hole indicator with prev/next navigation, club selection grid, green canvas, and status bar.
-8. THE green canvas SHALL render the actual Green_Polygon shape for the current hole, with a darker fringe area surrounding it and a scale indicator showing yard distance. THE Tracker SHALL orient each green so the approach direction (tee-to-green) is from bottom to top. WHEN tee box data is available for a hole, THE Tracker SHALL use the tee-to-green bearing for rotation; otherwise it SHALL fall back to rotating the green's longest axis to vertical.
+7. WHEN course data is loaded, THE Tracker SHALL display the round UI showing: course name, current hole indicator with prev/next navigation, hole metadata (par, stroke index, distance in yards), club selection grid, green canvas, and status bar.
+8. THE green canvas SHALL render the actual Green_Polygon shape for the current hole, with a darker fringe area surrounding it and a scale indicator showing yard distance. THE Tracker SHALL orient each green using the following priority chain: (1) Approach_Bearing derived from the Hole_Line last segment (penultimate node → final node), (2) tee box centroid → green centroid bearing if no Hole_Line is available, (3) rotating the green's longest axis to vertical as a last resort. The green SHALL always be oriented so the approach direction points from bottom to top on screen.
+8a. THE green canvas SHALL display an approach direction indicator (arrow or chevron) at the bottom edge of the canvas, visually confirming the direction the player is hitting from.
 9. THE round progression SHALL follow a 3-step flow per hole: (1) select club, (2) tap pin position on the green, (3) tap ball landing position (on or off the green area).
 10. AFTER the ball position is tapped, THE Tracker SHALL auto-save the shot (calculating Vertical_Distance and Horizontal_Distance as the difference between ball and pin positions in yards) and auto-advance to the next hole after a brief delay.
 11. THE Tracker SHALL display a flash confirmation after each saved shot showing the club used and distance from pin.
@@ -343,7 +346,9 @@ ApproachIQ is a standalone single-file HTML web application that allows golfers 
 14. THE Tracker SHALL provide a "Change Course" button that returns to the course search view.
 15. THE Tracker SHALL convert Green_Polygon lat/lon coordinates to local yard-based coordinates using equirectangular approximation, centred on each green's centroid.
 16. THE green canvas SHALL render responsively, scaling to fit the container width on all screen sizes including mobile.
-17. THE Tracker SHALL sort fetched greens by their OSM `ref` tag (hole number) when available, falling back to geographic position (south-to-north latitude) when ref tags are absent.
+17. THE Tracker SHALL sort fetched greens by their OSM `ref` tag (hole number) when available, falling back to geographic position (south-to-north latitude) when ref tags are absent. WHEN Hole_Line data is available, THE Tracker SHALL match each green to its corresponding Hole_Line by verifying that the Hole_Line's final node falls within or nearest to the green polygon.
 18. WHEN the final hole is reached and a shot is saved, THE Tracker SHALL display a "Round complete" message with the total shots logged.
 19. THE Tracker SHALL display pin placement as a flag marker (white pole, red flag, hole) and ball placement as a green glowing marker with a dashed line connecting them.
 20. ALL shots logged via Course Plot SHALL be persisted using the same localStorage Shot format as other entry modes, ensuring they appear in Charts, KPIs, and Coach's Corner analysis.
+21. THE Tracker SHALL extract par, stroke index (handicap), and hole distance (sum of Hole_Line segment lengths in yards) from each `golf=hole` way and display them in the hole header. WHEN Hole_Line data is unavailable for a hole, THE Tracker SHALL omit the metadata display gracefully.
+22. THE Tracker SHALL calculate hole distance by summing the equirectangular distances between consecutive nodes of the Hole_Line, converted to yards.
