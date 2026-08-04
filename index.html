@@ -379,6 +379,10 @@
       opacity: 0.8;
     }
     .card:hover { transform: translateY(-3px); box-shadow: var(--shadow-xl), var(--shadow-glow); }
+    @media (max-width: 600px) {
+      .view { padding-left: 0.75rem; padding-right: 0.75rem; }
+      .card { padding: 1.2rem; border-radius: 14px; }
+    }
 
     .card h2 {
       font-family: 'Space Grotesk', sans-serif;
@@ -406,12 +410,16 @@
     /* ===== FORM ===== */
     .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; }
     @media (max-width: 600px) { .form-grid { grid-template-columns: 1fr; } }
+    .form-group input[type="date"] {
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+      box-sizing: border-box;
+      -webkit-appearance: none;
+      appearance: none;
+    }
     @media (max-width: 600px) {
       .form-group input[type="date"] {
-        width: 100%;
-        max-width: 100%;
-        min-width: 0;
-        box-sizing: border-box;
         font-size: 0.9rem;
       }
     }
@@ -1167,7 +1175,9 @@
       border-radius: 12px;
       margin-bottom: 1.5rem;
       width: fit-content;
+      max-width: 100%;
       box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
+      overflow-x: auto;
     }
     .entry-mode-btn {
       padding: 0.55rem 1.1rem;
@@ -1183,12 +1193,20 @@
       display: flex;
       align-items: center;
       gap: 0.4rem;
+      white-space: nowrap;
     }
     .entry-mode-btn:hover { color: var(--text-secondary); background: rgba(255,255,255,0.04); }
     .entry-mode-btn.active {
       background: var(--gradient-brand);
       color: white;
       box-shadow: var(--shadow-brand);
+    }
+    @media (max-width: 600px) {
+      .entry-mode-btn {
+        padding: 0.5rem 0.7rem;
+        font-size: 0.72rem;
+        gap: 0.25rem;
+      }
     }
 
     /* ===== CLICK-TO-PLACE PANEL ===== */
@@ -1225,12 +1243,6 @@
         max-width: 100%;
         touch-action: none;
       }
-      .coord-readout {
-        flex-wrap: wrap;
-        gap: 0.6rem;
-        padding: 0.6rem 0.8rem;
-        font-size: 0.75rem;
-      }
     }
 
     /* Coordinate readout */
@@ -1242,6 +1254,8 @@
       gap: 1.2rem;
       margin: 0.8rem auto 0;
       max-width: 540px;
+      width: 100%;
+      box-sizing: border-box;
       padding: 0.7rem 1.2rem;
       min-height: 3.2rem;
       background: var(--bg-secondary);
@@ -1284,6 +1298,34 @@
       max-width: 420px;
       margin-left: auto;
       margin-right: auto;
+      box-sizing: border-box;
+      padding: 0 0.5rem;
+    }
+    @media (max-width: 600px) {
+      .coord-readout {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.4rem 0.8rem;
+        padding: 0.6rem 0.8rem;
+        font-size: 0.75rem;
+        max-width: 100%;
+      }
+      .coord-sep {
+        display: none;
+      }
+      .coord-val .coord-number {
+        min-width: 36px;
+        font-size: 0.9rem;
+      }
+      .coord-dist {
+        min-width: 0;
+        width: 100%;
+        padding: 0.35rem 0.6rem;
+        font-size: 0.72rem;
+      }
+      .coord-hint {
+        max-width: 100%;
+      }
     }
 
     /* Placed marker pulse ring */
@@ -1295,6 +1337,10 @@
     /* ===== QUICK LOG MODE ===== */
     .quick-log-panel { display: none; }
     .quick-log-panel.active { display: block; }
+
+    /* ===== COURSE PLOT MODE ===== */
+    .course-entry-panel { display: none; }
+    .course-entry-panel.active { display: block; }
 
     .ql-club-grid {
       display: grid;
@@ -1594,6 +1640,7 @@
     }
     @media (max-width: 600px) {
       .cp-canvas-wrap { max-width: 100%; }
+      .cp-club-grid { max-width: 100%; }
     }
 
     .cp-club-grid {
@@ -1748,7 +1795,6 @@
   <!-- NAVIGATION (desktop top tabs) -->
   <nav class="tabs" role="tablist">
     <button class="tab active" data-tab="entry" role="tab">⛳ Log</button>
-    <button class="tab" data-tab="course" role="tab">🗺️ Course Plot</button>
     <button class="tab" data-tab="charts" role="tab">📊 Charts</button>
     <button class="tab" data-tab="kpis" role="tab">📈 KPIs</button>
     <button class="tab" data-tab="advice" role="tab">🎯 Coach's Corner</button>
@@ -1759,10 +1805,6 @@
     <button class="bottom-nav-btn active" data-tab="entry" role="tab" aria-selected="true">
       <span class="nav-icon">⛳</span>
       <span>Log</span>
-    </button>
-    <button class="bottom-nav-btn" data-tab="course" role="tab" aria-selected="false">
-      <span class="nav-icon">🗺️</span>
-      <span>Course</span>
     </button>
     <button class="bottom-nav-btn" data-tab="charts" role="tab" aria-selected="false">
       <span class="nav-icon">📊</span>
@@ -1815,6 +1857,7 @@
         <button type="button" class="entry-mode-btn active" id="mode-btn-manual" onclick="setEntryMode('manual')">✏️ Manual</button>
         <button type="button" class="entry-mode-btn" id="mode-btn-click" onclick="setEntryMode('click')">📍 Place</button>
         <button type="button" class="entry-mode-btn" id="mode-btn-quick" onclick="setEntryMode('quick')">⚡ Quick Log</button>
+        <button type="button" class="entry-mode-btn" id="mode-btn-course" onclick="setEntryMode('course')">🗺️ Course</button>
       </div>
 
       <form id="shot-form">
@@ -1920,6 +1963,72 @@
           </div>
         </div>
 
+        <!-- COURSE PLOT PANEL -->
+        <div class="course-entry-panel" id="course-entry-panel">
+          <!-- Search / Select Course -->
+          <div id="cp-search-section">
+            <div class="cp-search-wrap">
+              <span class="cp-search-icon">🔍</span>
+              <input type="text" class="cp-search-input" id="cp-search-input" placeholder="Search for your golf course..." autocomplete="off" />
+              <div class="cp-search-results" id="cp-search-results"></div>
+            </div>
+            <div class="cp-no-course" id="cp-no-course">
+              <div class="cp-no-course-icon">🗺️</div>
+              <strong>Find your course to get started</strong>
+              <p>Search above to load real green shapes from OpenStreetMap.<br>Data is cached locally for offline use on future visits.</p>
+            </div>
+          </div>
+
+          <!-- Active Round UI (hidden until course selected) -->
+          <div id="cp-round-section" style="display:none;">
+            <!-- Course header -->
+            <div class="cp-course-header">
+              <span class="cp-course-name" id="cp-course-name"></span>
+              <button type="button" class="cp-change-course" onclick="cpChangeCourse()">Change Course</button>
+            </div>
+
+            <!-- Hole indicator -->
+            <div class="cp-hole-indicator">
+              <button type="button" class="cp-hole-nav-btn" onclick="cpPrevHole()">‹</button>
+              <span class="cp-hole-num" id="cp-hole-num">Hole 1</span>
+              <button type="button" class="cp-hole-nav-btn" onclick="cpNextHole()">›</button>
+            </div>
+
+            <!-- Instruction -->
+            <div class="cp-instruction" id="cp-instruction">
+              <span class="step-highlight">Step 1:</span> Select your club
+            </div>
+
+            <!-- Club grid -->
+            <div class="cp-club-grid" id="cp-club-grid">
+              <button type="button" class="cp-club-btn" data-cp-club="Wedge">W</button>
+              <button type="button" class="cp-club-btn" data-cp-club="9 Iron">9i</button>
+              <button type="button" class="cp-club-btn" data-cp-club="8 Iron">8i</button>
+              <button type="button" class="cp-club-btn" data-cp-club="7 Iron">7i</button>
+              <button type="button" class="cp-club-btn" data-cp-club="6 Iron">6i</button>
+              <button type="button" class="cp-club-btn" data-cp-club="5 Iron">5i</button>
+              <button type="button" class="cp-club-btn" data-cp-club="3 Wood">3W</button>
+              <button type="button" class="cp-club-btn" data-cp-club="Driver">DR</button>
+            </div>
+
+            <!-- Green canvas -->
+            <div class="cp-canvas-wrap">
+              <canvas id="cp-green-canvas"></canvas>
+            </div>
+
+            <!-- Flash feedback -->
+            <div class="cp-flash" id="cp-flash"></div>
+
+            <!-- Status bar -->
+            <div class="cp-status-bar">
+              <span>Shots: <span class="cp-shots-count" id="cp-shots-count">0</span></span>
+              <span>Hole <span id="cp-hole-of">1</span> / <span id="cp-total-holes">18</span></span>
+              <button type="button" class="cp-skip-btn" onclick="cpSkipHole()">Skip Hole →</button>
+              <button type="button" class="cp-undo-btn" onclick="cpUndoLast()">↩ Undo</button>
+            </div>
+          </div>
+        </div>
+
         <div id="form-errors" class="error-msg"></div>
         <div id="form-success" class="success-msg"></div>
         <div id="import-result" class="success-msg"></div>
@@ -1931,76 +2040,6 @@
         </div>
         <div class="csv-hint">CSV format: <code>Club, Vertical Distance, Horizontal Distance, Date (YYYY-MM-DD)</code></div>
       </form>
-    </div>
-  </section>
-
-  <!-- COURSE PLOT VIEW -->
-  <section id="view-course" class="view" role="tabpanel">
-    <div class="card">
-      <h2>Course Plot <span class="section-badge">On-Course</span></h2>
-
-      <!-- Search / Select Course -->
-      <div id="cp-search-section">
-        <div class="cp-search-wrap">
-          <span class="cp-search-icon">🔍</span>
-          <input type="text" class="cp-search-input" id="cp-search-input" placeholder="Search for your golf course..." autocomplete="off" />
-          <div class="cp-search-results" id="cp-search-results"></div>
-        </div>
-        <div class="cp-no-course" id="cp-no-course">
-          <div class="cp-no-course-icon">🗺️</div>
-          <strong>Find your course to get started</strong>
-          <p>Search above to load real green shapes from OpenStreetMap.<br>Data is cached locally for offline use on future visits.</p>
-        </div>
-      </div>
-
-      <!-- Active Round UI (hidden until course selected) -->
-      <div id="cp-round-section" style="display:none;">
-        <!-- Course header -->
-        <div class="cp-course-header">
-          <span class="cp-course-name" id="cp-course-name"></span>
-          <button class="cp-change-course" onclick="cpChangeCourse()">Change Course</button>
-        </div>
-
-        <!-- Hole indicator -->
-        <div class="cp-hole-indicator">
-          <button class="cp-hole-nav-btn" onclick="cpPrevHole()">‹</button>
-          <span class="cp-hole-num" id="cp-hole-num">Hole 1</span>
-          <button class="cp-hole-nav-btn" onclick="cpNextHole()">›</button>
-        </div>
-
-        <!-- Instruction -->
-        <div class="cp-instruction" id="cp-instruction">
-          <span class="step-highlight">Step 1:</span> Select your club
-        </div>
-
-        <!-- Club grid -->
-        <div class="cp-club-grid" id="cp-club-grid">
-          <button type="button" class="cp-club-btn" data-cp-club="Wedge">W</button>
-          <button type="button" class="cp-club-btn" data-cp-club="9 Iron">9i</button>
-          <button type="button" class="cp-club-btn" data-cp-club="8 Iron">8i</button>
-          <button type="button" class="cp-club-btn" data-cp-club="7 Iron">7i</button>
-          <button type="button" class="cp-club-btn" data-cp-club="6 Iron">6i</button>
-          <button type="button" class="cp-club-btn" data-cp-club="5 Iron">5i</button>
-          <button type="button" class="cp-club-btn" data-cp-club="3 Wood">3W</button>
-          <button type="button" class="cp-club-btn" data-cp-club="Driver">DR</button>
-        </div>
-
-        <!-- Green canvas -->
-        <div class="cp-canvas-wrap">
-          <canvas id="cp-green-canvas"></canvas>
-        </div>
-
-        <!-- Flash feedback -->
-        <div class="cp-flash" id="cp-flash"></div>
-
-        <!-- Status bar -->
-        <div class="cp-status-bar">
-          <span>Shots: <span class="cp-shots-count" id="cp-shots-count">0</span></span>
-          <span>Hole <span id="cp-hole-of">1</span> / <span id="cp-total-holes">18</span></span>
-          <button class="cp-skip-btn" onclick="cpSkipHole()">Skip Hole →</button>
-          <button class="cp-undo-btn" onclick="cpUndoLast()">↩ Undo</button>
-        </div>
-      </div>
     </div>
   </section>
 
@@ -2278,7 +2317,6 @@
       if (tabName === 'charts') renderChart();
       if (tabName === 'kpis') renderKPIs();
       if (tabName === 'advice') renderAdvice();
-      if (tabName === 'course' && cpState.course) cpRenderGreen();
       // Scroll to top on mobile tab switch
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -2301,14 +2339,17 @@
       document.getElementById('mode-btn-manual').classList.toggle('active', mode === 'manual');
       document.getElementById('mode-btn-click').classList.toggle('active', mode === 'click');
       document.getElementById('mode-btn-quick').classList.toggle('active', mode === 'quick');
+      document.getElementById('mode-btn-course').classList.toggle('active', mode === 'course');
       document.getElementById('manual-entry-panel').classList.toggle('hidden', mode !== 'manual');
       document.getElementById('click-entry-panel').classList.toggle('active', mode === 'click');
       document.getElementById('quick-log-panel').classList.toggle('active', mode === 'quick');
+      document.getElementById('course-entry-panel').classList.toggle('active', mode === 'course');
 
-      // Hide shared fields (club dropdown + date) and form buttons in quick log mode
-      document.getElementById('shared-fields-row').style.display = mode === 'quick' ? 'none' : '';
-      document.querySelector('.btn-row').style.display = mode === 'quick' ? 'none' : '';
-      document.querySelector('.csv-hint').style.display = mode === 'quick' ? 'none' : '';
+      // Hide shared fields (club dropdown + date) and form buttons in quick log and course modes
+      const hideShared = mode === 'quick' || mode === 'course';
+      document.getElementById('shared-fields-row').style.display = hideShared ? 'none' : '';
+      document.querySelector('.btn-row').style.display = hideShared ? 'none' : '';
+      document.querySelector('.csv-hint').style.display = hideShared ? 'none' : '';
 
       if (mode === 'click') {
         requestAnimationFrame(() => renderEntryGreen());
@@ -2320,6 +2361,10 @@
 
       if (mode === 'quick') {
         initQuickLog();
+      }
+
+      if (mode === 'course' && cpState.course) {
+        requestAnimationFrame(() => cpRenderGreen());
       }
 
       // Clear any prior errors
@@ -2829,7 +2874,7 @@
       resizeTimer = setTimeout(() => {
         if (document.getElementById('view-charts').classList.contains('active')) renderChart();
         if (document.getElementById('view-entry').classList.contains('active') && entryMode === 'click') renderEntryGreen();
-        if (document.getElementById('view-course').classList.contains('active') && typeof cpState !== 'undefined' && cpState.course) cpRenderGreen();
+        if (document.getElementById('view-entry').classList.contains('active') && entryMode === 'course' && typeof cpState !== 'undefined' && cpState.course) cpRenderGreen();
       }, 200);
     });
 
