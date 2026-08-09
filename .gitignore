@@ -1,2 +1,4 @@
 # Private notes and ideas (not for public repo)
 ideas/
+# CSV data files
+*.csv
