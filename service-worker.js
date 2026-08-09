@@ -1,4 +1,4 @@
-const CACHE_NAME = 'approachiq-v1';
+const CACHE_NAME = 'approachiq-v2';
 
 // Assets to cache on install
 const PRECACHE_ASSETS = [

@@ -5,6 +5,22 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>APPROACH IQ — Golf Practice Intelligence</title>
 
+  <!-- ===== Force-clear stale service worker cache ===== -->
+  <script>
+    if ('caches' in window) {
+      caches.keys().then(function(names) {
+        names.forEach(function(name) {
+          if (name !== 'approachiq-v2') caches.delete(name);
+        });
+      });
+    }
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(function(regs) {
+        regs.forEach(function(reg) { reg.update(); });
+      });
+    }
+  </script>
+
   <!-- ===== PWA: Web App Manifest ===== -->
   <link rel="manifest" href="manifest.json" />
 
@@ -379,6 +395,10 @@
       opacity: 0.8;
     }
     .card:hover { transform: translateY(-3px); box-shadow: var(--shadow-xl), var(--shadow-glow); }
+    @media (max-width: 600px) {
+      .view { padding-left: 0.75rem; padding-right: 0.75rem; }
+      .card { padding: 1.2rem; border-radius: 14px; }
+    }
 
     .card h2 {
       font-family: 'Space Grotesk', sans-serif;
@@ -406,6 +426,19 @@
     /* ===== FORM ===== */
     .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; }
     @media (max-width: 600px) { .form-grid { grid-template-columns: 1fr; } }
+    .form-group input[type="date"] {
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+      box-sizing: border-box;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    @media (max-width: 600px) {
+      .form-group input[type="date"] {
+        font-size: 0.9rem;
+      }
+    }
     .form-grid .full-width { grid-column: 1 / -1; }
 
     .form-group label {
@@ -762,8 +795,10 @@
 
     /* Mobile carousel fixes */
     @media (max-width: 768px) {
-      .reviews-section { margin: 1.5rem auto 0; padding: 0 1rem; }
-      .review-card { padding: 1.2rem; }
+      .reviews-section { margin: 1.5rem auto 0; padding: 0 0.75rem; }
+      .carousel-wrapper { overflow: hidden; }
+      .carousel { gap: 0; }
+      .review-card { min-width: 100%; padding: 1.2rem; box-sizing: border-box; }
       .review-text { font-size: 0.85rem; line-height: 1.6; }
       .review-stars { font-size: 1rem; margin-bottom: 0.5rem; }
       .review-author { font-size: 0.8rem; }
@@ -1156,7 +1191,9 @@
       border-radius: 12px;
       margin-bottom: 1.5rem;
       width: fit-content;
+      max-width: 100%;
       box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
+      overflow-x: auto;
     }
     .entry-mode-btn {
       padding: 0.55rem 1.1rem;
@@ -1172,12 +1209,20 @@
       display: flex;
       align-items: center;
       gap: 0.4rem;
+      white-space: nowrap;
     }
     .entry-mode-btn:hover { color: var(--text-secondary); background: rgba(255,255,255,0.04); }
     .entry-mode-btn.active {
       background: var(--gradient-brand);
       color: white;
       box-shadow: var(--shadow-brand);
+    }
+    @media (max-width: 600px) {
+      .entry-mode-btn {
+        padding: 0.5rem 0.7rem;
+        font-size: 0.72rem;
+        gap: 0.25rem;
+      }
     }
 
     /* ===== CLICK-TO-PLACE PANEL ===== */
@@ -1191,6 +1236,7 @@
       width: 100%;
       max-width: 420px;
       margin: 0 auto 1rem;
+      box-sizing: border-box;
     }
     .click-canvas-wrap canvas {
       width: 100%;
@@ -1200,8 +1246,20 @@
       cursor: crosshair;
       display: block;
       border: 1px solid var(--border-glass);
+      box-sizing: border-box;
+      max-width: 100%;
     }
     .click-canvas-wrap canvas:hover { border-color: var(--border-accent); }
+    @media (max-width: 600px) {
+      .click-canvas-wrap {
+        max-width: 100%;
+        padding: 0;
+      }
+      .click-canvas-wrap canvas {
+        max-width: 100%;
+        touch-action: none;
+      }
+    }
 
     /* Coordinate readout */
     .coord-readout {
@@ -1212,6 +1270,8 @@
       gap: 1.2rem;
       margin: 0.8rem auto 0;
       max-width: 540px;
+      width: 100%;
+      box-sizing: border-box;
       padding: 0.7rem 1.2rem;
       min-height: 3.2rem;
       background: var(--bg-secondary);
@@ -1254,6 +1314,34 @@
       max-width: 420px;
       margin-left: auto;
       margin-right: auto;
+      box-sizing: border-box;
+      padding: 0 0.5rem;
+    }
+    @media (max-width: 600px) {
+      .coord-readout {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.4rem 0.8rem;
+        padding: 0.6rem 0.8rem;
+        font-size: 0.75rem;
+        max-width: 100%;
+      }
+      .coord-sep {
+        display: none;
+      }
+      .coord-val .coord-number {
+        min-width: 36px;
+        font-size: 0.9rem;
+      }
+      .coord-dist {
+        min-width: 0;
+        width: 100%;
+        padding: 0.35rem 0.6rem;
+        font-size: 0.72rem;
+      }
+      .coord-hint {
+        max-width: 100%;
+      }
     }
 
     /* Placed marker pulse ring */
@@ -1265,6 +1353,10 @@
     /* ===== QUICK LOG MODE ===== */
     .quick-log-panel { display: none; }
     .quick-log-panel.active { display: block; }
+
+    /* ===== COURSE PLOT MODE ===== */
+    .course-entry-panel { display: none; }
+    .course-entry-panel.active { display: block; }
 
     .ql-club-grid {
       display: grid;
@@ -1410,6 +1502,277 @@
       min-height: 1.4rem;
       margin-top: 0.4rem;
     }
+
+    /* ===== COURSE PLOT ===== */
+    .cp-search-wrap {
+      position: relative;
+      margin-bottom: 1.2rem;
+    }
+    .cp-search-input {
+      width: 100%;
+      padding: 0.85rem 1rem 0.85rem 2.6rem;
+      border: 1px solid var(--border-glass);
+      border-radius: var(--radius-xs);
+      font-size: 0.95rem;
+      font-family: inherit;
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      outline: none;
+      box-sizing: border-box;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .cp-search-input:focus {
+      border-color: var(--brand-green);
+      box-shadow: 0 0 0 3px var(--accent-green-dim);
+    }
+    .cp-search-input::placeholder { color: var(--text-muted); }
+    .cp-search-icon {
+      position: absolute;
+      left: 0.9rem;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 1.1rem;
+      pointer-events: none;
+    }
+    .cp-search-results {
+      position: absolute;
+      top: 100%;
+      left: 0; right: 0;
+      z-index: 50;
+      background: var(--bg-card);
+      border: 1px solid var(--border-glass);
+      border-radius: var(--radius-xs);
+      margin-top: 4px;
+      max-height: 220px;
+      overflow-y: auto;
+      box-shadow: var(--shadow-xl);
+      display: none;
+    }
+    .cp-search-results.active { display: block; }
+    .cp-search-result {
+      padding: 0.7rem 1rem;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      cursor: pointer;
+      border-bottom: 1px solid var(--border-glass);
+      transition: background 0.15s;
+    }
+    .cp-search-result:last-child { border-bottom: none; }
+    .cp-search-result:hover { background: var(--accent-green-dim); color: var(--text-primary); }
+    .cp-search-result .cp-result-name { font-weight: 700; color: var(--text-primary); }
+    .cp-search-loading {
+      padding: 1rem;
+      text-align: center;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
+    .cp-course-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.8rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+    .cp-course-name {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    .cp-change-course {
+      padding: 0.4rem 0.8rem;
+      border: 1px solid var(--border-glass);
+      border-radius: 6px;
+      background: transparent;
+      color: var(--text-muted);
+      font-family: inherit;
+      font-size: 0.72rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .cp-change-course:hover { border-color: var(--border-accent); color: var(--text-secondary); }
+
+    .cp-hole-indicator {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.8rem;
+      margin-bottom: 1rem;
+    }
+    .cp-hole-num {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--brand-emerald);
+    }
+    .cp-hole-meta {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin-bottom: 0.8rem;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+    }
+    .cp-meta-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.2rem 0.6rem;
+      background: var(--bg-secondary);
+      border-radius: 10px;
+      border: 1px solid var(--border-glass);
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 600;
+    }
+    .cp-hole-nav-btn {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      border: 1px solid var(--border-glass);
+      background: var(--bg-secondary);
+      color: var(--text-secondary);
+      font-size: 1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+    .cp-hole-nav-btn:hover { border-color: var(--border-accent); color: var(--text-primary); }
+
+    .cp-instruction {
+      text-align: center;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 0.6rem;
+      min-height: 1.2rem;
+    }
+    .cp-instruction .step-highlight {
+      color: var(--brand-emerald);
+      font-weight: 700;
+    }
+
+    .cp-canvas-wrap {
+      position: relative;
+      width: 100%;
+      max-width: 400px;
+      margin: 0 auto 1rem;
+      box-sizing: border-box;
+    }
+    .cp-canvas-wrap canvas {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 1/1;
+      border-radius: var(--radius-sm);
+      cursor: crosshair;
+      display: block;
+      border: 1px solid var(--border-glass);
+      box-sizing: border-box;
+      background: #0a1a0f;
+    }
+    @media (max-width: 600px) {
+      .cp-canvas-wrap { max-width: 100%; }
+      .cp-club-grid { max-width: 100%; }
+    }
+
+    .cp-club-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.4rem;
+      margin-bottom: 1rem;
+      max-width: 400px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .cp-club-btn {
+      padding: 0.7rem 0.3rem;
+      border: 2px solid var(--border-glass);
+      border-radius: var(--radius-xs);
+      background: var(--bg-secondary);
+      color: var(--text-secondary);
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .cp-club-btn:hover { border-color: var(--border-accent); color: var(--text-primary); }
+    .cp-club-btn.active {
+      border-color: var(--brand-green);
+      background: var(--accent-green-dim);
+      color: var(--brand-emerald);
+      box-shadow: 0 0 12px rgba(16,185,129,0.15);
+    }
+
+    .cp-status-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      padding: 0.6rem 1rem;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-glass);
+      border-radius: var(--radius-xs);
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+      margin-top: 0.8rem;
+      flex-wrap: wrap;
+    }
+    .cp-status-bar .cp-shots-count {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      color: var(--brand-emerald);
+    }
+    .cp-skip-btn {
+      padding: 0.35rem 0.7rem;
+      border: 1px solid rgba(245,158,11,0.3);
+      border-radius: 6px;
+      background: rgba(245,158,11,0.08);
+      color: #f59e0b;
+      font-family: inherit;
+      font-size: 0.7rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-transform: uppercase;
+    }
+    .cp-skip-btn:hover { background: rgba(245,158,11,0.15); }
+    .cp-undo-btn {
+      padding: 0.35rem 0.7rem;
+      border: 1px solid rgba(244,63,94,0.3);
+      border-radius: 6px;
+      background: rgba(244,63,94,0.08);
+      color: var(--accent-red);
+      font-family: inherit;
+      font-size: 0.7rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-transform: uppercase;
+    }
+    .cp-undo-btn:hover { background: rgba(244,63,94,0.15); }
+
+    .cp-flash {
+      text-align: center;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--brand-emerald);
+      min-height: 1.4rem;
+      margin-top: 0.4rem;
+    }
+
+    .cp-no-course {
+      text-align: center;
+      padding: 3rem 1.5rem;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+    .cp-no-course .cp-no-course-icon { font-size: 3rem; margin-bottom: 1rem; }
+    .cp-no-course p { margin-top: 0.5rem; font-size: 0.8rem; }
   </style>
 </head>
 
@@ -1529,6 +1892,7 @@
         <button type="button" class="entry-mode-btn active" id="mode-btn-manual" onclick="setEntryMode('manual')">✏️ Manual</button>
         <button type="button" class="entry-mode-btn" id="mode-btn-click" onclick="setEntryMode('click')">📍 Place</button>
         <button type="button" class="entry-mode-btn" id="mode-btn-quick" onclick="setEntryMode('quick')">⚡ Quick Log</button>
+        <button type="button" class="entry-mode-btn" id="mode-btn-course" onclick="setEntryMode('course')">🗺️ Course</button>
       </div>
 
       <form id="shot-form">
@@ -1634,6 +1998,72 @@
           </div>
         </div>
 
+        <!-- COURSE PLOT PANEL -->
+        <div class="course-entry-panel" id="course-entry-panel">
+          <!-- Search / Select Course -->
+          <div id="cp-search-section">
+            <div class="cp-search-wrap">
+              <span class="cp-search-icon">🔍</span>
+              <input type="text" class="cp-search-input" id="cp-search-input" placeholder="Search for your golf course..." autocomplete="off" />
+              <div class="cp-search-results" id="cp-search-results"></div>
+            </div>
+            <div class="cp-no-course" id="cp-no-course">
+              <div class="cp-no-course-icon">🗺️</div>
+              <strong>Find your course to get started</strong>
+              <p>Search above to load real green shapes from OpenStreetMap.<br>Data is cached locally for offline use on future visits.</p>
+            </div>
+          </div>
+
+          <!-- Active Round UI (hidden until course selected) -->
+          <div id="cp-round-section" style="display:none;">
+            <!-- Course header -->
+            <div class="cp-course-header">
+              <span class="cp-course-name" id="cp-course-name"></span>
+              <button type="button" class="cp-change-course" onclick="cpChangeCourse()">Change Course</button>
+            </div>
+
+            <!-- Hole indicator -->
+            <div class="cp-hole-indicator">
+              <button type="button" class="cp-hole-nav-btn" onclick="cpPrevHole()">‹</button>
+              <span class="cp-hole-num" id="cp-hole-num">Hole 1</span>
+              <button type="button" class="cp-hole-nav-btn" onclick="cpNextHole()">›</button>
+            </div>
+
+            <!-- Instruction -->
+            <div class="cp-instruction" id="cp-instruction">
+              <span class="step-highlight">Step 1:</span> Select your club
+            </div>
+
+            <!-- Club grid -->
+            <div class="cp-club-grid" id="cp-club-grid">
+              <button type="button" class="cp-club-btn" data-cp-club="Wedge">W</button>
+              <button type="button" class="cp-club-btn" data-cp-club="9 Iron">9i</button>
+              <button type="button" class="cp-club-btn" data-cp-club="8 Iron">8i</button>
+              <button type="button" class="cp-club-btn" data-cp-club="7 Iron">7i</button>
+              <button type="button" class="cp-club-btn" data-cp-club="6 Iron">6i</button>
+              <button type="button" class="cp-club-btn" data-cp-club="5 Iron">5i</button>
+              <button type="button" class="cp-club-btn" data-cp-club="3 Wood">3W</button>
+              <button type="button" class="cp-club-btn" data-cp-club="Driver">DR</button>
+            </div>
+
+            <!-- Green canvas -->
+            <div class="cp-canvas-wrap">
+              <canvas id="cp-green-canvas"></canvas>
+            </div>
+
+            <!-- Flash feedback -->
+            <div class="cp-flash" id="cp-flash"></div>
+
+            <!-- Status bar -->
+            <div class="cp-status-bar">
+              <span>Shots: <span class="cp-shots-count" id="cp-shots-count">0</span></span>
+              <span>Hole <span id="cp-hole-of">1</span> / <span id="cp-total-holes">18</span></span>
+              <button type="button" class="cp-skip-btn" onclick="cpSkipHole()">Skip Hole →</button>
+              <button type="button" class="cp-undo-btn" onclick="cpUndoLast()">↩ Undo</button>
+            </div>
+          </div>
+        </div>
+
         <div id="form-errors" class="error-msg"></div>
         <div id="form-success" class="success-msg"></div>
         <div id="import-result" class="success-msg"></div>
@@ -1645,6 +2075,83 @@
         </div>
         <div class="csv-hint">CSV format: <code>Club, Vertical Distance, Horizontal Distance, Date (YYYY-MM-DD)</code></div>
       </form>
+    </div>
+  </section>
+
+  <!-- COURSE PLOT VIEW -->
+  <section id="view-course" class="view" role="tabpanel">
+    <div class="card">
+      <h2>Course Plot <span class="section-badge">On-Course</span></h2>
+
+      <!-- Search / Select Course -->
+      <div id="cp-search-section">
+        <div class="cp-search-wrap">
+          <span class="cp-search-icon">🔍</span>
+          <input type="text" class="cp-search-input" id="cp-search-input" placeholder="Search for your golf course..." autocomplete="off" />
+          <div class="cp-search-results" id="cp-search-results"></div>
+        </div>
+        <div class="cp-no-course" id="cp-no-course">
+          <div class="cp-no-course-icon">🗺️</div>
+          <strong>Find your course to get started</strong>
+          <p>Search above to load real green shapes from OpenStreetMap.<br>Data is cached locally for offline use on future visits.</p>
+        </div>
+      </div>
+
+      <!-- Active Round UI (hidden until course selected) -->
+      <div id="cp-round-section" style="display:none;">
+        <!-- Course header -->
+        <div class="cp-course-header">
+          <span class="cp-course-name" id="cp-course-name"></span>
+          <button class="cp-change-course" onclick="cpChangeCourse()">Change Course</button>
+        </div>
+
+        <!-- Hole indicator -->
+        <div class="cp-hole-indicator">
+          <button class="cp-hole-nav-btn" onclick="cpPrevHole()">‹</button>
+          <span class="cp-hole-num" id="cp-hole-num">Hole 1</span>
+          <button class="cp-hole-nav-btn" onclick="cpNextHole()">›</button>
+        </div>
+
+        <!-- Hole metadata (par, SI, distance) -->
+        <div class="cp-hole-meta" id="cp-hole-meta" style="display:none;">
+          <span class="cp-meta-item" id="cp-meta-par"></span>
+          <span class="cp-meta-item" id="cp-meta-si"></span>
+          <span class="cp-meta-item" id="cp-meta-dist"></span>
+        </div>
+
+        <!-- Instruction -->
+        <div class="cp-instruction" id="cp-instruction">
+          <span class="step-highlight">Step 1:</span> Select your club
+        </div>
+
+        <!-- Club grid -->
+        <div class="cp-club-grid" id="cp-club-grid">
+          <button type="button" class="cp-club-btn" data-cp-club="Wedge">W</button>
+          <button type="button" class="cp-club-btn" data-cp-club="9 Iron">9i</button>
+          <button type="button" class="cp-club-btn" data-cp-club="8 Iron">8i</button>
+          <button type="button" class="cp-club-btn" data-cp-club="7 Iron">7i</button>
+          <button type="button" class="cp-club-btn" data-cp-club="6 Iron">6i</button>
+          <button type="button" class="cp-club-btn" data-cp-club="5 Iron">5i</button>
+          <button type="button" class="cp-club-btn" data-cp-club="3 Wood">3W</button>
+          <button type="button" class="cp-club-btn" data-cp-club="Driver">DR</button>
+        </div>
+
+        <!-- Green canvas -->
+        <div class="cp-canvas-wrap">
+          <canvas id="cp-green-canvas"></canvas>
+        </div>
+
+        <!-- Flash feedback -->
+        <div class="cp-flash" id="cp-flash"></div>
+
+        <!-- Status bar -->
+        <div class="cp-status-bar">
+          <span>Shots: <span class="cp-shots-count" id="cp-shots-count">0</span></span>
+          <span>Hole <span id="cp-hole-of">1</span> / <span id="cp-total-holes">18</span></span>
+          <button class="cp-skip-btn" onclick="cpSkipHole()">Skip Hole →</button>
+          <button class="cp-undo-btn" onclick="cpUndoLast()">↩ Undo</button>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -1944,14 +2451,17 @@
       document.getElementById('mode-btn-manual').classList.toggle('active', mode === 'manual');
       document.getElementById('mode-btn-click').classList.toggle('active', mode === 'click');
       document.getElementById('mode-btn-quick').classList.toggle('active', mode === 'quick');
+      document.getElementById('mode-btn-course').classList.toggle('active', mode === 'course');
       document.getElementById('manual-entry-panel').classList.toggle('hidden', mode !== 'manual');
       document.getElementById('click-entry-panel').classList.toggle('active', mode === 'click');
       document.getElementById('quick-log-panel').classList.toggle('active', mode === 'quick');
+      document.getElementById('course-entry-panel').classList.toggle('active', mode === 'course');
 
-      // Hide shared fields (club dropdown + date) and form buttons in quick log mode
-      document.getElementById('shared-fields-row').style.display = mode === 'quick' ? 'none' : '';
-      document.querySelector('.btn-row').style.display = mode === 'quick' ? 'none' : '';
-      document.querySelector('.csv-hint').style.display = mode === 'quick' ? 'none' : '';
+      // Hide shared fields (club dropdown + date) and form buttons in quick log and course modes
+      const hideShared = mode === 'quick' || mode === 'course';
+      document.getElementById('shared-fields-row').style.display = hideShared ? 'none' : '';
+      document.querySelector('.btn-row').style.display = hideShared ? 'none' : '';
+      document.querySelector('.csv-hint').style.display = hideShared ? 'none' : '';
 
       if (mode === 'click') {
         requestAnimationFrame(() => renderEntryGreen());
@@ -1965,23 +2475,47 @@
         initQuickLog();
       }
 
+      if (mode === 'course' && cpState.course) {
+        requestAnimationFrame(() => cpRenderGreen());
+      }
+
       // Clear any prior errors
       document.getElementById('form-errors').textContent = '';
     }
 
     // ===== QUICK LOG =====
     const ZONE_COORDS = {
-      'centre':      { v: 0,   h: 0   },
-      'long':        { v: 8,   h: 0   },
-      'short':       { v: -8,  h: 0   },
-      'left':        { v: 0,   h: -8  },
-      'right':       { v: 0,   h: 8   },
-      'long-left':   { v: 6,   h: -6  },
-      'long-right':  { v: 6,   h: 6   },
-      'short-left':  { v: -6,  h: -6  },
-      'short-right': { v: -6,  h: 6   },
-      'miss':        { v: 18,  h: 0   }
+      'centre':      { v: 0,   h: 0,   radius: 3   },
+      'long':        { v: 8,   h: 0,   radius: 2.5 },
+      'short':       { v: -8,  h: 0,   radius: 2.5 },
+      'left':        { v: 0,   h: -8,  radius: 2.5 },
+      'right':       { v: 0,   h: 8,   radius: 2.5 },
+      'long-left':   { v: 6,   h: -6,  radius: 2.5 },
+      'long-right':  { v: 6,   h: 6,   radius: 2.5 },
+      'short-left':  { v: -6,  h: -6,  radius: 2.5 },
+      'short-right': { v: -6,  h: 6,   radius: 2.5 },
+      'miss':        { v: 18,  h: 0,   radius: 5   }
     };
+
+    // Generate a random point within a circle of given radius around a centre
+    function randomiseZoneCoords(zone) {
+      const base = ZONE_COORDS[zone];
+      if (!base) return { v: 0, h: 0 };
+      const r = base.radius;
+      // Random point in circle using rejection-free polar method
+      const angle = Math.random() * 2 * Math.PI;
+      const dist = r * Math.sqrt(Math.random());
+      let v = base.v + dist * Math.sin(angle);
+      let h = base.h + dist * Math.cos(angle);
+      // Ensure centre zone never lands exactly at (0,0) — minimum 0.5 yds from pin
+      if (zone === 'centre' && Math.sqrt(v * v + h * h) < 0.5) {
+        const nudgeAngle = Math.random() * 2 * Math.PI;
+        v = 0.5 * Math.sin(nudgeAngle);
+        h = 0.5 * Math.cos(nudgeAngle);
+      }
+      // Round to 1 decimal place for clean data
+      return { v: Math.round(v * 10) / 10, h: Math.round(h * 10) / 10 };
+    }
 
     function initQuickLog() {
       qlSelectedClub = null;
@@ -2069,7 +2603,7 @@
           }
 
           const zone = btn.dataset.qlZone;
-          const coords = ZONE_COORDS[zone];
+          const coords = randomiseZoneCoords(zone);
           if (!coords) return;
 
           // Save the shot immediately
@@ -2452,6 +2986,7 @@
       resizeTimer = setTimeout(() => {
         if (document.getElementById('view-charts').classList.contains('active')) renderChart();
         if (document.getElementById('view-entry').classList.contains('active') && entryMode === 'click') renderEntryGreen();
+        if (document.getElementById('view-entry').classList.contains('active') && entryMode === 'course' && typeof cpState !== 'undefined' && cpState.course) cpRenderGreen();
       }, 200);
     });
 
@@ -3272,7 +3807,10 @@
 
       function goTo(idx) {
         current = idx;
-        carousel.style.transform = `translateX(-${current * (100 + 2.5)}%)`;
+        // On mobile (gap: 0), use exactly 100% per slide; on desktop use 100% + gap equivalent
+        const isMobile = window.innerWidth <= 768;
+        const slideWidth = isMobile ? 100 : 102.5;
+        carousel.style.transform = `translateX(-${current * slideWidth}%)`;
         dotsContainer.querySelectorAll('.carousel-dot').forEach((d, i) => {
           d.classList.toggle('active', i === current);
         });
@@ -3775,6 +4313,854 @@
           widget.innerHTML = '<span class="weather-loading">📍 Enable location for weather</span>';
         }
       );
+    }
+
+    // ===== COURSE PLOT =====
+    const CP_CACHE_KEY = 'approachiq-course-cache';
+    let cpState = {
+      course: null,         // { name, id, greens: [polygon arrays] }
+      currentHole: 0,       // 0-indexed
+      selectedClub: null,
+      pinCoords: null,      // { x, y } in canvas-local yards
+      ballCoords: null,     // { x, y } in canvas-local yards
+      step: 'club',         // 'club' | 'pin' | 'ball'
+      shotsThisRound: 0
+    };
+
+    // Cache helpers
+    function getCourseCache() {
+      try { return JSON.parse(localStorage.getItem(CP_CACHE_KEY)) || {}; } catch(e) { return {}; }
+    }
+    function saveCourseToCache(courseId, courseData) {
+      const cache = getCourseCache();
+      cache[courseId] = courseData;
+      localStorage.setItem(CP_CACHE_KEY, JSON.stringify(cache));
+    }
+    function getCachedCourse(courseId) {
+      return getCourseCache()[courseId] || null;
+    }
+
+    // Search courses via Overpass API
+    let cpSearchTimeout = null;
+    const cpSearchInput = document.getElementById('cp-search-input');
+    const cpSearchResults = document.getElementById('cp-search-results');
+
+    cpSearchInput.addEventListener('input', () => {
+      clearTimeout(cpSearchTimeout);
+      const query = cpSearchInput.value.trim();
+      if (query.length < 3) { cpSearchResults.classList.remove('active'); return; }
+      cpSearchTimeout = setTimeout(() => cpSearchCourses(query), 500);
+    });
+
+    // Close results on outside click
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.cp-search-wrap')) cpSearchResults.classList.remove('active');
+    });
+
+    async function cpSearchCourses(query) {
+      cpSearchResults.innerHTML = '<div class="cp-search-loading">Searching...</div>';
+      cpSearchResults.classList.add('active');
+
+      try {
+        // Use Nominatim (OSM's geocoder) for fast name-based search
+        const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query + ' golf')}&format=json&limit=10&addressdetails=1`;
+        const resp = await fetch(url, {
+          headers: { 'Accept': 'application/json' }
+        });
+
+        if (!resp.ok) {
+          cpSearchResults.innerHTML = '<div class="cp-search-loading">Search failed (API error). Try again.</div>';
+          return;
+        }
+
+        const data = await resp.json();
+
+        if (!data || data.length === 0) {
+          cpSearchResults.innerHTML = '<div class="cp-search-loading">No courses found. Try a different name.</div>';
+          return;
+        }
+
+        // Render results
+        cpSearchResults.innerHTML = '';
+        const seen = new Set();
+        data.forEach(el => {
+          const name = el.display_name ? el.display_name.split(',')[0] : el.name;
+          if (!name || seen.has(name)) return;
+          seen.add(name);
+          const lat = parseFloat(el.lat);
+          const lon = parseFloat(el.lon);
+          if (isNaN(lat) || isNaN(lon)) return;
+          const div = document.createElement('div');
+          div.className = 'cp-search-result';
+          const location = el.display_name ? el.display_name.split(',').slice(1, 3).join(',').trim() : '';
+          div.innerHTML = `<span class="cp-result-name">${name}</span>${location ? '<br><small style="color:var(--text-muted);font-size:0.72rem;">' + location + '</small>' : ''}`;
+          div.addEventListener('click', () => cpSelectCourse(name, lat, lon));
+          cpSearchResults.appendChild(div);
+        });
+
+        if (cpSearchResults.children.length === 0) {
+          cpSearchResults.innerHTML = '<div class="cp-search-loading">No courses found. Try adding your city/region.</div>';
+        }
+      } catch(e) {
+        cpSearchResults.innerHTML = '<div class="cp-search-loading">Search failed. Check your connection.</div>';
+        console.error('Course search error:', e);
+      }
+    }
+
+    async function cpSelectCourse(name, lat, lon) {
+      cpSearchResults.classList.remove('active');
+      cpSearchInput.value = '';
+
+      // Check cache first
+      const cacheKey = name.replace(/\s+/g, '_').toLowerCase();
+      const cached = getCachedCourse(cacheKey);
+      if (cached) {
+        cpLoadCourse(cached);
+        showToast('📍 Loaded ' + name + ' from cache', 'success');
+        return;
+      }
+
+      // Fetch greens for this course
+      showToast('🗺️ Fetching green data for ' + name + '...', 'info', 5000);
+      try {
+        // Use 1.5km radius to capture all holes
+        // Fetch greens and hole ways (lines from tee to green with hole numbers)
+        const overpassQuery = `[out:json][timeout:25];(way["golf"="green"](around:1500,${lat},${lon});way["golf"="hole"](around:1500,${lat},${lon}););out geom tags;`;
+        
+        // Try primary endpoint, fall back to secondary if it fails
+        const overpassEndpoints = [
+          'https://overpass-api.de/api/interpreter',
+          'https://overpass.kumi.systems/api/interpreter'
+        ];
+        let data = null;
+        for (const endpoint of overpassEndpoints) {
+          try {
+            const resp = await fetch(endpoint, {
+              method: 'POST',
+              body: 'data=' + encodeURIComponent(overpassQuery)
+            });
+            if (!resp.ok) {
+              console.warn('Overpass endpoint ' + endpoint + ' returned ' + resp.status + ', trying next...');
+              continue;
+            }
+            const text = await resp.text();
+            if (text.startsWith('<?xml') || text.startsWith('<')) {
+              console.warn('Overpass endpoint ' + endpoint + ' returned XML (rate limited?), trying next...');
+              continue;
+            }
+            data = JSON.parse(text);
+            break;
+          } catch (e) {
+            console.warn('Overpass endpoint ' + endpoint + ' failed:', e.message);
+            continue;
+          }
+        }
+
+        if (!data) {
+          showToast('⚠️ Overpass API unavailable — try again in 30 seconds', 'error', 5000);
+          return;
+        }
+
+        if (!data.elements || data.elements.length === 0) {
+          showToast('⚠️ No green data found for this course in OSM', 'error', 5000);
+          return;
+        }
+
+        // Separate greens and hole ways (lines from tee to green)
+        const greenElements = data.elements.filter(el => el.tags && el.tags.golf === 'green' && el.geometry && el.geometry.length > 2);
+        const holeWays = data.elements.filter(el => el.tags && el.tags.golf === 'hole' && el.geometry && el.geometry.length >= 2);
+
+        console.log('Raw greens:', greenElements.length, '| Hole ways:', holeWays.length);
+
+        // STEP 1: Identify which greens belong to this course by clustering near search centre
+        // Only keep greens within 800m of the course centre (filters out neighbouring courses)
+        const courseRadiusDeg = 0.008; // ~800m at London latitudes
+        const nearbyGreens = greenElements.filter(el => {
+          const gLat = el.geometry.reduce((s, p) => s + p.lat, 0) / el.geometry.length;
+          const gLon = el.geometry.reduce((s, p) => s + p.lon, 0) / el.geometry.length;
+          return Math.abs(gLat - lat) < courseRadiusDeg && Math.abs(gLon - lon) < courseRadiusDeg;
+        });
+        
+        console.log('Greens within 800m of course centre:', nearbyGreens.length, '(of', greenElements.length, 'total)');
+
+        // STEP 2: Build hole data - pick the hole way whose greenEnd is closest to a NEARBY green
+        const holeDataByRef = {};
+        holeWays.forEach(el => {
+          if (!el.tags || !el.tags.ref) return;
+          const num = parseInt(el.tags.ref.replace(/\D/g, ''));
+          if (isNaN(num) || num < 1 || num > 18) return;
+          const geom = el.geometry;
+          const teePoint = geom[0];
+          const greenPoint = geom[geom.length - 1];
+          const approachFrom = geom.length >= 2 ? geom[geom.length - 2] : geom[0];
+          let distanceYards = 0;
+          for (let i = 1; i < geom.length; i++) {
+            const lat1 = geom[i-1].lat, lon1 = geom[i-1].lon;
+            const lat2 = geom[i].lat, lon2 = geom[i].lon;
+            const midLat = (lat1 + lat2) / 2 * Math.PI / 180;
+            const dx = (lon2 - lon1) * Math.cos(midLat);
+            const dy = lat2 - lat1;
+            const segMetres = Math.sqrt(dx * dx + dy * dy) * 111320;
+            distanceYards += segMetres * 1.09361;
+          }
+          const entry = {
+            ref: num,
+            par: el.tags.par ? parseInt(el.tags.par) : null,
+            handicap: el.tags.handicap ? parseInt(el.tags.handicap) : null,
+            distanceYards: Math.round(distanceYards),
+            tee: { lat: teePoint.lat, lon: teePoint.lon },
+            greenEnd: { lat: greenPoint.lat, lon: greenPoint.lon },
+            approachFrom: { lat: approachFrom.lat, lon: approachFrom.lon },
+            nodeCount: geom.length
+          };
+          if (!holeDataByRef[num]) holeDataByRef[num] = [];
+          holeDataByRef[num].push(entry);
+        });
+
+        // STEP 3: For each ref, pick the hole way whose greenEnd is closest to a nearby green
+        const holeData = [];
+        Object.keys(holeDataByRef).forEach(ref => {
+          const candidates = holeDataByRef[ref];
+          if (candidates.length === 1) {
+            holeData.push(candidates[0]);
+          } else {
+            // Find any nearby green with this ref, or nearest nearby green
+            let bestGreenLat = lat, bestGreenLon = lon; // default to course centre
+            const matchingNearbyGreen = nearbyGreens.find(el => el.tags && el.tags.ref && parseInt(el.tags.ref.replace(/\D/g, '')) === parseInt(ref));
+            if (matchingNearbyGreen && matchingNearbyGreen.geometry) {
+              bestGreenLat = matchingNearbyGreen.geometry.reduce((s, p) => s + p.lat, 0) / matchingNearbyGreen.geometry.length;
+              bestGreenLon = matchingNearbyGreen.geometry.reduce((s, p) => s + p.lon, 0) / matchingNearbyGreen.geometry.length;
+            }
+            // Pick candidate whose greenEnd is closest to the target green/centre
+            candidates.sort((a, b) => {
+              const distA = Math.pow(a.greenEnd.lat - bestGreenLat, 2) + Math.pow(a.greenEnd.lon - bestGreenLon, 2);
+              const distB = Math.pow(b.greenEnd.lat - bestGreenLat, 2) + Math.pow(b.greenEnd.lon - bestGreenLon, 2);
+              return distA - distB;
+            });
+            holeData.push(candidates[0]);
+          }
+        });
+
+        console.log('Hole ways with valid refs:', Object.keys(holeDataByRef).length, '(from', holeWays.filter(el => el.tags && el.tags.ref).length, 'total ways)');
+        holeData.forEach(h => {
+          const altCount = holeDataByRef[h.ref] ? holeDataByRef[h.ref].length : 0;
+          console.log('  Hole ' + h.ref + ' | par=' + h.par + ' | dist=' + h.distanceYards + 'yds | nodes=' + h.nodeCount + ' (of ' + altCount + ' ways) | approachFrom=(' + h.approachFrom.lat.toFixed(5) + ',' + h.approachFrom.lon.toFixed(5) + ') | greenEnd=(' + h.greenEnd.lat.toFixed(5) + ',' + h.greenEnd.lon.toFixed(5) + ')');
+        });
+
+        // Match greens to holes by proximity of green centroid to hole way endpoint
+        // Build tee lookup from matched holes (includes approach direction and metadata)
+        const teeLookup = {};
+        const holeMeta = {};
+        holeData.forEach(h => {
+          teeLookup[h.ref] = { lat: h.approachFrom.lat, lon: h.approachFrom.lon };
+          holeMeta[h.ref] = { par: h.par, handicap: h.handicap, distanceYards: h.distanceYards };
+        });
+
+        // STEP 4: Extract polygon data from nearby greens only
+        let greens = nearbyGreens
+          .map(el => {
+            // Parse ref tag on green itself (rare but possible)
+            let ref = null;
+            if (el.tags && el.tags.ref) {
+              const num = parseInt(el.tags.ref.replace(/\D/g, ''));
+              if (!isNaN(num)) ref = num;
+            }
+            const polygon = el.geometry.map(p => ({ lat: p.lat, lon: p.lon }));
+            const centroidLat = polygon.reduce((s, p) => s + p.lat, 0) / polygon.length;
+            const centroidLon = polygon.reduce((s, p) => s + p.lon, 0) / polygon.length;
+
+            // Match to nearest hole way endpoint if no ref tag
+            if (ref === null && holeData.length > 0) {
+              let minDist = Infinity;
+              holeData.forEach(h => {
+                const dLat = h.greenEnd.lat - centroidLat;
+                const dLon = h.greenEnd.lon - centroidLon;
+                const dist = dLat * dLat + dLon * dLon;
+                if (dist < minDist) {
+                  minDist = dist;
+                  ref = h.ref;
+                }
+              });
+              // Only accept match if within ~80 yards (roughly 0.0007 degrees)
+              if (minDist > 0.0007 * 0.0007) ref = null;
+            }
+
+            return {
+              ref,
+              name: el.tags && el.tags.name ? el.tags.name : null,
+              polygon,
+              centroidLat,
+              centroidLon,
+              tee: ref !== null ? (teeLookup[ref] || null) : null,
+              greenEnd: ref !== null && holeData.find(h => h.ref === ref) ? { lat: holeData.find(h => h.ref === ref).greenEnd.lat, lon: holeData.find(h => h.ref === ref).greenEnd.lon } : null,
+              par: ref !== null && holeMeta[ref] ? holeMeta[ref].par : null,
+              handicap: ref !== null && holeMeta[ref] ? holeMeta[ref].handicap : null,
+              distanceYards: ref !== null && holeMeta[ref] ? holeMeta[ref].distanceYards : null
+            };
+          });
+
+        // Filter: if we have ref-tagged greens, keep only those in range 1-18
+        // Deduplicate: if multiple greens match the same hole, keep the closest to the hole endpoint
+        const refTagged = greens.filter(g => g.ref !== null && g.ref >= 1 && g.ref <= 18);
+        if (refTagged.length >= 9) {
+          // Group by ref and pick the best match per hole
+          const byRef = {};
+          refTagged.forEach(g => {
+            if (!byRef[g.ref]) { byRef[g.ref] = g; return; }
+            // Keep the one closest to the hole way green-end point
+            const holeInfo = holeData.find(h => h.ref === g.ref);
+            if (holeInfo) {
+              const existDist = Math.pow(byRef[g.ref].centroidLat - holeInfo.greenEnd.lat, 2) + Math.pow(byRef[g.ref].centroidLon - holeInfo.greenEnd.lon, 2);
+              const newDist = Math.pow(g.centroidLat - holeInfo.greenEnd.lat, 2) + Math.pow(g.centroidLon - holeInfo.greenEnd.lon, 2);
+              if (newDist < existDist) byRef[g.ref] = g;
+            }
+          });
+          greens = Object.values(byRef);
+        }
+
+        // Sort: prefer ref tag if available, otherwise sort by latitude
+        greens.sort((a, b) => {
+          if (a.ref !== null && b.ref !== null) return a.ref - b.ref;
+          if (a.ref !== null) return -1;
+          if (b.ref !== null) return 1;
+          return a.centroidLat - b.centroidLat;
+        });
+
+        console.log('Course Plot: fetched', greens.length, 'greens for', name);
+        console.log('Greens with ref tags:', greens.filter(g => g.ref !== null).length);
+        console.log('Tees found:', Object.keys(teeLookup).length);
+        greens.forEach((g, i) => console.log('  Green', i+1, '→ ref:', g.ref, '| tee:', g.tee ? 'yes' : 'no', '| points:', g.polygon.length));
+
+        const courseData = { name, greens, lat, lon, fetchedAt: new Date().toISOString() };
+        saveCourseToCache(cacheKey, courseData);
+        cpLoadCourse(courseData);
+        showToast('✅ ' + name + ' loaded — ' + greens.length + ' greens cached', 'success');
+      } catch(e) {
+        showToast('❌ Failed to fetch course data. Try again.', 'error');
+        console.error('Course fetch error:', e);
+      }
+    }
+
+    function cpLoadCourse(courseData) {
+      cpState.course = courseData;
+      cpState.currentHole = 0;
+      cpState.selectedClub = null;
+      cpState.pinCoords = null;
+      cpState.ballCoords = null;
+      cpState.step = 'club';
+      cpState.shotsThisRound = 0;
+
+      // Show round UI, hide search
+      document.getElementById('cp-search-section').style.display = 'none';
+      document.getElementById('cp-round-section').style.display = 'block';
+      document.getElementById('cp-course-name').textContent = courseData.name;
+      document.getElementById('cp-total-holes').textContent = courseData.greens.length;
+      document.getElementById('cp-shots-count').textContent = '0';
+
+      // Reset club buttons
+      document.querySelectorAll('.cp-club-btn').forEach(b => b.classList.remove('active'));
+
+      cpUpdateHoleDisplay();
+      cpRenderGreen();
+    }
+
+    function cpChangeCourse() {
+      document.getElementById('cp-search-section').style.display = 'block';
+      document.getElementById('cp-round-section').style.display = 'none';
+      cpState.course = null;
+    }
+
+    function cpUpdateHoleDisplay() {
+      const holeNum = cpState.currentHole + 1;
+      document.getElementById('cp-hole-num').textContent = 'Hole ' + holeNum;
+      document.getElementById('cp-hole-of').textContent = holeNum;
+
+      // Update hole metadata (par, SI, distance)
+      const greenData = cpState.course ? cpState.course.greens[cpState.currentHole] : null;
+      const metaEl = document.getElementById('cp-hole-meta');
+      if (greenData && (greenData.par || greenData.handicap || greenData.distanceYards)) {
+        metaEl.style.display = 'flex';
+        document.getElementById('cp-meta-par').textContent = greenData.par ? 'Par ' + greenData.par : '';
+        document.getElementById('cp-meta-si').textContent = greenData.handicap ? 'SI ' + greenData.handicap : '';
+        document.getElementById('cp-meta-dist').textContent = greenData.distanceYards ? greenData.distanceYards + ' yds' : '';
+        // Hide empty items
+        document.getElementById('cp-meta-par').style.display = greenData.par ? 'inline-flex' : 'none';
+        document.getElementById('cp-meta-si').style.display = greenData.handicap ? 'inline-flex' : 'none';
+        document.getElementById('cp-meta-dist').style.display = greenData.distanceYards ? 'inline-flex' : 'none';
+      } else {
+        metaEl.style.display = 'none';
+      }
+
+      cpUpdateInstruction();
+    }
+
+    function cpUpdateInstruction() {
+      const el = document.getElementById('cp-instruction');
+      if (cpState.step === 'club') {
+        el.innerHTML = '<span class="step-highlight">Step 1:</span> Select your club';
+      } else if (cpState.step === 'pin') {
+        el.innerHTML = '<span class="step-highlight">Step 2:</span> Tap where the pin is on the green';
+      } else if (cpState.step === 'ball') {
+        el.innerHTML = '<span class="step-highlight">Step 3:</span> Tap where your ball landed';
+      }
+    }
+
+    function cpPrevHole() {
+      if (!cpState.course) return;
+      cpState.currentHole = Math.max(0, cpState.currentHole - 1);
+      cpResetHoleState();
+      cpUpdateHoleDisplay();
+      cpRenderGreen();
+    }
+
+    function cpNextHole() {
+      if (!cpState.course) return;
+      cpState.currentHole = Math.min(cpState.course.greens.length - 1, cpState.currentHole + 1);
+      cpResetHoleState();
+      cpUpdateHoleDisplay();
+      cpRenderGreen();
+    }
+
+    function cpSkipHole() {
+      if (!cpState.course) return;
+      if (cpState.currentHole < cpState.course.greens.length - 1) {
+        cpState.currentHole++;
+        cpResetHoleState();
+        cpUpdateHoleDisplay();
+        cpRenderGreen();
+        cpFlash('⏭ Skipped to Hole ' + (cpState.currentHole + 1));
+      } else {
+        cpFlash('🏁 Final hole reached!');
+      }
+    }
+
+    function cpResetHoleState() {
+      cpState.selectedClub = null;
+      cpState.pinCoords = null;
+      cpState.ballCoords = null;
+      cpState.step = 'club';
+      document.querySelectorAll('.cp-club-btn').forEach(b => b.classList.remove('active'));
+    }
+
+    function cpFlash(msg) {
+      const el = document.getElementById('cp-flash');
+      el.textContent = msg;
+      setTimeout(() => { el.textContent = ''; }, 2500);
+    }
+
+    function cpUndoLast() {
+      if (cpState.shotsThisRound <= 0) {
+        showToast('Nothing to undo', 'info');
+        return;
+      }
+      const shots = getShots();
+      if (shots.length === 0) return;
+      shots.pop();
+      saveShots(shots);
+      cpState.shotsThisRound--;
+      document.getElementById('cp-shots-count').textContent = cpState.shotsThisRound;
+      updateStats();
+      showToast('↩️ Last shot undone', 'info');
+    }
+
+    // Club selection
+    document.querySelectorAll('.cp-club-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        document.querySelectorAll('.cp-club-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        cpState.selectedClub = btn.dataset.cpClub;
+        if (cpState.step === 'club') {
+          cpState.step = 'pin';
+          cpUpdateInstruction();
+        }
+      });
+    });
+
+    // ===== GREEN RENDERING =====
+    function cpGetGreenTransform(greenData) {
+      // Convert lat/lon polygon to local x/y coordinates in yards
+      // Uses equirectangular approximation (fine for small areas like a green)
+      const polygon = greenData.polygon;
+      const centLat = polygon.reduce((s, p) => s + p.lat, 0) / polygon.length;
+      const centLon = polygon.reduce((s, p) => s + p.lon, 0) / polygon.length;
+
+      // Meters per degree at this latitude
+      const mPerDegLat = 111320;
+      const mPerDegLon = 111320 * Math.cos(centLat * Math.PI / 180);
+      const ydsPerMeter = 1.09361;
+
+      // Convert to yards relative to centroid
+      let points = polygon.map(p => ({
+        x: (p.lon - centLon) * mPerDegLon * ydsPerMeter,
+        y: (p.lat - centLat) * mPerDegLat * ydsPerMeter
+      }));
+
+      // Determine rotation angle
+      let rotateBy = 0;
+      let orientationSource = 'none';
+
+      if (greenData.tee) {
+        // greenData.tee is the "approach from" point (second-to-last point of hole way)
+        // greenData.greenEnd is the final node of the hole way (at the green)
+        // The TRUE approach direction is from approachFrom → greenEnd, independent of polygon centroid
+        const mPerDegLat2 = 111320;
+        const mPerDegLonLocal = 111320 * Math.cos(centLat * Math.PI / 180);
+        const ydsPerM = 1.09361;
+        
+        // Vector from approachFrom to greenEnd = actual approach direction from OSM data
+        let intoGreenX, intoGreenY;
+        if (greenData.greenEnd) {
+          intoGreenX = (greenData.greenEnd.lon - greenData.tee.lon) * mPerDegLonLocal * ydsPerM;
+          intoGreenY = (greenData.greenEnd.lat - greenData.tee.lat) * mPerDegLat2 * ydsPerM;
+        } else {
+          // Fallback to polygon centroid if greenEnd not available
+          intoGreenX = (centLon - greenData.tee.lon) * mPerDegLonLocal * ydsPerM;
+          intoGreenY = (centLat - greenData.tee.lat) * mPerDegLat2 * ydsPerM;
+        }
+        const vecLen = Math.sqrt(intoGreenX * intoGreenX + intoGreenY * intoGreenY);
+        
+        if (vecLen >= 5) {
+          // Angle of the into-green vector measured from +Y axis (north), clockwise
+          const angleFromUp = Math.atan2(intoGreenX, intoGreenY);
+          // Rotate all points by -angleFromUp so approach direction aligns with +Y (up on canvas)
+          rotateBy = -angleFromUp;
+          orientationSource = 'holeLine';
+          console.log('  Green orientation: holeLine | intoGreen=(' + intoGreenX.toFixed(1) + ',' + intoGreenY.toFixed(1) + ') len=' + vecLen.toFixed(1) + 'yds angleFromUp=' + (angleFromUp * 180 / Math.PI).toFixed(1) + '° rotateBy=' + (rotateBy * 180 / Math.PI).toFixed(1) + '°');
+        } else {
+          console.log('  Green orientation: holeLine vector too short (' + vecLen.toFixed(1) + ' yds), using fallback');
+          greenData.tee = null; // Force fallback
+        }
+      }
+      
+      if (!greenData.tee) {
+        // Fallback: rotate so longest axis is vertical
+        orientationSource = 'longestAxis';
+        let maxDist = 0;
+        let angle = 0;
+        for (let i = 0; i < points.length; i++) {
+          for (let j = i + 1; j < points.length; j++) {
+            const dx = points[j].x - points[i].x;
+            const dy = points[j].y - points[i].y;
+            const dist = dx * dx + dy * dy;
+            if (dist > maxDist) {
+              maxDist = dist;
+              angle = Math.atan2(dy, dx);
+            }
+          }
+        }
+        rotateBy = (Math.PI / 2) - angle;
+        console.log('  Green orientation: longestAxis | angle=' + (angle * 180 / Math.PI).toFixed(1) + '° rotate=' + (rotateBy * 180 / Math.PI).toFixed(1) + '°');
+      }
+
+      // Apply rotation
+      points = points.map(p => ({
+        x: p.x * Math.cos(rotateBy) - p.y * Math.sin(rotateBy),
+        y: p.x * Math.sin(rotateBy) + p.y * Math.cos(rotateBy)
+      }));
+
+      // Find bounding box after rotation
+      let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+      points.forEach(p => {
+        if (p.x < minX) minX = p.x;
+        if (p.x > maxX) maxX = p.x;
+        if (p.y < minY) minY = p.y;
+        if (p.y > maxY) maxY = p.y;
+      });
+
+      const width = maxX - minX;
+      const height = maxY - minY;
+
+      return { points, centLat, centLon, minX, maxX, minY, maxY, width, height, rotateBy };
+    }
+
+    function cpRenderGreen() {
+      const canvas = document.getElementById('cp-green-canvas');
+      if (!canvas || !cpState.course) return;
+      const ctx = canvas.getContext('2d');
+
+      const greenData = cpState.course.greens[cpState.currentHole];
+      if (!greenData) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        return;
+      }
+      console.log('Rendering Hole ' + (cpState.currentHole + 1) + ' | ref=' + greenData.ref + ' | hasTee=' + !!greenData.tee + ' | tee=' + JSON.stringify(greenData.tee));
+
+      const transform = cpGetGreenTransform(greenData);
+
+      // Canvas sizing
+      const wrap = canvas.parentElement;
+      const size = Math.min(wrap.getBoundingClientRect().width || 360, 400);
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = size * dpr;
+      canvas.height = size * dpr;
+      canvas.style.width = size + 'px';
+      canvas.style.height = size + 'px';
+      ctx.scale(dpr, dpr);
+
+      const W = size, H = size;
+      const padding = 40; // px padding around green
+
+      // Scale to fit green within canvas with padding
+      const scaleX = (W - padding * 2) / (transform.width || 1);
+      const scaleY = (H - padding * 2) / (transform.height || 1);
+      const scale = Math.min(scaleX, scaleY);
+
+      // Centre offset
+      const offsetX = W / 2;
+      const offsetY = H / 2;
+      const greenCentX = (transform.minX + transform.maxX) / 2;
+      const greenCentY = (transform.minY + transform.maxY) / 2;
+
+      // Convert yard coords to pixel coords
+      function toPixel(x, y) {
+        return {
+          px: offsetX + (x - greenCentX) * scale,
+          py: offsetY - (y - greenCentY) * scale  // flip Y for canvas
+        };
+      }
+
+      // Store transform for tap handling
+      canvas._cpTransform = { scale, offsetX, offsetY, greenCentX, greenCentY, toPixel };
+      // Inverse: pixel to yards
+      canvas._cpInverse = function(px, py) {
+        return {
+          x: (px - offsetX) / scale + greenCentX,
+          y: -(py - offsetY) / scale + greenCentY
+        };
+      };
+
+      // ---- Draw ----
+      ctx.clearRect(0, 0, W, H);
+
+      // Background
+      ctx.fillStyle = '#0a1a0f';
+      ctx.fillRect(0, 0, W, H);
+
+      // Fringe (slightly larger than green)
+      ctx.beginPath();
+      transform.points.forEach((p, i) => {
+        const { px, py } = toPixel(p.x, p.y);
+        // Expand outward from centre for fringe
+        const dx = p.x - greenCentX;
+        const dy = p.y - greenCentY;
+        const fringeX = greenCentX + dx * 1.15;
+        const fringeY = greenCentY + dy * 1.15;
+        const fp = toPixel(fringeX, fringeY);
+        if (i === 0) ctx.moveTo(fp.px, fp.py);
+        else ctx.lineTo(fp.px, fp.py);
+      });
+      ctx.closePath();
+      ctx.fillStyle = '#0f4d28';
+      ctx.fill();
+
+      // Green surface
+      ctx.beginPath();
+      transform.points.forEach((p, i) => {
+        const { px, py } = toPixel(p.x, p.y);
+        if (i === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+      });
+      ctx.closePath();
+      ctx.fillStyle = '#1a6b3c';
+      ctx.fill();
+      ctx.strokeStyle = '#2d8f52';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // Scale indicator
+      const scaleBarYds = Math.round(transform.width > 20 ? 10 : 5);
+      const scaleBarPx = scaleBarYds * scale;
+      ctx.beginPath();
+      ctx.moveTo(15, H - 15);
+      ctx.lineTo(15 + scaleBarPx, H - 15);
+      ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      ctx.font = '10px Inter, sans-serif';
+      ctx.fillStyle = 'rgba(255,255,255,0.5)';
+      ctx.textAlign = 'center';
+      ctx.fillText(scaleBarYds + ' yds', 15 + scaleBarPx / 2, H - 4);
+
+      // Approach direction indicator (arrow at bottom centre)
+      if (greenData.tee) {
+        const arrowCx = W / 2;
+        const arrowCy = H - 25;
+        const arrowSize = 8;
+        // Draw upward-pointing chevron
+        ctx.beginPath();
+        ctx.moveTo(arrowCx - arrowSize, arrowCy + arrowSize * 0.5);
+        ctx.lineTo(arrowCx, arrowCy - arrowSize * 0.5);
+        ctx.lineTo(arrowCx + arrowSize, arrowCy + arrowSize * 0.5);
+        ctx.strokeStyle = 'rgba(16,185,129,0.7)';
+        ctx.lineWidth = 2.5;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.stroke();
+        // Second chevron for emphasis
+        ctx.beginPath();
+        ctx.moveTo(arrowCx - arrowSize, arrowCy + arrowSize * 1.3);
+        ctx.lineTo(arrowCx, arrowCy + arrowSize * 0.3);
+        ctx.lineTo(arrowCx + arrowSize, arrowCy + arrowSize * 1.3);
+        ctx.strokeStyle = 'rgba(16,185,129,0.4)';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        // Label
+        ctx.font = '9px Inter, sans-serif';
+        ctx.fillStyle = 'rgba(16,185,129,0.6)';
+        ctx.textAlign = 'center';
+        ctx.fillText('approach', arrowCx, arrowCy + arrowSize * 2.2);
+      }
+
+      // Draw pin if placed
+      if (cpState.pinCoords) {
+        const pp = toPixel(cpState.pinCoords.x, cpState.pinCoords.y);
+        // Flag pole
+        ctx.beginPath();
+        ctx.moveTo(pp.px, pp.py + 2);
+        ctx.lineTo(pp.px, pp.py - 28);
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        // Flag
+        ctx.beginPath();
+        ctx.moveTo(pp.px, pp.py - 28);
+        ctx.lineTo(pp.px + 12, pp.py - 22);
+        ctx.lineTo(pp.px, pp.py - 16);
+        ctx.closePath();
+        ctx.fillStyle = '#f43f5e';
+        ctx.fill();
+        // Hole
+        ctx.beginPath();
+        ctx.arc(pp.px, pp.py, 3, 0, Math.PI * 2);
+        ctx.fillStyle = '#0a0a0a';
+        ctx.fill();
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
+
+      // Draw ball if placed
+      if (cpState.ballCoords) {
+        const bp = toPixel(cpState.ballCoords.x, cpState.ballCoords.y);
+        // Glow
+        ctx.beginPath();
+        ctx.arc(bp.px, bp.py, 12, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(52,211,153,0.15)';
+        ctx.fill();
+        // Ball
+        ctx.beginPath();
+        ctx.arc(bp.px, bp.py, 7, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(52,211,153,0.95)';
+        ctx.shadowColor = 'rgba(52,211,153,0.6)';
+        ctx.shadowBlur = 8;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+        ctx.strokeStyle = '#10b981';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Line from pin to ball
+        if (cpState.pinCoords) {
+          const pp = toPixel(cpState.pinCoords.x, cpState.pinCoords.y);
+          ctx.beginPath();
+          ctx.moveTo(pp.px, pp.py);
+          ctx.lineTo(bp.px, bp.py);
+          ctx.strokeStyle = 'rgba(52,211,153,0.3)';
+          ctx.lineWidth = 1;
+          ctx.setLineDash([3, 4]);
+          ctx.stroke();
+          ctx.setLineDash([]);
+        }
+      }
+
+      // Hole label
+      ctx.font = 'bold 13px "Space Grotesk", sans-serif';
+      ctx.fillStyle = 'rgba(255,255,255,0.7)';
+      ctx.textAlign = 'center';
+      ctx.fillText('Hole ' + (cpState.currentHole + 1), W / 2, 20);
+    }
+
+    // Canvas tap handler
+    (function wireCpCanvas() {
+      const canvas = document.getElementById('cp-green-canvas');
+      if (!canvas) return;
+
+      function handleTap(e) {
+        e.preventDefault();
+        if (!cpState.course || cpState.step === 'club') return;
+
+        const rect = canvas.getBoundingClientRect();
+        let clientX, clientY;
+        if (e.touches) {
+          clientX = e.touches[0].clientX;
+          clientY = e.touches[0].clientY;
+        } else {
+          clientX = e.clientX;
+          clientY = e.clientY;
+        }
+
+        const dpr = window.devicePixelRatio || 1;
+        const canvasW = canvas.width / dpr;
+        const canvasH = canvas.height / dpr;
+        const px = (clientX - rect.left) * (canvasW / rect.width);
+        const py = (clientY - rect.top) * (canvasH / rect.height);
+
+        if (!canvas._cpInverse) return;
+        const yardCoords = canvas._cpInverse(px, py);
+
+        if (cpState.step === 'pin') {
+          cpState.pinCoords = { x: yardCoords.x, y: yardCoords.y };
+          cpState.step = 'ball';
+          cpUpdateInstruction();
+          cpRenderGreen();
+        } else if (cpState.step === 'ball') {
+          cpState.ballCoords = { x: yardCoords.x, y: yardCoords.y };
+          cpRenderGreen();
+          // Auto-save the shot
+          cpSaveShot();
+        }
+      }
+
+      canvas.addEventListener('click', handleTap);
+      canvas.addEventListener('touchstart', handleTap, { passive: false });
+    })();
+
+    function cpSaveShot() {
+      if (!cpState.selectedClub || !cpState.pinCoords || !cpState.ballCoords) return;
+
+      // Calculate vertical and horizontal distance relative to pin
+      const v = cpState.ballCoords.y - cpState.pinCoords.y;  // positive = long
+      const h = cpState.ballCoords.x - cpState.pinCoords.x;  // positive = right
+
+      // Round to 1 decimal
+      const vRound = Math.round(v * 10) / 10;
+      const hRound = Math.round(h * 10) / 10;
+
+      addShot({
+        club: cpState.selectedClub,
+        verticalDistance: vRound,
+        horizontalDistance: hRound,
+        date: new Date().toISOString().split('T')[0]
+      });
+
+      cpState.shotsThisRound++;
+      document.getElementById('cp-shots-count').textContent = cpState.shotsThisRound;
+
+      const dist = Math.sqrt(vRound * vRound + hRound * hRound).toFixed(1);
+      cpFlash('✓ ' + cpState.selectedClub + ' — ' + dist + ' yds from pin');
+
+      // Auto-advance to next hole after short delay
+      setTimeout(() => {
+        if (cpState.currentHole < cpState.course.greens.length - 1) {
+          cpState.currentHole++;
+          cpResetHoleState();
+          cpUpdateHoleDisplay();
+          cpRenderGreen();
+        } else {
+          cpFlash('🏁 Round complete! ' + cpState.shotsThisRound + ' shots logged.');
+        }
+      }, 1200);
     }
 
     // ===== INIT =====
